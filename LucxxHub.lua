@@ -17,11 +17,58 @@ local Window = Rayfield:CreateWindow({
 -- // Tabs
 local PlayerTab = Window:CreateTab("Player", 4483362458)
 local VisualTab = Window:CreateTab("Visual", 4483362458)
+local SettingsTab = Window:CreateSettingsTab() -- ✅ Tab bawaan Rayfield Settings
+
+-- ======================================================
+-- CUSTOM SETTINGS THEME
+-- ======================================================
+SettingsTab:CreateDropdown({
+    Name = "UI Theme",
+    Options = {"Dark", "Light", "Red", "Blue", "Green"},
+    CurrentOption = "Dark",
+    Callback = function(Theme)
+        if Theme == "Dark" then
+            Rayfield:SetTheme({
+                Background = Color3.fromRGB(25, 25, 25),
+                Topbar = Color3.fromRGB(30, 30, 30),
+                TabBackground = Color3.fromRGB(35, 35, 35),
+                Primary = Color3.fromRGB(0, 170, 255)
+            })
+        elseif Theme == "Light" then
+            Rayfield:SetTheme({
+                Background = Color3.fromRGB(245, 245, 245),
+                Topbar = Color3.fromRGB(230, 230, 230),
+                TabBackground = Color3.fromRGB(220, 220, 220),
+                Primary = Color3.fromRGB(0, 120, 255)
+            })
+        elseif Theme == "Red" then
+            Rayfield:SetTheme({
+                Background = Color3.fromRGB(25, 25, 25),
+                Topbar = Color3.fromRGB(35, 0, 0),
+                TabBackground = Color3.fromRGB(45, 0, 0),
+                Primary = Color3.fromRGB(255, 0, 0)
+            })
+        elseif Theme == "Blue" then
+            Rayfield:SetTheme({
+                Background = Color3.fromRGB(25, 25, 35),
+                Topbar = Color3.fromRGB(0, 0, 60),
+                TabBackground = Color3.fromRGB(0, 0, 80),
+                Primary = Color3.fromRGB(0, 120, 255)
+            })
+        elseif Theme == "Green" then
+            Rayfield:SetTheme({
+                Background = Color3.fromRGB(20, 35, 20),
+                Topbar = Color3.fromRGB(0, 60, 0),
+                TabBackground = Color3.fromRGB(0, 80, 0),
+                Primary = Color3.fromRGB(0, 200, 100)
+            })
+        end
+    end,
+})
 
 -- ======================================================
 -- PLAYER SETTINGS
 -- ======================================================
-
 PlayerTab:CreateSlider({
     Name = "WalkSpeed",
     Range = {16,300},
@@ -74,14 +121,12 @@ PlayerTab:CreateButton({
 -- ======================================================
 -- VISUAL SETTINGS
 -- ======================================================
-
 local HighlightESPEnabled = false
 local DrawingESP = {}
 local ESPEnabled = false
 local HealthESPEnabled = false
 local LineESPEnabled = false
 
--- Highlight
 VisualTab:CreateToggle({
     Name = "Player Highlight",
     CurrentValue = false,
@@ -105,21 +150,18 @@ VisualTab:CreateToggle({
     end,
 })
 
--- Name ESP
 VisualTab:CreateToggle({
     Name = "Name ESP",
     CurrentValue = false,
     Callback = function(Value) ESPEnabled = Value end,
 })
 
--- Healthbar ESP
 VisualTab:CreateToggle({
     Name = "Healthbar ESP",
     CurrentValue = false,
     Callback = function(Value) HealthESPEnabled = Value end,
 })
 
--- ✅ Line ESP Toggle (ini yang ditambah)
 VisualTab:CreateToggle({
     Name = "Line ESP",
     CurrentValue = false,
@@ -129,7 +171,6 @@ VisualTab:CreateToggle({
 -- ======================================================
 -- ESP LOOP
 -- ======================================================
-
 game:GetService("RunService").RenderStepped:Connect(function()
     local camera = workspace.CurrentCamera
     local screenCenter = Vector2.new(camera.ViewportSize.X/2, camera.ViewportSize.Y/2)
