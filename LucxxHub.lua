@@ -3,17 +3,18 @@ local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 --// Buat Window
 local Window = Rayfield:CreateWindow({
-   Name = "Universal Hub",
-   LoadingTitle = "Rayfield UI",
-   LoadingSubtitle = "by kamu",
+   Name = "Lucxx Hub",
+   LoadingTitle = "Lucxx UI",
+   LoadingSubtitle = "by Lucxxy",
    ConfigurationSaving = {
       Enabled = true,
       FolderName = nil,
-      FileName = "UniversalConfig"
+      FileName = "LucxxConfig"
    },
    KeySystem = false
 })
 
+------------------------------------------------------
 --// Tab Movement
 local MovementTab = Window:CreateTab("Player", 4483362458)
 local MovementSection = MovementTab:CreateSection("Movement")
@@ -22,7 +23,6 @@ local MovementSection = MovementTab:CreateSection("Movement")
 local SelectedSpeed = 16
 local SelectedJump = 50
 local SelectedGravity = 196.2
-local SelectedZoom = 128
 local Running = true
 
 -- Slider WalkSpeed
@@ -70,15 +70,11 @@ MovementTab:CreateSlider({
    end,
 })
 
--- Slider Max Zoom
-MovementTab:CreateSlider({
-   Name = "Max Zoom",
-   Range = {0, 1000},
-   Increment = 1,
-   CurrentValue = 128,
-   Callback = function(Value)
-      SelectedZoom = Value
-      game.Players.LocalPlayer.CameraMaxZoomDistance = SelectedZoom
+-- Button Fly
+MovementTab:CreateButton({
+   Name = "Fly",
+   Callback = function()
+      loadstring(game:HttpGet("https://raw.githubusercontent.com/XNEOFF/FlyGuiV3/main/FlyGuiV3.txt"))()
    end,
 })
 
@@ -96,9 +92,6 @@ task.spawn(function()
                Humanoid.JumpPower = SelectedJump
             end
          end
-         if Player.CameraMaxZoomDistance ~= SelectedZoom then
-            Player.CameraMaxZoomDistance = SelectedZoom
-         end
       end
       if workspace.Gravity ~= SelectedGravity then
          workspace.Gravity = SelectedGravity
@@ -109,10 +102,24 @@ end)
 ------------------------------------------------------
 --// Tab Visual
 local VisualTab = Window:CreateTab("Visual", 4483362458)
-local VisualSection = VisualTab:CreateSection("ESP")
+local VisualSection = VisualTab:CreateSection("ESP & Camera")
 
--- Variabel Highlight
+-- Variabel Visual
+local SelectedZoom = 128 -- default
 local HighlightEnabled = false
+
+-- Slider Max Zoom
+VisualTab:CreateSlider({
+   Name = "Max Zoom",
+   Range = {0, 1000},
+   Increment = 1,
+   CurrentValue = 128,
+   Callback = function(Value)
+      SelectedZoom = Value
+      local Player = game.Players.LocalPlayer
+      Player.CameraMaxZoomDistance = SelectedZoom
+   end,
+})
 
 -- Fungsi pasang Highlight
 local function addHighlight(plr)
@@ -164,3 +171,14 @@ VisualTab:CreateToggle({
       end
    end,
 })
+
+-- Anti-reset untuk Max Zoom
+task.spawn(function()
+   while true do
+      task.wait(0.2)
+      local Player = game.Players.LocalPlayer
+      if Player.CameraMaxZoomDistance ~= SelectedZoom then
+         Player.CameraMaxZoomDistance = SelectedZoom
+      end
+   end
+end)
