@@ -81,7 +81,7 @@ local ESPEnabled = false
 local HealthESPEnabled = false
 local LineESPEnabled = false
 
--- Highlight Toggle
+-- Highlight
 VisualTab:CreateToggle({
     Name = "Player Highlight",
     CurrentValue = false,
@@ -105,21 +105,21 @@ VisualTab:CreateToggle({
     end,
 })
 
--- Name ESP Toggle
+-- Name ESP
 VisualTab:CreateToggle({
     Name = "Name ESP",
     CurrentValue = false,
     Callback = function(Value) ESPEnabled = Value end,
 })
 
--- Healthbar ESP Toggle
+-- Healthbar ESP
 VisualTab:CreateToggle({
-    Name = "Healthbar ESP (Rounded Slim)",
+    Name = "Healthbar ESP",
     CurrentValue = false,
     Callback = function(Value) HealthESPEnabled = Value end,
 })
 
--- Line ESP Toggle
+-- ✅ Line ESP Toggle (ini yang ditambah)
 VisualTab:CreateToggle({
     Name = "Line ESP",
     CurrentValue = false,
@@ -142,7 +142,7 @@ game:GetService("RunService").RenderStepped:Connect(function()
             if not DrawingESP[plr] then DrawingESP[plr] = {} end
             local data = DrawingESP[plr]
 
-            -- Name ESP
+            -- NAME ESP
             if ESPEnabled and head then
                 if not data.Name then
                     data.Name = Drawing.new("Text")
@@ -163,7 +163,7 @@ game:GetService("RunService").RenderStepped:Connect(function()
                 data.Name.Visible = false
             end
 
-            -- Healthbar ESP
+            -- HEALTHBAR ESP
             if HealthESPEnabled and hum and head then
                 if not data.HealthBG then
                     data.HealthBG = Drawing.new("Quad")
@@ -206,11 +206,11 @@ game:GetService("RunService").RenderStepped:Connect(function()
                 if data.HealthBG then data.HealthBG.Visible = false end
             end
 
-            -- Line ESP
+            -- LINE ESP
             if LineESPEnabled and head then
                 if not data.Line then
                     data.Line = Drawing.new("Line")
-                    data.Line.Thickness = 1.5
+                    data.Line.Thickness = 2
                     data.Line.Color = Color3.fromRGB(0,255,255)
                 end
                 local pos, vis = camera:WorldToViewportPoint(head.Position)
