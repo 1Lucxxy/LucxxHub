@@ -186,4 +186,15 @@ VisualTab:CreateToggle({
 VisualTab:CreateColorPicker({
     Name = "Highlight Color",
     Color = Color3.fromRGB(0,255,0),
-    Callback = function(v) Hi
+    Callback = function(v) HighlightColor = v end,
+})
+VisualTab:CreateToggle({
+    Name = "ESP Healthbar",
+    CurrentValue = false,
+    Callback = function(v) HealthESPEnabled = v end,
+})
+VisualTab:CreateToggle({
+    Name = "ESP Name",
+    CurrentValue = false,
+    Callback = function(v) NameESPEnabled = v end,
+})
