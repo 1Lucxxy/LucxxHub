@@ -125,7 +125,7 @@ VisualTab:CreateToggle({
 })
 
 VisualTab:CreateToggle({
-    Name = "Healthbar ESP (Roblox style)",
+    Name = "Healthbar ESP (Rounded Slim)",
     CurrentValue = false,
     Callback = function(Value) HealthESPEnabled = Value end,
 })
@@ -161,32 +161,38 @@ game:GetService("RunService").RenderStepped:Connect(function()
                 data.Name.Visible = false
             end
 
-            -- Healthbar ala Roblox
+            -- Healthbar rounded tipis
             if HealthESPEnabled and hum and head then
                 if not data.HealthBG then
-                    data.HealthBG = Drawing.new("Square")
+                    data.HealthBG = Drawing.new("Quad")
                     data.HealthBG.Filled = true
-                    data.HealthBG.Color = Color3.fromRGB(50, 50, 50)
+                    data.HealthBG.Color = Color3.fromRGB(50,50,50)
                 end
                 if not data.Health then
-                    data.Health = Drawing.new("Square")
+                    data.Health = Drawing.new("Quad")
                     data.Health.Filled = true
                 end
 
                 local hp = hum.Health / hum.MaxHealth
                 local headPos, vis = workspace.CurrentCamera:WorldToViewportPoint(head.Position+Vector3.new(0,2.5,0))
                 if vis then
-                    local barW, barH = 70, 6
+                    local barW, barH = 70, 4 -- tipis
                     local x, y = headPos.X - barW/2, headPos.Y - 15
 
+                    local function makeQuad(obj, px, py, w, h)
+                        obj.PointA = Vector2.new(px, py)
+                        obj.PointB = Vector2.new(px+w, py)
+                        obj.PointC = Vector2.new(px+w, py+h)
+                        obj.PointD = Vector2.new(px, py+h)
+                    end
+
                     -- background
-                    data.HealthBG.Position = Vector2.new(x, y)
-                    data.HealthBG.Size = Vector2.new(barW, barH)
+                    makeQuad(data.HealthBG, x, y, barW, barH)
                     data.HealthBG.Visible = true
 
-                    -- foreground
-                    data.Health.Position = Vector2.new(x, y)
-                    data.Health.Size = Vector2.new(barW * math.clamp(hp,0,1), barH)
+                    -- isi HP
+                    local hpW = barW * math.clamp(hp,0,1)
+                    makeQuad(data.Health, x, y, hpW, barH)
                     data.Health.Color = hp > 0.5 and Color3.fromRGB(0,255,0)
                         or hp > 0.2 and Color3.fromRGB(255,255,0)
                         or Color3.fromRGB(255,0,0)
