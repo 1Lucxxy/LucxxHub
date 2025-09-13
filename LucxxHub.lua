@@ -115,7 +115,7 @@ local function createESP(plr)
     hl.OutlineColor, hl.OutlineTransparency = Color3.fromRGB(255,255,255), 0
     hl.Enabled = false
     if plr.Character then hl.Parent = plr.Character end
-    ESPData[plr] = {Highlight = hl, Health = nil, Name = nil}
+    ESPData[plr] = {Highlight = hl, Health = nil, HealthBG = nil, Name = nil}
 end
 
 -- Update ESP
@@ -144,37 +144,52 @@ game:GetService("RunService").RenderStepped:Connect(function()
                 end
                 local headPos, vis = workspace.CurrentCamera:WorldToViewportPoint(head.Position+Vector3.new(0,2,0))
                 data.Name.Visible = vis
-                if vis then data.Name.Position = Vector2.new(headPos.X, headPos.Y-20) end
+                if vis then data.Name.Position = Vector2.new(headPos.X, headPos.Y-25) end
             elseif data.Name then
                 data.Name.Visible = false
             end
 
-            -- Healthbar di atas kepala
+            -- Healthbar di atas kepala (rapih dengan background)
             if HealthESPEnabled and hum and head then
+                if not data.HealthBG then
+                    data.HealthBG = Drawing.new("Square")
+                    data.HealthBG.Filled = true
+                    data.HealthBG.Color = Color3.fromRGB(0, 0, 0) -- background hitam
+                end
                 if not data.Health then
                     data.Health = Drawing.new("Square")
                     data.Health.Filled = true
                 end
+
                 local hp = hum.Health / hum.MaxHealth
                 local headPos, vis = workspace.CurrentCamera:WorldToViewportPoint(head.Position+Vector3.new(0,2,0))
                 if vis then
-                    local barW, barH = 50, 5 -- panjang dan tebal healthbar
-                    local x, y = headPos.X - barW/2, headPos.Y - 8
+                    local barW, barH = 60, 6 -- panjang & tinggi bar
+                    local x, y = headPos.X - barW/2, headPos.Y - 12
+
+                    -- background
+                    data.HealthBG.Position = Vector2.new(x, y)
+                    data.HealthBG.Size = Vector2.new(barW, barH)
+                    data.HealthBG.Visible = true
+
+                    -- bar HP
                     data.Health.Position = Vector2.new(x, y)
-                    data.Health.Size = Vector2.new(barW * hp, barH)
+                    data.Health.Size = Vector2.new(barW * math.clamp(hp,0,1), barH)
                     data.Health.Color = hp > 0.5 and Color3.fromRGB(0,255,0) or hp > 0.2 and Color3.fromRGB(255,255,0) or Color3.fromRGB(255,0,0)
                     data.Health.Visible = true
                 else
+                    data.HealthBG.Visible = false
                     data.Health.Visible = false
                 end
             elseif data.Health then
                 data.Health.Visible = false
+                if data.HealthBG then data.HealthBG.Visible = false end
             end
         end
     end
 end)
 
--- Player baru
+-- Player baru join
 game.Players.PlayerAdded:Connect(createESP)
 
 -- Toggles UI
