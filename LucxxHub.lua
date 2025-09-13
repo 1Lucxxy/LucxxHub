@@ -17,54 +17,7 @@ local Window = Rayfield:CreateWindow({
 -- // Tabs
 local PlayerTab = Window:CreateTab("Player", 4483362458)
 local VisualTab = Window:CreateTab("Visual", 4483362458)
-local SettingsTab = Window:CreateSettingsTab() -- ✅ Tab bawaan Rayfield Settings
-
--- ======================================================
--- CUSTOM SETTINGS THEME
--- ======================================================
-SettingsTab:CreateDropdown({
-    Name = "UI Theme",
-    Options = {"Dark", "Light", "Red", "Blue", "Green"},
-    CurrentOption = "Dark",
-    Callback = function(Theme)
-        if Theme == "Dark" then
-            Rayfield:SetTheme({
-                Background = Color3.fromRGB(25, 25, 25),
-                Topbar = Color3.fromRGB(30, 30, 30),
-                TabBackground = Color3.fromRGB(35, 35, 35),
-                Primary = Color3.fromRGB(0, 170, 255)
-            })
-        elseif Theme == "Light" then
-            Rayfield:SetTheme({
-                Background = Color3.fromRGB(245, 245, 245),
-                Topbar = Color3.fromRGB(230, 230, 230),
-                TabBackground = Color3.fromRGB(220, 220, 220),
-                Primary = Color3.fromRGB(0, 120, 255)
-            })
-        elseif Theme == "Red" then
-            Rayfield:SetTheme({
-                Background = Color3.fromRGB(25, 25, 25),
-                Topbar = Color3.fromRGB(35, 0, 0),
-                TabBackground = Color3.fromRGB(45, 0, 0),
-                Primary = Color3.fromRGB(255, 0, 0)
-            })
-        elseif Theme == "Blue" then
-            Rayfield:SetTheme({
-                Background = Color3.fromRGB(25, 25, 35),
-                Topbar = Color3.fromRGB(0, 0, 60),
-                TabBackground = Color3.fromRGB(0, 0, 80),
-                Primary = Color3.fromRGB(0, 120, 255)
-            })
-        elseif Theme == "Green" then
-            Rayfield:SetTheme({
-                Background = Color3.fromRGB(20, 35, 20),
-                Topbar = Color3.fromRGB(0, 60, 0),
-                TabBackground = Color3.fromRGB(0, 80, 0),
-                Primary = Color3.fromRGB(0, 200, 100)
-            })
-        end
-    end,
-})
+local SettingsTab = Window:CreateTab("Settings", 4483362458) -- Tab Settings baru
 
 -- ======================================================
 -- PLAYER SETTINGS
@@ -166,6 +119,69 @@ VisualTab:CreateToggle({
     Name = "Line ESP",
     CurrentValue = false,
     Callback = function(Value) LineESPEnabled = Value end,
+})
+
+-- ======================================================
+-- SETTINGS TAB (Theme & Transparansi)
+-- ======================================================
+-- UI Theme Dropdown
+SettingsTab:CreateDropdown({
+    Name = "UI Theme",
+    Options = {"Dark", "Light", "Red", "Blue", "Green"},
+    CurrentOption = "Dark",
+    Callback = function(Theme)
+        if Theme == "Dark" then
+            Rayfield:SetTheme({
+                Background = Color3.fromRGB(25, 25, 25),
+                Topbar = Color3.fromRGB(30, 30, 30),
+                TabBackground = Color3.fromRGB(35, 35, 35),
+                Primary = Color3.fromRGB(0, 170, 255)
+            })
+        elseif Theme == "Light" then
+            Rayfield:SetTheme({
+                Background = Color3.fromRGB(245, 245, 245),
+                Topbar = Color3.fromRGB(230, 230, 230),
+                TabBackground = Color3.fromRGB(220, 220, 220),
+                Primary = Color3.fromRGB(0, 120, 255)
+            })
+        elseif Theme == "Red" then
+            Rayfield:SetTheme({
+                Background = Color3.fromRGB(25, 25, 25),
+                Topbar = Color3.fromRGB(35, 0, 0),
+                TabBackground = Color3.fromRGB(45, 0, 0),
+                Primary = Color3.fromRGB(255, 0, 0)
+            })
+        elseif Theme == "Blue" then
+            Rayfield:SetTheme({
+                Background = Color3.fromRGB(25, 25, 35),
+                Topbar = Color3.fromRGB(0, 0, 60),
+                TabBackground = Color3.fromRGB(0, 0, 80),
+                Primary = Color3.fromRGB(0, 120, 255)
+            })
+        elseif Theme == "Green" then
+            Rayfield:SetTheme({
+                Background = Color3.fromRGB(20, 35, 20),
+                Topbar = Color3.fromRGB(0, 60, 0),
+                TabBackground = Color3.fromRGB(0, 80, 0),
+                Primary = Color3.fromRGB(0, 200, 100)
+            })
+        end
+    end,
+})
+
+-- Transparansi UI Slider
+SettingsTab:CreateSlider({
+    Name = "UI Transparency",
+    Range = {0,1},
+    Increment = 0.05,
+    CurrentValue = 0,
+    Callback = function(Value)
+        Rayfield:SetTheme({
+            BackgroundTransparency = Value,
+            TopbarTransparency = Value,
+            TabBackgroundTransparency = Value
+        })
+    end
 })
 
 -- ======================================================
