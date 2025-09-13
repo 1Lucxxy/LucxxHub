@@ -106,7 +106,8 @@ local VisualSection = VisualTab:CreateSection("ESP & Camera")
 
 -- Variabel Visual
 local SelectedZoom = 128 -- default
-local HighlightEnabled = false
+local ESPEnabled = false
+local BoxColor = Color3.fromRGB(0, 255, 0)
 
 -- Slider Max Zoom
 VisualTab:CreateSlider({
@@ -121,55 +122,120 @@ VisualTab:CreateSlider({
    end,
 })
 
--- Fungsi pasang Highlight
-local function addHighlight(plr)
-   if plr ~= game.Players.LocalPlayer and plr.Character then
-      if not plr.Character:FindFirstChild("Highlight") then
-         local hl = Instance.new("Highlight")
-         hl.Name = "Highlight"
-         hl.FillColor = Color3.fromRGB(255, 0, 0)
-         hl.OutlineColor = Color3.fromRGB(255, 255, 255)
-         hl.Adornee = plr.Character
-         hl.Parent = plr.Character
-      end
-   end
+-- Fungsi bikin ESP Billboard
+local function createESP(plr)
+    if plr == game.Players.LocalPlayer then return end
+    task.spawn(function()
+        local char = plr.Character or plr.CharacterAdded:Wait()
+        local head = char:WaitForChild("Head", 5)
+        if head and not head:FindFirstChild("ESPBillboard") then
+            local billboard = Instance.new("BillboardGui")
+            billboard.Name = "ESPBillboard"
+            billboard.Adornee = head
+            billboard.Size = UDim2.new(0, 200, 0, 50)
+            billboard.StudsOffset = Vector3.new(0, 2, 0)
+            billboard.AlwaysOnTop = true
+            billboard.Parent = head
+
+            -- Background box
+            local box = Instance.new("Frame")
+            box.Size = UDim2.new(1, 0, 1, 0)
+            box.BackgroundTransparency = 0.5
+            box.BackgroundColor3 = BoxColor
+            box.BorderSizePixel = 2
+            box.Parent = billboard
+
+            -- Nama Player
+            local nameLabel = Instance.new("TextLabel")
+            nameLabel.Size = UDim2.new(1, 0, 0.5, 0)
+            nameLabel.BackgroundTransparency = 1
+            nameLabel.Text = plr.Name
+            nameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+            nameLabel.TextStrokeTransparency = 0
+            nameLabel.Font = Enum.Font.SourceSansBold
+            nameLabel.TextScaled = true
+            nameLabel.Parent = billboard
+
+            -- Health Bar
+            local healthBar = Instance.new("Frame")
+            healthBar.Size = UDim2.new(1, 0, 0.2, 0)
+            healthBar.Position = UDim2.new(0, 0, 0.8, 0)
+            healthBar.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+            healthBar.BorderSizePixel = 0
+            healthBar.Parent = billboard
+
+            -- Update darah realtime
+            local humanoid = char:WaitForChild("Humanoid")
+            humanoid.HealthChanged:Connect(function(hp)
+                local maxHp = humanoid.MaxHealth
+                healthBar.Size = UDim2.new(hp / maxHp, 0, 0.2, 0)
+                if hp / maxHp > 0.5 then
+                    healthBar.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+                elseif hp / maxHp > 0.2 then
+                    healthBar.BackgroundColor3 = Color3.fromRGB(255, 255, 0)
+                else
+                    healthBar.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+                end
+            end)
+        end
+    end)
 end
 
--- Fungsi hapus Highlight
-local function removeHighlight(plr)
-   if plr.Character and plr.Character:FindFirstChild("Highlight") then
-      plr.Character.Highlight:Destroy()
-   end
-end
-
--- Toggle Player Highlight
+-- Toggle ESP
 VisualTab:CreateToggle({
-   Name = "Player Highlight",
+   Name = "ESP (Name + HP + Box)",
    CurrentValue = false,
-   Flag = "PlayerHighlightToggle",
    Callback = function(Value)
-      HighlightEnabled = Value
-      if HighlightEnabled then
-         -- Tambahin highlight ke semua player
+      ESPEnabled = Value
+      if ESPEnabled then
          for _, plr in pairs(game.Players:GetPlayers()) do
-            addHighlight(plr)
+            if plr.Character then
+                createESP(plr)
+            end
+            plr.CharacterAdded:Connect(function()
+                if ESPEnabled then
+                    task.wait(1)
+                    createESP(plr)
+                end
+            end)
          end
-         -- Kalau ada player baru join
          game.Players.PlayerAdded:Connect(function(plr)
             plr.CharacterAdded:Connect(function()
-               if HighlightEnabled then
-                  task.wait(1)
-                  addHighlight(plr)
-               end
+                if ESPEnabled then
+                    task.wait(1)
+                    createESP(plr)
+                end
             end)
          end)
       else
-         -- Hapus highlight dari semua player
          for _, plr in pairs(game.Players:GetPlayers()) do
-            removeHighlight(plr)
+            if plr.Character and plr.Character:FindFirstChild("Head") then
+                local head = plr.Character.Head
+                if head:FindFirstChild("ESPBillboard") then
+                    head.ESPBillboard:Destroy()
+                end
+            end
          end
       end
    end,
+})
+
+-- Color Picker untuk Box ESP
+VisualTab:CreateColorPicker({
+    Name = "Box Color",
+    Color = Color3.fromRGB(0,255,0),
+    Callback = function(Value)
+        BoxColor = Value
+        -- Update warna semua box aktif
+        for _, plr in pairs(game.Players:GetPlayers()) do
+            if plr.Character and plr.Character:FindFirstChild("Head") then
+                local head = plr.Character.Head
+                if head:FindFirstChild("ESPBillboard") then
+                    head.ESPBillboard.Frame.BackgroundColor3 = BoxColor
+                end
+            end
+        end
+    end
 })
 
 -- Anti-reset untuk Max Zoom
