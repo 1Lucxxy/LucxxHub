@@ -11,11 +11,6 @@ local Window = Rayfield:CreateWindow({
         FolderName = "UniversalHub",
         FileName = "Config"
     },
-    Discord = {
-        Enabled = false,
-        Invite = "",
-        RememberJoins = false
-    },
     KeySystem = false
 })
 
@@ -27,12 +22,10 @@ local VisualTab = Window:CreateTab("Visual", 4483362458)
 -- PLAYER SETTINGS
 -- ======================================================
 
--- WalkSpeed
 PlayerTab:CreateSlider({
     Name = "WalkSpeed",
     Range = {16,300},
     Increment = 1,
-    Suffix = "Speed",
     CurrentValue = 16,
     Callback = function(Value)
         local hum = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
@@ -40,12 +33,10 @@ PlayerTab:CreateSlider({
     end,
 })
 
--- JumpPower
 PlayerTab:CreateSlider({
     Name = "JumpPower",
     Range = {50,200},
     Increment = 1,
-    Suffix = "JP",
     CurrentValue = 50,
     Callback = function(Value)
         local hum = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
@@ -53,19 +44,16 @@ PlayerTab:CreateSlider({
     end,
 })
 
--- Gravity
 PlayerTab:CreateSlider({
     Name = "Gravity",
     Range = {0,500},
     Increment = 1,
-    Suffix = "G",
     CurrentValue = workspace.Gravity,
     Callback = function(Value)
         workspace.Gravity = Value
     end,
 })
 
--- Max Zoom
 PlayerTab:CreateSlider({
     Name = "Max Camera Zoom",
     Range = {0,1000},
@@ -76,7 +64,6 @@ PlayerTab:CreateSlider({
     end,
 })
 
--- Fly Button
 PlayerTab:CreateButton({
     Name = "Fly",
     Callback = function()
@@ -88,8 +75,13 @@ PlayerTab:CreateButton({
 -- VISUAL SETTINGS
 -- ======================================================
 
--- Toggle Highlight
 local HighlightESPEnabled = false
+local DrawingESP = {}
+local ESPEnabled = false
+local HealthESPEnabled = false
+local LineESPEnabled = false
+
+-- Highlight Toggle
 VisualTab:CreateToggle({
     Name = "Player Highlight",
     CurrentValue = false,
@@ -113,25 +105,35 @@ VisualTab:CreateToggle({
     end,
 })
 
--- Name ESP + Healthbar ala Roblox
-local DrawingESP = {}
-local ESPEnabled = false
-local HealthESPEnabled = false
-
+-- Name ESP Toggle
 VisualTab:CreateToggle({
     Name = "Name ESP",
     CurrentValue = false,
     Callback = function(Value) ESPEnabled = Value end,
 })
 
+-- Healthbar ESP Toggle
 VisualTab:CreateToggle({
     Name = "Healthbar ESP (Rounded Slim)",
     CurrentValue = false,
     Callback = function(Value) HealthESPEnabled = Value end,
 })
 
--- Loop ESP
+-- Line ESP Toggle
+VisualTab:CreateToggle({
+    Name = "Line ESP",
+    CurrentValue = false,
+    Callback = function(Value) LineESPEnabled = Value end,
+})
+
+-- ======================================================
+-- ESP LOOP
+-- ======================================================
+
 game:GetService("RunService").RenderStepped:Connect(function()
+    local camera = workspace.CurrentCamera
+    local screenCenter = Vector2.new(camera.ViewportSize.X/2, camera.ViewportSize.Y/2)
+
     for _,plr in pairs(game.Players:GetPlayers()) do
         if plr ~= game.Players.LocalPlayer and plr.Character then
             local hum = plr.Character:FindFirstChildOfClass("Humanoid")
@@ -149,7 +151,7 @@ game:GetService("RunService").RenderStepped:Connect(function()
                     data.Name.Outline = true
                     data.Name.Color = Color3.fromRGB(255,255,255)
                 end
-                local pos, vis = workspace.CurrentCamera:WorldToViewportPoint(head.Position+Vector3.new(0,2,0))
+                local pos, vis = camera:WorldToViewportPoint(head.Position+Vector3.new(0,2,0))
                 if vis then
                     data.Name.Text = plr.Name
                     data.Name.Position = Vector2.new(pos.X, pos.Y)
@@ -161,7 +163,7 @@ game:GetService("RunService").RenderStepped:Connect(function()
                 data.Name.Visible = false
             end
 
-            -- Healthbar rounded tipis
+            -- Healthbar ESP
             if HealthESPEnabled and hum and head then
                 if not data.HealthBG then
                     data.HealthBG = Drawing.new("Quad")
@@ -174,9 +176,9 @@ game:GetService("RunService").RenderStepped:Connect(function()
                 end
 
                 local hp = hum.Health / hum.MaxHealth
-                local headPos, vis = workspace.CurrentCamera:WorldToViewportPoint(head.Position+Vector3.new(0,2.5,0))
+                local headPos, vis = camera:WorldToViewportPoint(head.Position+Vector3.new(0,2.5,0))
                 if vis then
-                    local barW, barH = 70, 4 -- tipis
+                    local barW, barH = 70, 4
                     local x, y = headPos.X - barW/2, headPos.Y - 15
 
                     local function makeQuad(obj, px, py, w, h)
@@ -186,11 +188,9 @@ game:GetService("RunService").RenderStepped:Connect(function()
                         obj.PointD = Vector2.new(px, py+h)
                     end
 
-                    -- background
                     makeQuad(data.HealthBG, x, y, barW, barH)
                     data.HealthBG.Visible = true
 
-                    -- isi HP
                     local hpW = barW * math.clamp(hp,0,1)
                     makeQuad(data.Health, x, y, hpW, barH)
                     data.Health.Color = hp > 0.5 and Color3.fromRGB(0,255,0)
@@ -204,6 +204,25 @@ game:GetService("RunService").RenderStepped:Connect(function()
             elseif data.Health then
                 data.Health.Visible = false
                 if data.HealthBG then data.HealthBG.Visible = false end
+            end
+
+            -- Line ESP
+            if LineESPEnabled and head then
+                if not data.Line then
+                    data.Line = Drawing.new("Line")
+                    data.Line.Thickness = 1.5
+                    data.Line.Color = Color3.fromRGB(0,255,255)
+                end
+                local pos, vis = camera:WorldToViewportPoint(head.Position)
+                if vis then
+                    data.Line.From = screenCenter
+                    data.Line.To = Vector2.new(pos.X, pos.Y)
+                    data.Line.Visible = true
+                else
+                    data.Line.Visible = false
+                end
+            elseif data.Line then
+                data.Line.Visible = false
             end
         end
     end
