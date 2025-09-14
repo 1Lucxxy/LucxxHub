@@ -118,15 +118,23 @@ VisualTab:CreateToggle({
 })
 
 -- ======================================================
--- COMBAT SETTINGS (Team Check)
+-- COMBAT SETTINGS (FOV Circle)
 -- ======================================================
-local TeamCheck = false
-CombatTab:CreateToggle({
-    Name = "Team Check",
-    CurrentValue = false,
+local FOVCircle = Drawing.new("Circle")
+FOVCircle.Radius = 100 -- default radius
+FOVCircle.Thickness = 2
+FOVCircle.Color = Color3.fromRGB(0,255,0)
+FOVCircle.Visible = true
+FOVCircle.Position = Vector2.new(workspace.CurrentCamera.ViewportSize.X/2, workspace.CurrentCamera.ViewportSize.Y/2)
+
+CombatTab:CreateSlider({
+    Name = "FOV Circle Radius",
+    Range = {50, 500}, -- bisa diubah
+    Increment = 1,
+    CurrentValue = 100,
     Callback = function(Value)
-        TeamCheck = Value
-    end
+        FOVCircle.Radius = Value
+    end,
 })
 
 -- ======================================================
@@ -136,6 +144,9 @@ game:GetService("RunService").RenderStepped:Connect(function()
     local camera = workspace.CurrentCamera
     local screenCenter = Vector2.new(camera.ViewportSize.X/2, camera.ViewportSize.Y/2)
 
+    -- update FOV Circle posisi
+    FOVCircle.Position = screenCenter
+
     for _,plr in pairs(game.Players:GetPlayers()) do
         if plr ~= game.Players.LocalPlayer and plr.Character then
             local hum = plr.Character:FindFirstChildOfClass("Humanoid")
@@ -143,104 +154,88 @@ game:GetService("RunService").RenderStepped:Connect(function()
             if not DrawingESP[plr] then DrawingESP[plr] = {} end
             local data = DrawingESP[plr]
 
-            -- cek team
-            local showESP = true
-            if TeamCheck then
-                if plr.Team == game.Players.LocalPlayer.Team then
-                    showESP = false
+            -- NAME ESP
+            if ESPEnabled and head then
+                if not data.Name then
+                    data.Name = Drawing.new("Text")
+                    data.Name.Size = 16
+                    data.Name.Center = true
+                    data.Name.Outline = true
+                    data.Name.Color = Color3.fromRGB(255,255,255)
                 end
-            end
-
-            if showESP then
-                -- NAME ESP
-                if ESPEnabled and head then
-                    if not data.Name then
-                        data.Name = Drawing.new("Text")
-                        data.Name.Size = 16
-                        data.Name.Center = true
-                        data.Name.Outline = true
-                        data.Name.Color = Color3.fromRGB(255,255,255)
-                    end
-                    local pos, vis = camera:WorldToViewportPoint(head.Position+Vector3.new(0,2,0))
-                    if vis then
-                        data.Name.Text = plr.Name
-                        data.Name.Position = Vector2.new(pos.X, pos.Y)
-                        data.Name.Visible = true
-                    else
-                        data.Name.Visible = false
-                    end
-                elseif data.Name then
+                local pos, vis = camera:WorldToViewportPoint(head.Position+Vector3.new(0,2,0))
+                if vis then
+                    data.Name.Text = plr.Name
+                    data.Name.Position = Vector2.new(pos.X, pos.Y)
+                    data.Name.Visible = true
+                else
                     data.Name.Visible = false
                 end
+            elseif data.Name then
+                data.Name.Visible = false
+            end
 
-                -- HEALTHBAR ESP (tumpul & tipis)
-                if HealthESPEnabled and hum and head then
-                    if not data.HealthBG then
-                        data.HealthBG = Drawing.new("Quad")
-                        data.HealthBG.Filled = true
-                        data.HealthBG.Color = Color3.fromRGB(50,50,50)
-                    end
-                    if not data.Health then
-                        data.Health = Drawing.new("Quad")
-                        data.Health.Filled = true
-                    end
-
-                    local hp = hum.Health / hum.MaxHealth
-                    local headPos, vis = camera:WorldToViewportPoint(head.Position+Vector3.new(0,2.5,0))
-                    if vis then
-                        local barW, barH = 70, 4 -- tipis
-                        local x, y = headPos.X - barW/2, headPos.Y - 15
-                        local radius = 2 -- ujung tumpul
-
-                        local function makeRoundedQuad(obj, px, py, w, h, r)
-                            obj.PointA = Vector2.new(px+r, py)
-                            obj.PointB = Vector2.new(px+w-r, py)
-                            obj.PointC = Vector2.new(px+w-r, py+h)
-                            obj.PointD = Vector2.new(px+r, py+h)
-                        end
-
-                        makeRoundedQuad(data.HealthBG, x, y, barW, barH, radius)
-                        data.HealthBG.Visible = true
-
-                        local hpW = barW * math.clamp(hp,0,1)
-                        makeRoundedQuad(data.Health, x, y, hpW, barH, radius)
-                        data.Health.Color = hp > 0.5 and Color3.fromRGB(0,255,0)
-                            or hp > 0.2 and Color3.fromRGB(255,255,0)
-                            or Color3.fromRGB(255,0,0)
-                        data.Health.Visible = true
-                    else
-                        data.HealthBG.Visible = false
-                        data.Health.Visible = false
-                    end
-                elseif data.Health then
-                    data.Health.Visible = false
-                    if data.HealthBG then data.HealthBG.Visible = false end
+            -- HEALTHBAR ESP (tumpul & tipis)
+            if HealthESPEnabled and hum and head then
+                if not data.HealthBG then
+                    data.HealthBG = Drawing.new("Quad")
+                    data.HealthBG.Filled = true
+                    data.HealthBG.Color = Color3.fromRGB(50,50,50)
+                end
+                if not data.Health then
+                    data.Health = Drawing.new("Quad")
+                    data.Health.Filled = true
                 end
 
-                -- LINE ESP
-                if LineESPEnabled and head then
-                    if not data.Line then
-                        data.Line = Drawing.new("Line")
-                        data.Line.Thickness = 2
-                        data.Line.Color = Color3.fromRGB(0,255,255)
+                local hp = hum.Health / hum.MaxHealth
+                local headPos, vis = camera:WorldToViewportPoint(head.Position+Vector3.new(0,2.5,0))
+                if vis then
+                    local barW, barH = 70, 4 -- tipis
+                    local x, y = headPos.X - barW/2, headPos.Y - 15
+                    local radius = 2 -- ujung tumpul
+
+                    local function makeRoundedQuad(obj, px, py, w, h, r)
+                        obj.PointA = Vector2.new(px+r, py)
+                        obj.PointB = Vector2.new(px+w-r, py)
+                        obj.PointC = Vector2.new(px+w-r, py+h)
+                        obj.PointD = Vector2.new(px+r, py+h)
                     end
-                    local pos, vis = camera:WorldToViewportPoint(head.Position)
-                    if vis then
-                        data.Line.From = screenCenter
-                        data.Line.To = Vector2.new(pos.X, pos.Y)
-                        data.Line.Visible = true
-                    else
-                        data.Line.Visible = false
-                    end
-                elseif data.Line then
+
+                    makeRoundedQuad(data.HealthBG, x, y, barW, barH, radius)
+                    data.HealthBG.Visible = true
+
+                    local hpW = barW * math.clamp(hp,0,1)
+                    makeRoundedQuad(data.Health, x, y, hpW, barH, radius)
+                    data.Health.Color = hp > 0.5 and Color3.fromRGB(0,255,0)
+                        or hp > 0.2 and Color3.fromRGB(255,255,0)
+                        or Color3.fromRGB(255,0,0)
+                    data.Health.Visible = true
+                else
+                    data.HealthBG.Visible = false
+                    data.Health.Visible = false
+                end
+            elseif data.Health then
+                data.Health.Visible = false
+                if data.HealthBG then data.HealthBG.Visible = false end
+            end
+
+            -- LINE ESP
+            if LineESPEnabled and head then
+                if not data.Line then
+                    data.Line = Drawing.new("Line")
+                    data.Line.Thickness = 2
+                    data.Line.Color = Color3.fromRGB(0,255,255)
+                end
+                local pos, vis = camera:WorldToViewportPoint(head.Position)
+                if vis then
+                    data.Line.From = screenCenter
+                    data.Line.To = Vector2.new(pos.X, pos.Y)
+                    data.Line.Visible = true
+                else
                     data.Line.Visible = false
                 end
-            else
-                -- sembunyikan semua ESP untuk tim sendiri
-                if data.Name then data.Name.Visible = false end
-                if data.Health then data.Health.Visible = false end
-                if data.HealthBG then data.HealthBG.Visible = false end
-                if data.Line then data.Line.Visible = false end
+            elseif data.Line then
+                data.Line.Visible = false
             end
         end
     end
