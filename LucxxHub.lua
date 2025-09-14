@@ -162,6 +162,18 @@ VisualTab:CreateToggle({
 })
 
 -- ======================================================
+-- CLEANUP SYSTEM (biar ESP ga nyangkut)
+-- ======================================================
+game.Players.PlayerRemoving:Connect(function(plr)
+    if DrawingESP[plr] then
+        for _, obj in pairs(DrawingESP[plr]) do
+            if obj.Remove then obj:Remove() end
+        end
+        DrawingESP[plr] = nil
+    end
+end)
+
+-- ======================================================
 -- MAIN LOOP
 -- ======================================================
 game:GetService("RunService").RenderStepped:Connect(function()
@@ -192,7 +204,6 @@ game:GetService("RunService").RenderStepped:Connect(function()
             end
         end
     else
-        -- hapus semua highlight jika toggle dimatikan
         for _, plr in pairs(game.Players:GetPlayers()) do
             if plr.Character then
                 local hl = plr.Character:FindFirstChild("Highlight")
@@ -201,13 +212,23 @@ game:GetService("RunService").RenderStepped:Connect(function()
         end
     end
 
-    -- ESP Loop (Name, Health, Line)
+    -- ESP Loop
     for _,plr in pairs(game.Players:GetPlayers()) do
         if plr ~= game.Players.LocalPlayer and plr.Character then
             local hum = plr.Character:FindFirstChildOfClass("Humanoid")
             local head = plr.Character:FindFirstChild("Head")
+
             if not DrawingESP[plr] then DrawingESP[plr] = {} end
             local data = DrawingESP[plr]
+
+            -- kalau player mati/head hilang, sembunyikan semua ESP
+            if not head or not hum or hum.Health <= 0 then
+                if data.Name then data.Name.Visible = false end
+                if data.Health then data.Health.Visible = false end
+                if data.HealthBG then data.HealthBG.Visible = false end
+                if data.Line then data.Line.Visible = false end
+                continue
+            end
 
             local showESP = true
             if TeamCheck and plr.Team == game.Players.LocalPlayer.Team then
@@ -336,7 +357,7 @@ game:GetService("RunService").RenderStepped:Connect(function()
 
                 local rayResult = workspace:Raycast(origin, direction, raycastParams)
                 if rayResult then
-                    canSee = false -- ketutup object
+                    canSee = false
                 end
             end
 
