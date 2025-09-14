@@ -76,13 +76,15 @@ PlayerTab:CreateButton({
 -- ======================================================
 local TeamCheck = false
 local AimLockEnabled = false
+local WallCheck = false
 local FOVRadius = 100
 
 local camera = workspace.CurrentCamera
 
--- POV circle
+-- POV circle (Drawing API)
 local FOVCircle = Drawing.new("Circle")
 FOVCircle.Radius = FOVRadius
+FOVCircle.NumSides = 64
 FOVCircle.Thickness = 2
 FOVCircle.Filled = false
 FOVCircle.Color = Color3.fromRGB(0,255,0)
@@ -90,12 +92,12 @@ FOVCircle.Visible = false
 
 CombatTab:CreateSlider({
     Name = "FOV Circle Radius",
-    Range = {100,300}, -- minimal 100, maksimal 300
+    Range = {100,300},
     Increment = 1,
     CurrentValue = 100,
     Callback = function(Value)
         FOVRadius = Value
-        FOVCircle.Radius = Value -- update radius lingkaran
+        FOVCircle.Radius = Value
     end,
 })
 
@@ -115,8 +117,6 @@ CombatTab:CreateToggle({
         FOVCircle.Visible = Value
     end
 })
-
-local WallCheck = false
 
 CombatTab:CreateToggle({
     Name = "Wall Check",
@@ -167,41 +167,41 @@ VisualTab:CreateToggle({
 game:GetService("RunService").RenderStepped:Connect(function()
     local screenCenter = Vector2.new(camera.ViewportSize.X/2, camera.ViewportSize.Y/2)
 
-    -- update lingkaran POV biar ukurannya sesuai slider
+    -- update lingkaran POV
     FOVCircle.Position = screenCenter
     FOVCircle.Radius = FOVRadius
 
     -- Highlight ESP
-if HighlightESPEnabled then
-    for _, plr in pairs(game.Players:GetPlayers()) do
-        if plr.Character then
-            local hl = plr.Character:FindFirstChild("Highlight")
-            local showHighlight = true
-            if TeamCheck and plr.Team == game.Players.LocalPlayer.Team then
-                showHighlight = false
-            end
-            if showHighlight then
-                if not hl then
-                    hl = Instance.new("Highlight", plr.Character)
-                    hl.FillTransparency = 1
-                    hl.OutlineColor = Color3.fromRGB(0,255,0)
+    if HighlightESPEnabled then
+        for _, plr in pairs(game.Players:GetPlayers()) do
+            if plr ~= game.Players.LocalPlayer and plr.Character then
+                local hl = plr.Character:FindFirstChild("Highlight")
+                local showHighlight = true
+                if TeamCheck and plr.Team == game.Players.LocalPlayer.Team then
+                    showHighlight = false
                 end
-            else
+                if showHighlight then
+                    if not hl then
+                        hl = Instance.new("Highlight", plr.Character)
+                        hl.FillTransparency = 1
+                        hl.OutlineColor = Color3.fromRGB(0,255,0)
+                    end
+                else
+                    if hl then hl:Destroy() end
+                end
+            end
+        end
+    else
+        -- hapus semua highlight jika toggle dimatikan
+        for _, plr in pairs(game.Players:GetPlayers()) do
+            if plr.Character then
+                local hl = plr.Character:FindFirstChild("Highlight")
                 if hl then hl:Destroy() end
             end
         end
     end
-else
-    -- jika toggle dimatikan, hapus semua highlight
-    for _, plr in pairs(game.Players:GetPlayers()) do
-        if plr.Character then
-            local hl = plr.Character:FindFirstChild("Highlight")
-            if hl then hl:Destroy() end
-        end
-    end
-end
 
-    -- ESP Loop
+    -- ESP Loop (Name, Health, Line)
     for _,plr in pairs(game.Players:GetPlayers()) do
         if plr ~= game.Players.LocalPlayer and plr.Character then
             local hum = plr.Character:FindFirstChildOfClass("Humanoid")
@@ -302,7 +302,7 @@ end
     end
 
     -- ======================================================
-    -- Aim Lock Kamera
+    -- Aim Lock Kamera + WallCheck
     -- ======================================================
     if AimLockEnabled then
         local nearestPlayer
@@ -324,25 +324,25 @@ end
         end
 
         if nearestPlayer and nearestPlayer.Character and nearestPlayer.Character:FindFirstChild("Head") then
-    local headPos = nearestPlayer.Character.Head.Position
+            local headPos = nearestPlayer.Character.Head.Position
+            local canSee = true
 
-    local canSee = true
-    if WallCheck then
-        local origin = camera.CFrame.Position
-        local direction = (headPos - origin).Unit * (headPos - origin).Magnitude
-        local raycastParams = RaycastParams.new()
-        raycastParams.FilterDescendantsInstances = {game.Players.LocalPlayer.Character, nearestPlayer.Character}
-        raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
+            if WallCheck then
+                local origin = camera.CFrame.Position
+                local direction = (headPos - origin)
+                local raycastParams = RaycastParams.new()
+                raycastParams.FilterDescendantsInstances = {game.Players.LocalPlayer.Character, nearestPlayer.Character}
+                raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
 
-        local rayResult = workspace:Raycast(origin, direction, raycastParams)
-        if rayResult then
-            -- ada object yg menghalangi
-            canSee = false
+                local rayResult = workspace:Raycast(origin, direction, raycastParams)
+                if rayResult then
+                    canSee = false -- ketutup object
+                end
+            end
+
+            if canSee then
+                camera.CFrame = CFrame.new(camera.CFrame.Position, headPos)
+            end
         end
     end
-
-    if canSee then
-        camera.CFrame = CFrame.new(camera.CFrame.Position, headPos)
-    end
-end
 end)
