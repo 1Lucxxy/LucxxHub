@@ -225,7 +225,7 @@ game:GetService("RunService").RenderStepped:Connect(function()
             local data = DrawingESP[plr]
 
             -- sembunyikan jika mati / head hilang
-            if not head or not hum or hum.Health <= 0 then
+            if not head or not hum or hum.Health <= 1 then
                 if data.Name then data.Name.Visible = false end
                 if data.Health then data.Health.Visible = false end
                 if data.HealthBG then data.HealthBG.Visible = false end
@@ -335,7 +335,7 @@ game:GetService("RunService").RenderStepped:Connect(function()
         for _,plr in pairs(game.Players:GetPlayers()) do
             if plr ~= game.Players.LocalPlayer and plr.Character and plr.Character:FindFirstChild("Head") then
                 local hum = plr.Character:FindFirstChildOfClass("Humanoid")
-                if hum and hum.Health > 0 then -- ✅ hanya hidup
+                if hum and hum.Health > 1 then -- ✅ hanya hidup
                     if not TeamCheck or (TeamCheck and plr.Team ~= game.Players.LocalPlayer.Team) then
                         local headPos, onScreen = camera:WorldToViewportPoint(plr.Character.Head.Position)
                         if onScreen then
