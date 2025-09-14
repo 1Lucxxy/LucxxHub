@@ -77,7 +77,6 @@ PlayerTab:CreateButton({
 local TeamCheck = false
 local AimLockEnabled = false
 local WallCheck = false
-local WallbangEnabled = false
 local FOVRadius = 100
 
 local camera = workspace.CurrentCamera
@@ -105,7 +104,9 @@ CombatTab:CreateSlider({
 CombatTab:CreateToggle({
     Name = "Team Check",
     CurrentValue = false,
-    Callback = function(Value) TeamCheck = Value end
+    Callback = function(Value)
+        TeamCheck = Value
+    end
 })
 
 CombatTab:CreateToggle({
@@ -120,13 +121,9 @@ CombatTab:CreateToggle({
 CombatTab:CreateToggle({
     Name = "Wall Check",
     CurrentValue = false,
-    Callback = function(Value) WallCheck = Value end
-})
-
-CombatTab:CreateToggle({
-    Name = "Wallbang",
-    CurrentValue = false,
-    Callback = function(Value) WallbangEnabled = Value end
+    Callback = function(Value)
+        WallCheck = Value
+    end
 })
 
 -- ======================================================
@@ -141,7 +138,9 @@ local DrawingESP = {}
 VisualTab:CreateToggle({
     Name = "Player Highlight",
     CurrentValue = false,
-    Callback = function(Value) HighlightESPEnabled = Value end,
+    Callback = function(Value)
+        HighlightESPEnabled = Value
+    end,
 })
 
 VisualTab:CreateToggle({
@@ -175,52 +174,34 @@ game.Players.PlayerRemoving:Connect(function(plr)
 end)
 
 -- ======================================================
--- WALLBANG HOOK
--- ======================================================
-local old; old = hookmetamethod(workspace, "__namecall", function(self, ...)
-    local method = getnamecallmethod()
-    local args = {...}
-
-    if WallbangEnabled and method == "Raycast" then
-        local origin, direction, params = args[1], args[2], args[3]
-        if typeof(params) == "RaycastParams" then
-            params.FilterType = Enum.RaycastFilterType.Blacklist
-            params.FilterDescendantsInstances = {workspace}
-        end
-        return old(self, origin, direction, params)
-    end
-
-    return old(self, ...)
-end)
-
--- ======================================================
 -- MAIN LOOP
 -- ======================================================
 game:GetService("RunService").RenderStepped:Connect(function()
     local screenCenter = Vector2.new(camera.ViewportSize.X/2, camera.ViewportSize.Y/2)
+
+    -- update POV circle
     FOVCircle.Position = screenCenter
+    FOVCircle.Radius = FOVRadius
 
     -- Highlight ESP
     if HighlightESPEnabled then
         for _, plr in pairs(game.Players:GetPlayers()) do
             if plr ~= game.Players.LocalPlayer and plr.Character then
+                local hl = plr.Character:FindFirstChild("Highlight")
                 local hum = plr.Character:FindFirstChildOfClass("Humanoid")
-                if hum and hum.Health > 1 then
-                    local hl = plr.Character:FindFirstChild("LucxxHighlight")
+                local showHighlight = true
+                if TeamCheck and plr.Team == game.Players.LocalPlayer.Team then
+                    showHighlight = false
+                end
+                if showHighlight and hum and hum.Health > 0 then
                     if not hl then
-                        hl = Instance.new("Highlight")
-                        hl.Parent = plr.Character
-                        hl.Name = "LucxxHighlight"
-                        hl.FillColor = Color3.fromRGB(0,255,0)
-                        hl.FillTransparency = 0.7
+                        hl = Instance.new("Highlight", plr.Character)
+                        hl.FillTransparency = 1
                         hl.OutlineColor = Color3.fromRGB(0,255,0)
-                        hl.OutlineTransparency = 0
-                        hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+                    else
+                        hl.OutlineColor = Color3.fromRGB(0,255,0)
                     end
-                    hl.FillColor = Color3.fromRGB(0,255,0)
-                    hl.OutlineColor = Color3.fromRGB(0,255,0)
                 else
-                    local hl = plr.Character:FindFirstChild("LucxxHighlight")
                     if hl then hl:Destroy() end
                 end
             end
@@ -228,13 +209,13 @@ game:GetService("RunService").RenderStepped:Connect(function()
     else
         for _, plr in pairs(game.Players:GetPlayers()) do
             if plr.Character then
-                local hl = plr.Character:FindFirstChild("LucxxHighlight")
+                local hl = plr.Character:FindFirstChild("Highlight")
                 if hl then hl:Destroy() end
             end
         end
     end
 
-    -- ESP (Name, Health, Line)
+    -- ESP Loop (Name, Health, Line)
     for _,plr in pairs(game.Players:GetPlayers()) do
         if plr ~= game.Players.LocalPlayer and plr.Character then
             local hum = plr.Character:FindFirstChildOfClass("Humanoid")
@@ -243,6 +224,7 @@ game:GetService("RunService").RenderStepped:Connect(function()
             if not DrawingESP[plr] then DrawingESP[plr] = {} end
             local data = DrawingESP[plr]
 
+            -- sembunyikan jika mati / head hilang
             if not head or not hum or hum.Health <= 1 then
                 if data.Name then data.Name.Visible = false end
                 if data.Health then data.Health.Visible = false end
@@ -353,7 +335,7 @@ game:GetService("RunService").RenderStepped:Connect(function()
         for _,plr in pairs(game.Players:GetPlayers()) do
             if plr ~= game.Players.LocalPlayer and plr.Character and plr.Character:FindFirstChild("Head") then
                 local hum = plr.Character:FindFirstChildOfClass("Humanoid")
-                if hum and hum.Health > 1 then
+                if hum and hum.Health > 1 then -- ✅ hanya hidup
                     if not TeamCheck or (TeamCheck and plr.Team ~= game.Players.LocalPlayer.Team) then
                         local headPos, onScreen = camera:WorldToViewportPoint(plr.Character.Head.Position)
                         if onScreen then
