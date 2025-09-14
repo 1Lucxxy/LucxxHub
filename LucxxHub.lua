@@ -3,9 +3,9 @@ local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
 
 -- // Window
 local Window = Rayfield:CreateWindow({
-    Name = "Universal Hub",
+    Name = "Lucxx Hub",
     LoadingTitle = "Loading...",
-    LoadingSubtitle = "by ChatGPT",
+    LoadingSubtitle = "by Lucxxy",
     ConfigurationSaving = {
         Enabled = true,
         FolderName = "UniversalHub",
@@ -77,6 +77,7 @@ PlayerTab:CreateButton({
 local TeamCheck = false
 local AimLockEnabled = false
 local FOVRadius = 100
+local SmoothSpeed = 0.15 -- Smooth kamera
 
 local camera = workspace.CurrentCamera
 
@@ -281,7 +282,7 @@ game:GetService("RunService").RenderStepped:Connect(function()
     end
 
     -- ======================================================
-    -- Aim Lock Kamera
+    -- Aim Lock Kamera (Smooth)
     -- ======================================================
     if AimLockEnabled then
         local nearestPlayer
@@ -303,7 +304,8 @@ game:GetService("RunService").RenderStepped:Connect(function()
         end
 
         if nearestPlayer and nearestPlayer.Character then
-            camera.CFrame = CFrame.new(camera.CFrame.Position, nearestPlayer.Character.Head.Position)
+            local targetCFrame = CFrame.new(camera.CFrame.Position, nearestPlayer.Character.Head.Position)
+            camera.CFrame = camera.CFrame:Lerp(targetCFrame, SmoothSpeed)
         end
     end
 end)
