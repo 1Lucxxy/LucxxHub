@@ -76,6 +76,7 @@ PlayerTab:CreateButton({
 -- ======================================================
 local TeamCheck = false
 local AimLockEnabled = false
+local WallCheckEnabled = false
 local FOVRadius = 100
 
 local camera = workspace.CurrentCamera
@@ -104,6 +105,14 @@ CombatTab:CreateToggle({
     CurrentValue = false,
     Callback = function(Value)
         TeamCheck = Value
+    end
+})
+
+CombatTab:CreateToggle({
+    Name = "Wall Check",
+    CurrentValue = false,
+    Callback = function(Value)
+        WallCheckEnabled = Value
     end
 })
 
@@ -281,7 +290,7 @@ game:GetService("RunService").RenderStepped:Connect(function()
     end
 
     -- ======================================================
-    -- Aim Lock Kamera (Langsung Nempel Kepala)
+    -- Aim Lock Kamera (Langsung Nempel Kepala + Wall Check)
     -- ======================================================
     if AimLockEnabled then
         local nearestPlayer
@@ -294,8 +303,20 @@ game:GetService("RunService").RenderStepped:Connect(function()
                     if onScreen then
                         local dist = (Vector2.new(headPos.X, headPos.Y) - screenCenter).Magnitude
                         if dist <= FOVRadius and dist < nearestDistance then
-                            nearestDistance = dist
-                            nearestPlayer = plr
+                            -- Wall Check
+                            local canSee = true
+                            if WallCheckEnabled then
+                                local ray = Ray.new(camera.CFrame.Position, (plr.Character.Head.Position - camera.CFrame.Position).Unit * (plr.Character.Head.Position - camera.CFrame.Position).Magnitude)
+                                local part = workspace:FindPartOnRayWithIgnoreList(ray, {game.Players.LocalPlayer.Character})
+                                if part and part.Parent ~= plr.Character then
+                                    canSee = false
+                                end
+                            end
+
+                            if canSee then
+                                nearestDistance = dist
+                                nearestPlayer = plr
+                            end
                         end
                     end
                 end
