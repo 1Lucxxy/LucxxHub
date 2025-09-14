@@ -77,7 +77,7 @@ PlayerTab:CreateButton({
 local TeamCheck = false
 local AimLockEnabled = false
 local FOVRadius = 100
-local SmoothSpeed = 0.15 -- Smooth kamera
+local SmoothSpeed = 0.2 -- Smooth kamera
 
 local camera = workspace.CurrentCamera
 
