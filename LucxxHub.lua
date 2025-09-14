@@ -77,6 +77,7 @@ PlayerTab:CreateButton({
 local TeamCheck = false
 local AimLockEnabled = false
 local WallCheck = false
+local WallbangEnabled = false
 local FOVRadius = 100
 
 local camera = workspace.CurrentCamera
@@ -123,6 +124,14 @@ CombatTab:CreateToggle({
     CurrentValue = false,
     Callback = function(Value)
         WallCheck = Value
+    end
+})
+
+CombatTab:CreateToggle({
+    Name = "Wallbang",
+    CurrentValue = false,
+    Callback = function(Value)
+        WallbangEnabled = Value
     end
 })
 
@@ -174,6 +183,26 @@ game.Players.PlayerRemoving:Connect(function(plr)
 end)
 
 -- ======================================================
+-- WALLBANG HOOK
+-- ======================================================
+local old; old = hookmetamethod(workspace, "__namecall", function(self, ...)
+    local method = getnamecallmethod()
+    local args = {...}
+
+    if WallbangEnabled and method == "Raycast" then
+        local origin, direction, params = args[1], args[2], args[3]
+        if typeof(params) == "RaycastParams" then
+            -- blacklist semua part di workspace agar raycast nembus
+            params.FilterType = Enum.RaycastFilterType.Blacklist
+            params.FilterDescendantsInstances = {workspace}
+        end
+        return old(self, origin, direction, params)
+    end
+
+    return old(self, ...)
+end)
+
+-- ======================================================
 -- MAIN LOOP
 -- ======================================================
 game:GetService("RunService").RenderStepped:Connect(function()
@@ -193,7 +222,7 @@ game:GetService("RunService").RenderStepped:Connect(function()
                 if TeamCheck and plr.Team == game.Players.LocalPlayer.Team then
                     showHighlight = false
                 end
-                if showHighlight and hum and hum.Health > 0 then
+                if showHighlight and hum and hum.Health > 1 then
                     if not hl then
                         hl = Instance.new("Highlight", plr.Character)
                         hl.FillTransparency = 1
@@ -335,7 +364,7 @@ game:GetService("RunService").RenderStepped:Connect(function()
         for _,plr in pairs(game.Players:GetPlayers()) do
             if plr ~= game.Players.LocalPlayer and plr.Character and plr.Character:FindFirstChild("Head") then
                 local hum = plr.Character:FindFirstChildOfClass("Humanoid")
-                if hum and hum.Health > 1 then -- ✅ hanya hidup
+                if hum and hum.Health > 1 then
                     if not TeamCheck or (TeamCheck and plr.Team ~= game.Players.LocalPlayer.Team) then
                         local headPos, onScreen = camera:WorldToViewportPoint(plr.Character.Head.Position)
                         if onScreen then
