@@ -3,12 +3,12 @@ local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
 
 -- // Window
 local Window = Rayfield:CreateWindow({
-    Name = "Universal Hub",
+    Name = "Lucxx Hub",
     LoadingTitle = "Loading...",
-    LoadingSubtitle = "by ChatGPT",
+    LoadingSubtitle = "by Lucxxy",
     ConfigurationSaving = {
         Enabled = true,
-        FolderName = "UniversalHub",
+        FolderName = "LucxxHub",
         FileName = "Config"
     },
     KeySystem = false
@@ -78,6 +78,7 @@ local TeamCheck = false
 local AimLockEnabled = false
 local WallCheckEnabled = false
 local FOVRadius = 100
+local currentTarget = nil
 
 local camera = workspace.CurrentCamera
 
@@ -122,6 +123,9 @@ CombatTab:CreateToggle({
     Callback = function(Value)
         AimLockEnabled = Value
         FOVCircle.Visible = Value
+        if not Value then
+            currentTarget = nil
+        end
     end
 })
 
@@ -159,6 +163,63 @@ VisualTab:CreateToggle({
     CurrentValue = false,
     Callback = function(Value) LineESPEnabled = Value end,
 })
+
+-- ======================================================
+-- CLEANUP SYSTEM (fix ESP nyangkut)
+-- ======================================================
+game.Players.PlayerRemoving:Connect(function(plr)
+    if DrawingESP[plr] then
+        for _, obj in pairs(DrawingESP[plr]) do
+            if obj.Remove then obj:Remove() end
+        end
+        DrawingESP[plr] = nil
+    end
+end)
+
+game.Players.PlayerAdded:Connect(function(plr)
+    plr.CharacterRemoving:Connect(function()
+        if DrawingESP[plr] then
+            for _, obj in pairs(DrawingESP[plr]) do
+                if obj.Remove then obj:Remove() end
+            end
+            DrawingESP[plr] = nil
+        end
+    end)
+end)
+
+-- ======================================================
+-- AIM LOCK SYSTEM (fix lepas)
+-- ======================================================
+local function getNearestTarget()
+    local nearestPlayer
+    local nearestDistance = math.huge
+    for _,plr in pairs(game.Players:GetPlayers()) do
+        if plr ~= game.Players.LocalPlayer and plr.Character and plr.Character:FindFirstChild("Head") then
+            if not TeamCheck or (TeamCheck and plr.Team ~= game.Players.LocalPlayer.Team) then
+                local headPos, onScreen = camera:WorldToViewportPoint(plr.Character.Head.Position)
+                if onScreen then
+                    local dist = (Vector2.new(headPos.X, headPos.Y) - Vector2.new(camera.ViewportSize.X/2, camera.ViewportSize.Y/2)).Magnitude
+                    if dist <= FOVRadius and dist < nearestDistance then
+                        -- WallCheck
+                        local canSee = true
+                        if WallCheckEnabled then
+                            local ray = Ray.new(camera.CFrame.Position, (plr.Character.Head.Position - camera.CFrame.Position))
+                            local part = workspace:FindPartOnRayWithIgnoreList(ray, {game.Players.LocalPlayer.Character})
+                            if part and part.Parent ~= plr.Character then
+                                canSee = false
+                            end
+                        end
+                        if canSee then
+                            nearestDistance = dist
+                            nearestPlayer = plr
+                        end
+                    end
+                end
+            end
+        end
+    end
+    return nearestPlayer
+end
 
 -- ======================================================
 -- MAIN LOOP
@@ -289,43 +350,14 @@ game:GetService("RunService").RenderStepped:Connect(function()
         end
     end
 
-    -- ======================================================
-    -- Aim Lock Kamera (Langsung Nempel Kepala + Wall Check)
-    -- ======================================================
+    -- AIM LOCK UPDATE
     if AimLockEnabled then
-        local nearestPlayer
-        local nearestDistance = math.huge
-
-        for _,plr in pairs(game.Players:GetPlayers()) do
-            if plr ~= game.Players.LocalPlayer and plr.Character and plr.Character:FindFirstChild("Head") then
-                if not TeamCheck or (TeamCheck and plr.Team ~= game.Players.LocalPlayer.Team) then
-                    local headPos, onScreen = camera:WorldToViewportPoint(plr.Character.Head.Position)
-                    if onScreen then
-                        local dist = (Vector2.new(headPos.X, headPos.Y) - screenCenter).Magnitude
-                        if dist <= FOVRadius and dist < nearestDistance then
-                            -- Wall Check
-                            local canSee = true
-                            if WallCheckEnabled then
-                                local ray = Ray.new(camera.CFrame.Position, (plr.Character.Head.Position - camera.CFrame.Position).Unit * (plr.Character.Head.Position - camera.CFrame.Position).Magnitude)
-                                local part = workspace:FindPartOnRayWithIgnoreList(ray, {game.Players.LocalPlayer.Character})
-                                if part and part.Parent ~= plr.Character then
-                                    canSee = false
-                                end
-                            end
-
-                            if canSee then
-                                nearestDistance = dist
-                                nearestPlayer = plr
-                            end
-                        end
-                    end
-                end
-            end
+        if not currentTarget or not currentTarget.Character or not currentTarget.Character:FindFirstChild("Head") or currentTarget.Character.Humanoid.Health <= 0 then
+            currentTarget = getNearestTarget()
         end
 
-        if nearestPlayer and nearestPlayer.Character then
-            -- langsung nempel kepala tanpa smooth
-            camera.CFrame = CFrame.new(camera.CFrame.Position, nearestPlayer.Character.Head.Position)
+        if currentTarget and currentTarget.Character and currentTarget.Character:FindFirstChild("Head") then
+            camera.CFrame = CFrame.new(camera.CFrame.Position, currentTarget.Character.Head.Position)
         end
     end
 end)
