@@ -213,28 +213,37 @@ game:GetService("RunService").RenderStepped:Connect(function()
     FOVCircle.Radius = FOVRadius
 
     -- Highlight ESP
-    if HighlightESPEnabled then
-        for _, plr in pairs(game.Players:GetPlayers()) do
-            if plr ~= game.Players.LocalPlayer and plr.Character then
+if HighlightESPEnabled then
+    for _, plr in pairs(game.Players:GetPlayers()) do
+        if plr ~= game.Players.LocalPlayer and plr.Character then
+            local hum = plr.Character:FindFirstChildOfClass("Humanoid")
+            if hum and hum.Health > 1 then
                 local hl = plr.Character:FindFirstChild("Highlight")
-                local hum = plr.Character:FindFirstChildOfClass("Humanoid")
-                local showHighlight = true
-                if TeamCheck and plr.Team == game.Players.LocalPlayer.Team then
-                    showHighlight = false
+                if not hl then
+                    hl = Instance.new("Highlight")
+                    hl.Parent = plr.Character
+                    hl.Name = "LucxxHighlight"
+                    hl.FillColor = Color3.fromRGB(0,255,0)
+                    hl.FillTransparency = 0.7
+                    hl.OutlineColor = Color3.fromRGB(0,255,0)
+                    hl.OutlineTransparency = 0
+                    hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
                 end
-                if showHighlight and hum and hum.Health > 1 then
-                    if not hl then
-                        hl = Instance.new("Highlight", plr.Character)
-                        hl.FillTransparency = 1
-                        hl.OutlineColor = Color3.fromRGB(0,255,0)
-                    else
-                        hl.OutlineColor = Color3.fromRGB(0,255,0)
-                    end
-                else
-                    if hl then hl:Destroy() end
-                end
+                -- update warna kalau sudah ada
+                hl.FillColor = Color3.fromRGB(0,255,0)
+                hl.OutlineColor = Color3.fromRGB(0,255,0)
             end
         end
+    end
+else
+    -- matikan semua highlight kalau toggle OFF
+    for _, plr in pairs(game.Players:GetPlayers()) do
+        if plr.Character then
+            local hl = plr.Character:FindFirstChild("LucxxHighlight")
+            if hl then hl:Destroy() end
+        end
+    end
+end
     else
         for _, plr in pairs(game.Players:GetPlayers()) do
             if plr.Character then
