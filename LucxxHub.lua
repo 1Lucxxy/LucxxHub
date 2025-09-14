@@ -17,54 +17,7 @@ local Window = Rayfield:CreateWindow({
 -- // Tabs
 local PlayerTab = Window:CreateTab("Player", 4483362458)
 local VisualTab = Window:CreateTab("Visual", 4483362458)
-local SettingsTab = Window:CreateSettingsTab() -- ✅ Tab bawaan Rayfield Settings
-
--- ======================================================
--- CUSTOM SETTINGS THEME
--- ======================================================
-SettingsTab:CreateDropdown({
-    Name = "UI Theme",
-    Options = {"Dark", "Light", "Red", "Blue", "Green"},
-    CurrentOption = "Dark",
-    Callback = function(Theme)
-        if Theme == "Dark" then
-            Rayfield:SetTheme({
-                Background = Color3.fromRGB(25, 25, 25),
-                Topbar = Color3.fromRGB(30, 30, 30),
-                TabBackground = Color3.fromRGB(35, 35, 35),
-                Primary = Color3.fromRGB(0, 170, 255)
-            })
-        elseif Theme == "Light" then
-            Rayfield:SetTheme({
-                Background = Color3.fromRGB(245, 245, 245),
-                Topbar = Color3.fromRGB(230, 230, 230),
-                TabBackground = Color3.fromRGB(220, 220, 220),
-                Primary = Color3.fromRGB(0, 120, 255)
-            })
-        elseif Theme == "Red" then
-            Rayfield:SetTheme({
-                Background = Color3.fromRGB(25, 25, 25),
-                Topbar = Color3.fromRGB(35, 0, 0),
-                TabBackground = Color3.fromRGB(45, 0, 0),
-                Primary = Color3.fromRGB(255, 0, 0)
-            })
-        elseif Theme == "Blue" then
-            Rayfield:SetTheme({
-                Background = Color3.fromRGB(25, 25, 35),
-                Topbar = Color3.fromRGB(0, 0, 60),
-                TabBackground = Color3.fromRGB(0, 0, 80),
-                Primary = Color3.fromRGB(0, 120, 255)
-            })
-        elseif Theme == "Green" then
-            Rayfield:SetTheme({
-                Background = Color3.fromRGB(20, 35, 20),
-                Topbar = Color3.fromRGB(0, 60, 0),
-                TabBackground = Color3.fromRGB(0, 80, 0),
-                Primary = Color3.fromRGB(0, 200, 100)
-            })
-        end
-    end,
-})
+local SettingsTab = Window:CreateTab("Settings", 4483362458)
 
 -- ======================================================
 -- PLAYER SETTINGS
@@ -132,18 +85,14 @@ VisualTab:CreateToggle({
     CurrentValue = false,
     Callback = function(Value)
         HighlightESPEnabled = Value
-        if not Value then
-            for _,plr in pairs(game.Players:GetPlayers()) do
-                if plr.Character and plr.Character:FindFirstChild("Highlight") then
-                    plr.Character.Highlight:Destroy()
-                end
-            end
-        else
-            for _,plr in pairs(game.Players:GetPlayers()) do
-                if plr ~= game.Players.LocalPlayer and plr.Character and not plr.Character:FindFirstChild("Highlight") then
+        for _,plr in pairs(game.Players:GetPlayers()) do
+            if plr.Character then
+                if Value and not plr.Character:FindFirstChild("Highlight") then
                     local hl = Instance.new("Highlight", plr.Character)
                     hl.FillTransparency = 1
                     hl.OutlineColor = Color3.fromRGB(0,255,0)
+                elseif not Value and plr.Character:FindFirstChild("Highlight") then
+                    plr.Character.Highlight:Destroy()
                 end
             end
         end
@@ -169,7 +118,44 @@ VisualTab:CreateToggle({
 })
 
 -- ======================================================
--- ESP LOOP
+-- SETTINGS TAB (Theme & Transparansi)
+-- ======================================================
+SettingsTab:CreateDropdown({
+    Name = "UI Theme",
+    Options = {"Dark", "Light", "Red", "Blue", "Green"},
+    CurrentOption = "Dark",
+    Callback = function(Theme)
+        local themes = {
+            Dark = {Background = Color3.fromRGB(25,25,25), Topbar = Color3.fromRGB(30,30,30), TabBackground = Color3.fromRGB(35,35,35), Primary = Color3.fromRGB(0,170,255)},
+            Light = {Background = Color3.fromRGB(245,245,245), Topbar = Color3.fromRGB(230,230,230), TabBackground = Color3.fromRGB(220,220,220), Primary = Color3.fromRGB(0,120,255)},
+            Red = {Background = Color3.fromRGB(25,25,25), Topbar = Color3.fromRGB(35,0,0), TabBackground = Color3.fromRGB(45,0,0), Primary = Color3.fromRGB(255,0,0)},
+            Blue = {Background = Color3.fromRGB(25,25,35), Topbar = Color3.fromRGB(0,0,60), TabBackground = Color3.fromRGB(0,0,80), Primary = Color3.fromRGB(0,120,255)},
+            Green = {Background = Color3.fromRGB(20,35,20), Topbar = Color3.fromRGB(0,60,0), TabBackground = Color3.fromRGB(0,80,0), Primary = Color3.fromRGB(0,200,100)},
+        }
+        Rayfield:SetTheme(themes[Theme])
+    end,
+})
+
+SettingsTab:CreateSlider({
+    Name = "UI Transparency",
+    Range = {0,1},
+    Increment = 0.05,
+    CurrentValue = 0,
+    Callback = function(Value)
+        -- efek transparansi visual
+        local base = 25 + 230*Value
+        local bg = Color3.fromRGB(base, base, base)
+        Rayfield:SetTheme({
+            Background = bg,
+            Topbar = bg,
+            TabBackground = bg,
+            Primary = Color3.fromRGB(0,170,255)
+        })
+    end
+})
+
+-- ======================================================
+-- ESP LOOP (Healthbar tumpul & tipis)
 -- ======================================================
 game:GetService("RunService").RenderStepped:Connect(function()
     local camera = workspace.CurrentCamera
@@ -179,7 +165,6 @@ game:GetService("RunService").RenderStepped:Connect(function()
         if plr ~= game.Players.LocalPlayer and plr.Character then
             local hum = plr.Character:FindFirstChildOfClass("Humanoid")
             local head = plr.Character:FindFirstChild("Head")
-
             if not DrawingESP[plr] then DrawingESP[plr] = {} end
             local data = DrawingESP[plr]
 
@@ -204,7 +189,7 @@ game:GetService("RunService").RenderStepped:Connect(function()
                 data.Name.Visible = false
             end
 
-            -- HEALTHBAR ESP
+            -- HEALTHBAR ESP (tumpul & tipis)
             if HealthESPEnabled and hum and head then
                 if not data.HealthBG then
                     data.HealthBG = Drawing.new("Quad")
@@ -219,21 +204,22 @@ game:GetService("RunService").RenderStepped:Connect(function()
                 local hp = hum.Health / hum.MaxHealth
                 local headPos, vis = camera:WorldToViewportPoint(head.Position+Vector3.new(0,2.5,0))
                 if vis then
-                    local barW, barH = 70, 4
+                    local barW, barH = 70, 4 -- tipis
                     local x, y = headPos.X - barW/2, headPos.Y - 15
+                    local radius = 2 -- ujung tumpul
 
-                    local function makeQuad(obj, px, py, w, h)
-                        obj.PointA = Vector2.new(px, py)
-                        obj.PointB = Vector2.new(px+w, py)
-                        obj.PointC = Vector2.new(px+w, py+h)
-                        obj.PointD = Vector2.new(px, py+h)
+                    local function makeRoundedQuad(obj, px, py, w, h, r)
+                        obj.PointA = Vector2.new(px+r, py)
+                        obj.PointB = Vector2.new(px+w-r, py)
+                        obj.PointC = Vector2.new(px+w-r, py+h)
+                        obj.PointD = Vector2.new(px+r, py+h)
                     end
 
-                    makeQuad(data.HealthBG, x, y, barW, barH)
+                    makeRoundedQuad(data.HealthBG, x, y, barW, barH, radius)
                     data.HealthBG.Visible = true
 
                     local hpW = barW * math.clamp(hp,0,1)
-                    makeQuad(data.Health, x, y, hpW, barH)
+                    makeRoundedQuad(data.Health, x, y, hpW, barH, radius)
                     data.Health.Color = hp > 0.5 and Color3.fromRGB(0,255,0)
                         or hp > 0.2 and Color3.fromRGB(255,255,0)
                         or Color3.fromRGB(255,0,0)
@@ -267,4 +253,5 @@ game:GetService("RunService").RenderStepped:Connect(function()
             end
         end
     end
-end)
+end
+})
