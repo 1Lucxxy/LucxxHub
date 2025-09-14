@@ -81,7 +81,7 @@ local FOVRadius = 100
 
 local camera = workspace.CurrentCamera
 
--- POV circle (Drawing API)
+-- POV circle
 local FOVCircle = Drawing.new("Circle")
 FOVCircle.Radius = FOVRadius
 FOVCircle.NumSides = 64
@@ -162,7 +162,7 @@ VisualTab:CreateToggle({
 })
 
 -- ======================================================
--- CLEANUP SYSTEM (biar ESP ga nyangkut)
+-- CLEANUP SYSTEM
 -- ======================================================
 game.Players.PlayerRemoving:Connect(function(plr)
     if DrawingESP[plr] then
@@ -179,7 +179,7 @@ end)
 game:GetService("RunService").RenderStepped:Connect(function()
     local screenCenter = Vector2.new(camera.ViewportSize.X/2, camera.ViewportSize.Y/2)
 
-    -- update lingkaran POV
+    -- update POV circle
     FOVCircle.Position = screenCenter
     FOVCircle.Radius = FOVRadius
 
@@ -188,6 +188,7 @@ game:GetService("RunService").RenderStepped:Connect(function()
         for _, plr in pairs(game.Players:GetPlayers()) do
             if plr ~= game.Players.LocalPlayer and plr.Character then
                 local hl = plr.Character:FindFirstChild("Highlight")
+                local hum = plr.Character:FindFirstChildOfClass("Humanoid")
                 local showHighlight = true
                 if TeamCheck and plr.Team == game.Players.LocalPlayer.Team then
                     showHighlight = false
@@ -196,6 +197,11 @@ game:GetService("RunService").RenderStepped:Connect(function()
                     if not hl then
                         hl = Instance.new("Highlight", plr.Character)
                         hl.FillTransparency = 1
+                    end
+                    -- ✅ kalau mati, hitam
+                    if hum and hum.Health <= 0 then
+                        hl.OutlineColor = Color3.fromRGB(0,0,0)
+                    else
                         hl.OutlineColor = Color3.fromRGB(0,255,0)
                     end
                 else
@@ -212,7 +218,7 @@ game:GetService("RunService").RenderStepped:Connect(function()
         end
     end
 
-    -- ESP Loop
+    -- ESP Loop (Name, Health, Line)
     for _,plr in pairs(game.Players:GetPlayers()) do
         if plr ~= game.Players.LocalPlayer and plr.Character then
             local hum = plr.Character:FindFirstChildOfClass("Humanoid")
@@ -221,7 +227,7 @@ game:GetService("RunService").RenderStepped:Connect(function()
             if not DrawingESP[plr] then DrawingESP[plr] = {} end
             local data = DrawingESP[plr]
 
-            -- kalau player mati/head hilang, sembunyikan semua ESP
+            -- sembunyikan jika mati / head hilang
             if not head or not hum or hum.Health <= 0 then
                 if data.Name then data.Name.Visible = false end
                 if data.Health then data.Health.Visible = false end
@@ -323,7 +329,7 @@ game:GetService("RunService").RenderStepped:Connect(function()
     end
 
     -- ======================================================
-    -- Aim Lock Kamera + WallCheck
+    -- Aim Lock + WallCheck
     -- ======================================================
     if AimLockEnabled then
         local nearestPlayer
@@ -331,13 +337,16 @@ game:GetService("RunService").RenderStepped:Connect(function()
 
         for _,plr in pairs(game.Players:GetPlayers()) do
             if plr ~= game.Players.LocalPlayer and plr.Character and plr.Character:FindFirstChild("Head") then
-                if not TeamCheck or (TeamCheck and plr.Team ~= game.Players.LocalPlayer.Team) then
-                    local headPos, onScreen = camera:WorldToViewportPoint(plr.Character.Head.Position)
-                    if onScreen then
-                        local dist = (Vector2.new(headPos.X, headPos.Y) - screenCenter).Magnitude
-                        if dist <= FOVRadius and dist < nearestDistance then
-                            nearestDistance = dist
-                            nearestPlayer = plr
+                local hum = plr.Character:FindFirstChildOfClass("Humanoid")
+                if hum and hum.Health > 0 then -- ✅ hanya hidup
+                    if not TeamCheck or (TeamCheck and plr.Team ~= game.Players.LocalPlayer.Team) then
+                        local headPos, onScreen = camera:WorldToViewportPoint(plr.Character.Head.Position)
+                        if onScreen then
+                            local dist = (Vector2.new(headPos.X, headPos.Y) - screenCenter).Magnitude
+                            if dist <= FOVRadius and dist < nearestDistance then
+                                nearestDistance = dist
+                                nearestPlayer = plr
+                            end
                         end
                     end
                 end
