@@ -78,20 +78,15 @@ local TeamCheck = false
 local AimLockEnabled = false
 local FOVRadius = 100
 
--- Fake POV circle & crosshair
+local camera = workspace.CurrentCamera
+
+-- POV circle
 local FOVCircle = Drawing.new("Circle")
 FOVCircle.Radius = FOVRadius
 FOVCircle.Thickness = 2
 FOVCircle.Filled = false
 FOVCircle.Color = Color3.fromRGB(0,255,0)
 FOVCircle.Visible = false
-
-local Crosshair = Drawing.new("Circle")
-Crosshair.Radius = 5
-Crosshair.Thickness = 2
-Crosshair.Filled = false
-Crosshair.Color = Color3.fromRGB(255,0,0)
-Crosshair.Visible = false
 
 CombatTab:CreateSlider({
     Name = "FOV Circle Radius",
@@ -118,7 +113,6 @@ CombatTab:CreateToggle({
     Callback = function(Value)
         AimLockEnabled = Value
         FOVCircle.Visible = Value
-        Crosshair.Visible = Value
     end
 })
 
@@ -136,21 +130,6 @@ VisualTab:CreateToggle({
     CurrentValue = false,
     Callback = function(Value)
         HighlightESPEnabled = Value
-        for _, plr in pairs(game.Players:GetPlayers()) do
-            if plr.Character then
-                local showHighlight = true
-                if TeamCheck and plr.Team == game.Players.LocalPlayer.Team then
-                    showHighlight = false
-                end
-                if Value and showHighlight and not plr.Character:FindFirstChild("Highlight") then
-                    local hl = Instance.new("Highlight", plr.Character)
-                    hl.FillTransparency = 1
-                    hl.OutlineColor = Color3.fromRGB(0,255,0)
-                elseif (not Value or not showHighlight) and plr.Character:FindFirstChild("Highlight") then
-                    plr.Character.Highlight:Destroy()
-                end
-            end
-        end
     end,
 })
 
@@ -173,13 +152,10 @@ VisualTab:CreateToggle({
 })
 
 -- ======================================================
--- ESP, Highlight & Aim Lock Loop
+-- MAIN LOOP
 -- ======================================================
 game:GetService("RunService").RenderStepped:Connect(function()
-    local camera = workspace.CurrentCamera
     local screenCenter = Vector2.new(camera.ViewportSize.X/2, camera.ViewportSize.Y/2)
-
-    -- Update FOV circle
     FOVCircle.Position = screenCenter
 
     -- Highlight ESP
@@ -218,7 +194,7 @@ game:GetService("RunService").RenderStepped:Connect(function()
             end
 
             if showESP then
-                -- NAME ESP
+                -- Name ESP
                 if ESPEnabled and head then
                     if not data.Name then
                         data.Name = Drawing.new("Text")
@@ -239,7 +215,7 @@ game:GetService("RunService").RenderStepped:Connect(function()
                     data.Name.Visible = false
                 end
 
-                -- HEALTHBAR ESP
+                -- Healthbar ESP
                 if HealthESPEnabled and hum and head then
                     if not data.HealthBG then
                         data.HealthBG = Drawing.new("Quad")
@@ -256,19 +232,17 @@ game:GetService("RunService").RenderStepped:Connect(function()
                     if vis then
                         local barW, barH = 70, 4
                         local x, y = headPos.X - barW/2, headPos.Y - 15
-                        local radius = 2
-                        local function makeRoundedQuad(obj, px, py, w, h, r)
-                            obj.PointA = Vector2.new(px+r, py)
-                            obj.PointB = Vector2.new(px+w-r, py)
-                            obj.PointC = Vector2.new(px+w-r, py+h)
-                            obj.PointD = Vector2.new(px+r, py+h)
-                        end
-
-                        makeRoundedQuad(data.HealthBG, x, y, barW, barH, radius)
+                        data.HealthBG.PointA = Vector2.new(x, y)
+                        data.HealthBG.PointB = Vector2.new(x+barW, y)
+                        data.HealthBG.PointC = Vector2.new(x+barW, y+barH)
+                        data.HealthBG.PointD = Vector2.new(x, y+barH)
                         data.HealthBG.Visible = true
 
                         local hpW = barW * math.clamp(hp,0,1)
-                        makeRoundedQuad(data.Health, x, y, hpW, barH, radius)
+                        data.Health.PointA = Vector2.new(x, y)
+                        data.Health.PointB = Vector2.new(x+hpW, y)
+                        data.Health.PointC = Vector2.new(x+hpW, y+barH)
+                        data.Health.PointD = Vector2.new(x, y+barH)
                         data.Health.Color = hp > 0.5 and Color3.fromRGB(0,255,0)
                             or hp > 0.2 and Color3.fromRGB(255,255,0)
                             or Color3.fromRGB(255,0,0)
@@ -282,7 +256,7 @@ game:GetService("RunService").RenderStepped:Connect(function()
                     if data.HealthBG then data.HealthBG.Visible = false end
                 end
 
-                -- LINE ESP
+                -- Line ESP
                 if LineESPEnabled and head then
                     if not data.Line then
                         data.Line = Drawing.new("Line")
@@ -301,7 +275,7 @@ game:GetService("RunService").RenderStepped:Connect(function()
                     data.Line.Visible = false
                 end
             else
-                -- sembunyikan ESP untuk tim sendiri
+                -- hide ESP for team
                 if data.Name then data.Name.Visible = false end
                 if data.Health then data.Health.Visible = false end
                 if data.HealthBG then data.HealthBG.Visible = false end
@@ -311,7 +285,7 @@ game:GetService("RunService").RenderStepped:Connect(function()
     end
 
     -- ======================================================
-    -- Fake Aim Lock Logic
+    -- Aim Lock Kamera
     -- ======================================================
     if AimLockEnabled then
         local nearestPlayer
@@ -322,8 +296,7 @@ game:GetService("RunService").RenderStepped:Connect(function()
                 if not TeamCheck or (TeamCheck and plr.Team ~= game.Players.LocalPlayer.Team) then
                     local headPos, onScreen = camera:WorldToViewportPoint(plr.Character.Head.Position)
                     if onScreen then
-                        local screenPos = Vector2.new(headPos.X, headPos.Y)
-                        local dist = (screenPos - screenCenter).Magnitude
+                        local dist = (Vector2.new(headPos.X, headPos.Y) - screenCenter).Magnitude
                         if dist <= FOVRadius and dist < nearestDistance then
                             nearestDistance = dist
                             nearestPlayer = plr
@@ -333,14 +306,9 @@ game:GetService("RunService").RenderStepped:Connect(function()
             end
         end
 
-        if nearestPlayer then
-            local headPos, onScreen = camera:WorldToViewportPoint(nearestPlayer.Character.Head.Position)
-            if onScreen then
-                Crosshair.Position = Vector2.new(headPos.X, headPos.Y)
-                Crosshair.Visible = true
-            end
-        else
-            Crosshair.Visible = false
+        if nearestPlayer and nearestPlayer.Character then
+            local headCFrame = nearestPlayer.Character.Head.CFrame
+            camera.CFrame = CFrame.new(camera.CFrame.Position, headCFrame.Position)
         end
     end
 end)
