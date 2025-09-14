@@ -17,6 +17,7 @@ local Window = Rayfield:CreateWindow({
 -- // Tabs
 local PlayerTab = Window:CreateTab("Player", 4483362458)
 local VisualTab = Window:CreateTab("Visual", 4483362458)
+local CombatTab = Window:CreateTab("Combat", 4483362458)
 
 -- ======================================================
 -- PLAYER SETTINGS
@@ -114,6 +115,19 @@ VisualTab:CreateToggle({
     Name = "Line ESP",
     CurrentValue = false,
     Callback = function(Value) LineESPEnabled = Value end,
+})
+
+-- ======================================================
+-- COMBAT SETTINGS
+-- ======================================================
+CombatTab:CreateSlider({
+    Name = "FOV",
+    Range = {70, 300},
+    Increment = 1,
+    CurrentValue = workspace.CurrentCamera.FieldOfView,
+    Callback = function(Value)
+        workspace.CurrentCamera.FieldOfView = Value
+    end,
 })
 
 -- ======================================================
