@@ -76,13 +76,22 @@ PlayerTab:CreateButton({
 -- ======================================================
 local TeamCheck = false
 local AimLockEnabled = false
+local FOVRadius = 100
 
+-- Fake POV circle & crosshair
 local FOVCircle = Drawing.new("Circle")
-FOVCircle.Radius = 100
+FOVCircle.Radius = FOVRadius
 FOVCircle.Thickness = 2
 FOVCircle.Filled = false
 FOVCircle.Color = Color3.fromRGB(0,255,0)
 FOVCircle.Visible = false
+
+local Crosshair = Drawing.new("Circle")
+Crosshair.Radius = 5
+Crosshair.Thickness = 2
+Crosshair.Filled = false
+Crosshair.Color = Color3.fromRGB(255,0,0)
+Crosshair.Visible = false
 
 CombatTab:CreateSlider({
     Name = "FOV Circle Radius",
@@ -91,6 +100,7 @@ CombatTab:CreateSlider({
     CurrentValue = 100,
     Callback = function(Value)
         FOVCircle.Radius = Value
+        FOVRadius = Value
     end,
 })
 
@@ -108,6 +118,7 @@ CombatTab:CreateToggle({
     Callback = function(Value)
         AimLockEnabled = Value
         FOVCircle.Visible = Value
+        Crosshair.Visible = Value
     end
 })
 
@@ -168,10 +179,10 @@ game:GetService("RunService").RenderStepped:Connect(function()
     local camera = workspace.CurrentCamera
     local screenCenter = Vector2.new(camera.ViewportSize.X/2, camera.ViewportSize.Y/2)
 
-    -- Update FOV Circle posisi
+    -- Update FOV circle
     FOVCircle.Position = screenCenter
 
-    -- Highlight ESP dinamis
+    -- Highlight ESP
     if HighlightESPEnabled then
         for _, plr in pairs(game.Players:GetPlayers()) do
             if plr.Character then
@@ -300,7 +311,7 @@ game:GetService("RunService").RenderStepped:Connect(function()
     end
 
     -- ======================================================
-    -- Aim Lock Logic
+    -- Fake Aim Lock Logic
     -- ======================================================
     if AimLockEnabled then
         local nearestPlayer
@@ -313,7 +324,7 @@ game:GetService("RunService").RenderStepped:Connect(function()
                     if onScreen then
                         local screenPos = Vector2.new(headPos.X, headPos.Y)
                         local dist = (screenPos - screenCenter).Magnitude
-                        if dist <= FOVCircle.Radius and dist < nearestDistance then
+                        if dist <= FOVRadius and dist < nearestDistance then
                             nearestDistance = dist
                             nearestPlayer = plr
                         end
@@ -322,10 +333,14 @@ game:GetService("RunService").RenderStepped:Connect(function()
             end
         end
 
-        -- Lock crosshair ke kepala player terdekat
-        if nearestPlayer and nearestPlayer.Character then
-            local headPos = camera:WorldToViewportPoint(nearestPlayer.Character.Head.Position)
-            mousemoverel(headPos.X - screenCenter.X, headPos.Y - screenCenter.Y)
+        if nearestPlayer then
+            local headPos, onScreen = camera:WorldToViewportPoint(nearestPlayer.Character.Head.Position)
+            if onScreen then
+                Crosshair.Position = Vector2.new(headPos.X, headPos.Y)
+                Crosshair.Visible = true
+            end
+        else
+            Crosshair.Visible = false
         end
     end
 end)
