@@ -162,26 +162,34 @@ game:GetService("RunService").RenderStepped:Connect(function()
     FOVCircle.Radius = FOVRadius
 
     -- Highlight ESP
-    if HighlightESPEnabled then
-        for _, plr in pairs(game.Players:GetPlayers()) do
-            if plr.Character then
-                local hl = plr.Character:FindFirstChild("Highlight")
-                local showHighlight = true
-                if TeamCheck and plr.Team == game.Players.LocalPlayer.Team then
-                    showHighlight = false
+if HighlightESPEnabled then
+    for _, plr in pairs(game.Players:GetPlayers()) do
+        if plr.Character then
+            local hl = plr.Character:FindFirstChild("Highlight")
+            local showHighlight = true
+            if TeamCheck and plr.Team == game.Players.LocalPlayer.Team then
+                showHighlight = false
+            end
+            if showHighlight then
+                if not hl then
+                    hl = Instance.new("Highlight", plr.Character)
+                    hl.FillTransparency = 1
+                    hl.OutlineColor = Color3.fromRGB(0,255,0)
                 end
-                if showHighlight then
-                    if not hl then
-                        hl = Instance.new("Highlight", plr.Character)
-                        hl.FillTransparency = 1
-                        hl.OutlineColor = Color3.fromRGB(0,255,0)
-                    end
-                else
-                    if hl then hl:Destroy() end
-                end
+            else
+                if hl then hl:Destroy() end
             end
         end
     end
+else
+    -- jika toggle dimatikan, hapus semua highlight
+    for _, plr in pairs(game.Players:GetPlayers()) do
+        if plr.Character then
+            local hl = plr.Character:FindFirstChild("Highlight")
+            if hl then hl:Destroy() end
+        end
+    end
+end
 
     -- ESP Loop
     for _,plr in pairs(game.Players:GetPlayers()) do
