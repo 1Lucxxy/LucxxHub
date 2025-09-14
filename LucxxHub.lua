@@ -90,12 +90,12 @@ FOVCircle.Visible = false
 
 CombatTab:CreateSlider({
     Name = "FOV Circle Radius",
-    Range = {50,500},
+    Range = {100,300}, -- minimal 100, maksimal 300
     Increment = 1,
     CurrentValue = 100,
     Callback = function(Value)
-        FOVCircle.Radius = Value
         FOVRadius = Value
+        FOVCircle.Radius = Value -- update radius lingkaran
     end,
 })
 
@@ -156,7 +156,10 @@ VisualTab:CreateToggle({
 -- ======================================================
 game:GetService("RunService").RenderStepped:Connect(function()
     local screenCenter = Vector2.new(camera.ViewportSize.X/2, camera.ViewportSize.Y/2)
+
+    -- update lingkaran POV biar ukurannya sesuai slider
     FOVCircle.Position = screenCenter
+    FOVCircle.Radius = FOVRadius
 
     -- Highlight ESP
     if HighlightESPEnabled then
