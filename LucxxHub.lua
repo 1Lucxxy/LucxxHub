@@ -75,12 +75,14 @@ PlayerTab:CreateButton({
 -- COMBAT SETTINGS
 -- ======================================================
 local TeamCheck = false
+local AimLockEnabled = false
+
 local FOVCircle = Drawing.new("Circle")
-FOVCircle.Radius = 100 -- default radius
+FOVCircle.Radius = 100
 FOVCircle.Thickness = 2
+FOVCircle.Filled = false
 FOVCircle.Color = Color3.fromRGB(0,255,0)
-FOVCircle.Visible = true
-FOVCircle.Position = Vector2.new(workspace.CurrentCamera.ViewportSize.X/2, workspace.CurrentCamera.ViewportSize.Y/2)
+FOVCircle.Visible = false
 
 CombatTab:CreateSlider({
     Name = "FOV Circle Radius",
@@ -97,6 +99,15 @@ CombatTab:CreateToggle({
     CurrentValue = false,
     Callback = function(Value)
         TeamCheck = Value
+    end
+})
+
+CombatTab:CreateToggle({
+    Name = "Aim Lock",
+    CurrentValue = false,
+    Callback = function(Value)
+        AimLockEnabled = Value
+        FOVCircle.Visible = Value
     end
 })
 
@@ -151,16 +162,16 @@ VisualTab:CreateToggle({
 })
 
 -- ======================================================
--- ESP & Highlight Loop
+-- ESP, Highlight & Aim Lock Loop
 -- ======================================================
 game:GetService("RunService").RenderStepped:Connect(function()
     local camera = workspace.CurrentCamera
     local screenCenter = Vector2.new(camera.ViewportSize.X/2, camera.ViewportSize.Y/2)
 
-    -- update FOV Circle posisi
+    -- Update FOV Circle posisi
     FOVCircle.Position = screenCenter
 
-    -- update HighlightESP dinamis
+    -- Highlight ESP dinamis
     if HighlightESPEnabled then
         for _, plr in pairs(game.Players:GetPlayers()) do
             if plr.Character then
@@ -285,6 +296,36 @@ game:GetService("RunService").RenderStepped:Connect(function()
                 if data.HealthBG then data.HealthBG.Visible = false end
                 if data.Line then data.Line.Visible = false end
             end
+        end
+    end
+
+    -- ======================================================
+    -- Aim Lock Logic
+    -- ======================================================
+    if AimLockEnabled then
+        local nearestPlayer
+        local nearestDistance = math.huge
+
+        for _,plr in pairs(game.Players:GetPlayers()) do
+            if plr ~= game.Players.LocalPlayer and plr.Character and plr.Character:FindFirstChild("Head") then
+                if not TeamCheck or (TeamCheck and plr.Team ~= game.Players.LocalPlayer.Team) then
+                    local headPos, onScreen = camera:WorldToViewportPoint(plr.Character.Head.Position)
+                    if onScreen then
+                        local screenPos = Vector2.new(headPos.X, headPos.Y)
+                        local dist = (screenPos - screenCenter).Magnitude
+                        if dist <= FOVCircle.Radius and dist < nearestDistance then
+                            nearestDistance = dist
+                            nearestPlayer = plr
+                        end
+                    end
+                end
+            end
+        end
+
+        -- Lock crosshair ke kepala player terdekat
+        if nearestPlayer and nearestPlayer.Character then
+            local headPos = camera:WorldToViewportPoint(nearestPlayer.Character.Head.Position)
+            mousemoverel(headPos.X - screenCenter.X, headPos.Y - screenCenter.Y)
         end
     end
 end)
