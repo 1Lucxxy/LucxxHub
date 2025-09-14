@@ -193,14 +193,11 @@ game:GetService("RunService").RenderStepped:Connect(function()
                 if TeamCheck and plr.Team == game.Players.LocalPlayer.Team then
                     showHighlight = false
                 end
-                if showHighlight then
+                if showHighlight and hum and hum.Health > 0 then
                     if not hl then
                         hl = Instance.new("Highlight", plr.Character)
                         hl.FillTransparency = 1
-                    end
-                    -- ✅ kalau mati, hitam
-                    if hum and hum.Health <= 0 then
-                        hl.OutlineColor = Color3.fromRGB(0,0,0)
+                        hl.OutlineColor = Color3.fromRGB(0,255,0)
                     else
                         hl.OutlineColor = Color3.fromRGB(0,255,0)
                     end
