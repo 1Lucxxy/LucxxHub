@@ -116,6 +116,16 @@ CombatTab:CreateToggle({
     end
 })
 
+local WallCheck = false
+
+CombatTab:CreateToggle({
+    Name = "Wall Check",
+    CurrentValue = false,
+    Callback = function(Value)
+        WallCheck = Value
+    end
+})
+
 -- ======================================================
 -- VISUAL SETTINGS
 -- ======================================================
@@ -313,8 +323,26 @@ end
             end
         end
 
-        if nearestPlayer and nearestPlayer.Character then
-            camera.CFrame = CFrame.new(camera.CFrame.Position, nearestPlayer.Character.Head.Position)
+        if nearestPlayer and nearestPlayer.Character and nearestPlayer.Character:FindFirstChild("Head") then
+    local headPos = nearestPlayer.Character.Head.Position
+
+    local canSee = true
+    if WallCheck then
+        local origin = camera.CFrame.Position
+        local direction = (headPos - origin).Unit * (headPos - origin).Magnitude
+        local raycastParams = RaycastParams.new()
+        raycastParams.FilterDescendantsInstances = {game.Players.LocalPlayer.Character, nearestPlayer.Character}
+        raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
+
+        local rayResult = workspace:Raycast(origin, direction, raycastParams)
+        if rayResult then
+            -- ada object yg menghalangi
+            canSee = false
         end
     end
+
+    if canSee then
+        camera.CFrame = CFrame.new(camera.CFrame.Position, headPos)
+    end
+end
 end)
