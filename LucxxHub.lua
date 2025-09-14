@@ -281,7 +281,7 @@ game:GetService("RunService").RenderStepped:Connect(function()
     end
 
     -- ======================================================
-    -- Aim Lock Kamera
+    -- Aim Lock Kamera (Langsung Nempel Kepala)
     -- ======================================================
     if AimLockEnabled then
         local nearestPlayer
@@ -303,6 +303,7 @@ game:GetService("RunService").RenderStepped:Connect(function()
         end
 
         if nearestPlayer and nearestPlayer.Character then
+            -- langsung nempel kepala tanpa smooth
             camera.CFrame = CFrame.new(camera.CFrame.Position, nearestPlayer.Character.Head.Position)
         end
     end
