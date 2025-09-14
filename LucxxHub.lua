@@ -105,9 +105,7 @@ CombatTab:CreateSlider({
 CombatTab:CreateToggle({
     Name = "Team Check",
     CurrentValue = false,
-    Callback = function(Value)
-        TeamCheck = Value
-    end
+    Callback = function(Value) TeamCheck = Value end
 })
 
 CombatTab:CreateToggle({
@@ -122,17 +120,13 @@ CombatTab:CreateToggle({
 CombatTab:CreateToggle({
     Name = "Wall Check",
     CurrentValue = false,
-    Callback = function(Value)
-        WallCheck = Value
-    end
+    Callback = function(Value) WallCheck = Value end
 })
 
 CombatTab:CreateToggle({
     Name = "Wallbang",
     CurrentValue = false,
-    Callback = function(Value)
-        WallbangEnabled = Value
-    end
+    Callback = function(Value) WallbangEnabled = Value end
 })
 
 -- ======================================================
@@ -147,9 +141,7 @@ local DrawingESP = {}
 VisualTab:CreateToggle({
     Name = "Player Highlight",
     CurrentValue = false,
-    Callback = function(Value)
-        HighlightESPEnabled = Value
-    end,
+    Callback = function(Value) HighlightESPEnabled = Value end,
 })
 
 VisualTab:CreateToggle({
@@ -192,7 +184,6 @@ local old; old = hookmetamethod(workspace, "__namecall", function(self, ...)
     if WallbangEnabled and method == "Raycast" then
         local origin, direction, params = args[1], args[2], args[3]
         if typeof(params) == "RaycastParams" then
-            -- blacklist semua part di workspace agar raycast nembus
             params.FilterType = Enum.RaycastFilterType.Blacklist
             params.FilterDescendantsInstances = {workspace}
         end
@@ -207,53 +198,43 @@ end)
 -- ======================================================
 game:GetService("RunService").RenderStepped:Connect(function()
     local screenCenter = Vector2.new(camera.ViewportSize.X/2, camera.ViewportSize.Y/2)
-
-    -- update POV circle
     FOVCircle.Position = screenCenter
-    FOVCircle.Radius = FOVRadius
 
     -- Highlight ESP
-if HighlightESPEnabled then
-    for _, plr in pairs(game.Players:GetPlayers()) do
-        if plr ~= game.Players.LocalPlayer and plr.Character then
-            local hum = plr.Character:FindFirstChildOfClass("Humanoid")
-            if hum and hum.Health > 1 then
-                local hl = plr.Character:FindFirstChild("Highlight")
-                if not hl then
-                    hl = Instance.new("Highlight")
-                    hl.Parent = plr.Character
-                    hl.Name = "LucxxHighlight"
+    if HighlightESPEnabled then
+        for _, plr in pairs(game.Players:GetPlayers()) do
+            if plr ~= game.Players.LocalPlayer and plr.Character then
+                local hum = plr.Character:FindFirstChildOfClass("Humanoid")
+                if hum and hum.Health > 1 then
+                    local hl = plr.Character:FindFirstChild("LucxxHighlight")
+                    if not hl then
+                        hl = Instance.new("Highlight")
+                        hl.Parent = plr.Character
+                        hl.Name = "LucxxHighlight"
+                        hl.FillColor = Color3.fromRGB(0,255,0)
+                        hl.FillTransparency = 0.7
+                        hl.OutlineColor = Color3.fromRGB(0,255,0)
+                        hl.OutlineTransparency = 0
+                        hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+                    end
                     hl.FillColor = Color3.fromRGB(0,255,0)
-                    hl.FillTransparency = 0.7
                     hl.OutlineColor = Color3.fromRGB(0,255,0)
-                    hl.OutlineTransparency = 0
-                    hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+                else
+                    local hl = plr.Character:FindFirstChild("LucxxHighlight")
+                    if hl then hl:Destroy() end
                 end
-                -- update warna kalau sudah ada
-                hl.FillColor = Color3.fromRGB(0,255,0)
-                hl.OutlineColor = Color3.fromRGB(0,255,0)
             end
         end
-    end
-else
-    -- matikan semua highlight kalau toggle OFF
-    for _, plr in pairs(game.Players:GetPlayers()) do
-        if plr.Character then
-            local hl = plr.Character:FindFirstChild("LucxxHighlight")
-            if hl then hl:Destroy() end
-        end
-    end
-end
     else
         for _, plr in pairs(game.Players:GetPlayers()) do
             if plr.Character then
-                local hl = plr.Character:FindFirstChild("Highlight")
+                local hl = plr.Character:FindFirstChild("LucxxHighlight")
                 if hl then hl:Destroy() end
             end
         end
     end
 
-    -- ESP Loop (Name, Health, Line)
+    -- ESP (Name, Health, Line)
     for _,plr in pairs(game.Players:GetPlayers()) do
         if plr ~= game.Players.LocalPlayer and plr.Character then
             local hum = plr.Character:FindFirstChildOfClass("Humanoid")
@@ -262,7 +243,6 @@ end
             if not DrawingESP[plr] then DrawingESP[plr] = {} end
             local data = DrawingESP[plr]
 
-            -- sembunyikan jika mati / head hilang
             if not head or not hum or hum.Health <= 1 then
                 if data.Name then data.Name.Visible = false end
                 if data.Health then data.Health.Visible = false end
