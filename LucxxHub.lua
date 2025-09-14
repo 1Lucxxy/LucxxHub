@@ -204,12 +204,10 @@ game:GetService("RunService").RenderStepped:Connect(function()
                         data.Name.Color = Color3.fromRGB(255,255,255)
                     end
                     local pos, vis = camera:WorldToViewportPoint(head.Position+Vector3.new(0,2,0))
+                    data.Name.Visible = vis
                     if vis then
                         data.Name.Text = plr.Name
                         data.Name.Position = Vector2.new(pos.X, pos.Y)
-                        data.Name.Visible = true
-                    else
-                        data.Name.Visible = false
                     end
                 elseif data.Name then
                     data.Name.Visible = false
@@ -226,7 +224,6 @@ game:GetService("RunService").RenderStepped:Connect(function()
                         data.Health = Drawing.new("Quad")
                         data.Health.Filled = true
                     end
-
                     local hp = hum.Health / hum.MaxHealth
                     local headPos, vis = camera:WorldToViewportPoint(head.Position+Vector3.new(0,2.5,0))
                     if vis then
@@ -275,7 +272,6 @@ game:GetService("RunService").RenderStepped:Connect(function()
                     data.Line.Visible = false
                 end
             else
-                -- hide ESP for team
                 if data.Name then data.Name.Visible = false end
                 if data.Health then data.Health.Visible = false end
                 if data.HealthBG then data.HealthBG.Visible = false end
@@ -307,8 +303,7 @@ game:GetService("RunService").RenderStepped:Connect(function()
         end
 
         if nearestPlayer and nearestPlayer.Character then
-            local headCFrame = nearestPlayer.Character.Head.CFrame
-            camera.CFrame = CFrame.new(camera.CFrame.Position, headCFrame.Position)
+            camera.CFrame = CFrame.new(camera.CFrame.Position, nearestPlayer.Character.Head.Position)
         end
     end
 end)
