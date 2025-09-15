@@ -18,10 +18,19 @@ local Window = Rayfield:CreateWindow({
 local PlayerTab = Window:CreateTab("Player", 4483362458)
 local VisualTab = Window:CreateTab("Visual", 4483362458)
 local CombatTab = Window:CreateTab("Combat", 4483362458)
+local MiscTab = Window:CreateTab("Miscellaneous", 4483362458)
 
 -- ======================================================
 -- PLAYER SETTINGS
 -- ======================================================
+PlayerTab:CreateButton({
+    Name = "Fly",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/XNEOFF/FlyGuiV3/main/FlyGuiV3.txt"))()
+    end,
+})
+
+
 PlayerTab:CreateSlider({
     Name = "WalkSpeed",
     Range = {16,300},
@@ -61,13 +70,6 @@ PlayerTab:CreateSlider({
     CurrentValue = 128,
     Callback = function(Value)
         game.Players.LocalPlayer.CameraMaxZoomDistance = Value
-    end,
-})
-
-PlayerTab:CreateButton({
-    Name = "Fly",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/XNEOFF/FlyGuiV3/main/FlyGuiV3.txt"))()
     end,
 })
 
@@ -160,6 +162,48 @@ VisualTab:CreateToggle({
     CurrentValue = false,
     Callback = function(Value) LineESPEnabled = Value end,
 })
+
+-- ======================================================
+-- MISCELLANEOUS SETTINGS
+-- ======================================================
+local noclipEnabled = false
+local antiAFKEnabled = false
+local noFallEnabled = false
+local freeCamEnabled = false
+local instantCollectEnabled = false
+local autoCollectEnabled = false
+local tracerEnabled = false
+local wallbangEnabled = false
+
+-- Movement
+MiscTab:CreateToggle({Name = "NoClip", CurrentValue = false, Callback = function(Value) noclipEnabled = Value end})
+MiscTab:CreateToggle({Name = "Anti AFK", CurrentValue = false, Callback = function(Value)
+    antiAFKEnabled = Value
+    if Value then
+        local plr = game.Players.LocalPlayer
+        local vu = game:GetService("VirtualUser")
+        plr.Idled:Connect(function()
+            vu:Button2Down(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
+            wait(1)
+            vu:Button2Up(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
+        end)
+    end
+end})
+MiscTab:CreateToggle({Name = "No Fall Damage", CurrentValue = false, Callback = function(Value) noFallEnabled = Value end})
+
+-- Camera
+MiscTab:CreateToggle({Name = "FreeCam / Spectate", CurrentValue = false, Callback = function(Value)
+    freeCamEnabled = Value
+    if Value then
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/XNEOFF/FreeCam/main/FreeCam.lua"))()
+    end
+end})
+
+-- Misc
+MiscTab:CreateToggle({Name = "Instant Collect", CurrentValue = false, Callback = function(Value) instantCollectEnabled = Value end})
+MiscTab:CreateToggle({Name = "Auto Collect", CurrentValue = false, Callback = function(Value) autoCollectEnabled = Value end})
+MiscTab:CreateToggle({Name = "Tracer", CurrentValue = false, Callback = function(Value) tracerEnabled = Value end})
+MiscTab:CreateToggle({Name = "Wallbang", CurrentValue = false, Callback = function(Value) wallbangEnabled = Value end})
 
 -- ======================================================
 -- CLEANUP SYSTEM
@@ -316,6 +360,23 @@ game:GetService("RunService").RenderStepped:Connect(function()
                 elseif data.Line then
                     data.Line.Visible = false
                 end
+
+                -- Tracer Misc
+                if tracerEnabled and head then
+                    if not data.Line then
+                        data.Line = Drawing.new("Line")
+                        data.Line.Thickness = 1
+                        data.Line.Color = Color3.fromRGB(255,0,255)
+                    end
+                    local pos, vis = camera:WorldToViewportPoint(head.Position)
+                    if vis then
+                        data.Line.From = screenCenter
+                        data.Line.To = Vector2.new(pos.X, pos.Y)
+                        data.Line.Visible = true
+                    else
+                        data.Line.Visible = false
+                    end
+                end
             else
                 if data.Name then data.Name.Visible = false end
                 if data.Health then data.Health.Visible = false end
@@ -335,7 +396,7 @@ game:GetService("RunService").RenderStepped:Connect(function()
         for _,plr in pairs(game.Players:GetPlayers()) do
             if plr ~= game.Players.LocalPlayer and plr.Character and plr.Character:FindFirstChild("Head") then
                 local hum = plr.Character:FindFirstChildOfClass("Humanoid")
-                if hum and hum.Health > 1 then -- ✅ hanya hidup
+                if hum and hum.Health > 1 then
                     if not TeamCheck or (TeamCheck and plr.Team ~= game.Players.LocalPlayer.Team) then
                         local headPos, onScreen = camera:WorldToViewportPoint(plr.Character.Head.Position)
                         if onScreen then
@@ -370,6 +431,39 @@ game:GetService("RunService").RenderStepped:Connect(function()
             if canSee then
                 camera.CFrame = CFrame.new(camera.CFrame.Position, headPos)
             end
+        end
+    end
+end)
+
+-- ======================================================
+-- MISC LOOP
+-- ======================================================
+game:GetService("RunService").Stepped:Connect(function()
+    local plr = game.Players.LocalPlayer
+    if plr.Character then
+        -- NoClip
+        if noclipEnabled then
+            for _, part in pairs(plr.Character:GetChildren()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = false
+                end
+            end
+        end
+
+        -- No Fall Damage
+        if noFallEnabled then
+            local hum = plr.Character:FindFirstChildOfClass("Humanoid")
+            if hum and hum.FloorMaterial == Enum.Material.Air and hum.Health > 0 then
+                hum:ChangeState(Enum.HumanoidStateType.Landed)
+            end
+        end
+
+        -- Auto Collect placeholder
+        if autoCollectEnabled then
+            -- Tambahkan logika auto collect sesuai game
+        end
+        if instantCollectEnabled then
+            -- Tambahkan logika instant collect sesuai game
         end
     end
 end)
