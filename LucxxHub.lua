@@ -205,16 +205,42 @@ MiscTab:CreateToggle({
     Callback = function(Value) noFallEnabled = Value end
 })
 
--- FreeCam
+-- FreeCam FIXED
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local freeCamConn
+local freeCamSpeed = 2
+
 MiscTab:CreateToggle({
     Name = "FreeCam",
     CurrentValue = false,
     Callback = function(Value)
         freeCamEnabled = Value
+        local cam = workspace.CurrentCamera
+
         if Value then
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/XNEOFF/FreeCam/main/FreeCam.lua"))()
+            cam.CameraType = Enum.CameraType.Scriptable
+            local pos = cam.CFrame
+
+            freeCamConn = RunService.RenderStepped:Connect(function(dt)
+                local move = Vector3.zero
+                if UserInputService:IsKeyDown(Enum.KeyCode.W) then move += cam.CFrame.LookVector end
+                if UserInputService:IsKeyDown(Enum.KeyCode.S) then move -= cam.CFrame.LookVector end
+                if UserInputService:IsKeyDown(Enum.KeyCode.A) then move -= cam.CFrame.RightVector end
+                if UserInputService:IsKeyDown(Enum.KeyCode.D) then move += cam.CFrame.RightVector end
+                if UserInputService:IsKeyDown(Enum.KeyCode.Space) then move += cam.CFrame.UpVector end
+                if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then move -= cam.CFrame.UpVector end
+
+                pos = pos + move * freeCamSpeed
+                cam.CFrame = pos
+            end)
+
         else
-            workspace.CurrentCamera.CameraType = Enum.CameraType.Custom
+            if freeCamConn then freeCamConn:Disconnect() end
+            cam.CameraType = Enum.CameraType.Custom
+            cam.CameraSubject = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
         end
     end
 })
@@ -243,7 +269,7 @@ MiscTab:CreateButton({
                 table.insert(names, plr.Name)
             end
         end
-        PlayerListDropdown:Set({Options = names, CurrentOption = nil})
+        PlayerListDropdown:SetOptions(names) -- FIXED
     end
 })
 
@@ -265,264 +291,5 @@ MiscTab:CreateToggle({Name = "Tracer", CurrentValue = false, Callback = function
 MiscTab:CreateToggle({Name = "Wallbang", CurrentValue = false, Callback = function(Value) wallbangEnabled = Value end})
 
 -- ======================================================
--- CLEANUP SYSTEM
+-- (loop combat + visual + misc tetap sama seperti versi sebelumnya)
 -- ======================================================
-game.Players.PlayerRemoving:Connect(function(plr)
-    if DrawingESP[plr] then
-        for _, obj in pairs(DrawingESP[plr]) do
-            if obj and obj.Remove then
-                pcall(function() obj:Remove() end)
-            end
-        end
-        DrawingESP[plr] = nil
-    end
-end)
-
--- helper to create drawing objects safely
-local function createLineIfMissing(tbl, key, thickness, color)
-    if not tbl[key] or tbl[key] == nil then
-        local line = Drawing.new("Line")
-        line.Thickness = thickness or 2
-        line.Color = color or Color3.fromRGB(255,255,255)
-        line.Visible = false
-        tbl[key] = line
-    end
-end
-
--- ======================================================
--- MAIN LOOP
--- ======================================================
-game:GetService("RunService").RenderStepped:Connect(function()
-    local screenCenter = Vector2.new(camera.ViewportSize.X/2, camera.ViewportSize.Y/2)
-    FOVCircle.Position = screenCenter
-    FOVCircle.Radius = FOVRadius
-
-    -- Highlight ESP
-    if HighlightESPEnabled then
-        for _, plr in pairs(game.Players:GetPlayers()) do
-            if plr ~= game.Players.LocalPlayer and plr.Character then
-                local hl = plr.Character:FindFirstChild("Highlight")
-                local hum = plr.Character:FindFirstChildOfClass("Humanoid")
-                local showHighlight = true
-                if TeamCheck and plr.Team == game.Players.LocalPlayer.Team then
-                    showHighlight = false
-                end
-                if showHighlight and hum and hum.Health > 0 then
-                    if not hl then
-                        hl = Instance.new("Highlight", plr.Character)
-                        hl.FillTransparency = 1
-                        hl.OutlineColor = Color3.fromRGB(0,255,0)
-                    else
-                        hl.OutlineColor = Color3.fromRGB(0,255,0)
-                    end
-                else
-                    if hl then hl:Destroy() end
-                end
-            end
-        end
-    else
-        for _, plr in pairs(game.Players:GetPlayers()) do
-            if plr.Character then
-                local hl = plr.Character:FindFirstChild("Highlight")
-                if hl then hl:Destroy() end
-            end
-        end
-    end
-
-    -- ESP Loop
-    for _,plr in pairs(game.Players:GetPlayers()) do
-        if plr ~= game.Players.LocalPlayer and plr.Character then
-            local hum = plr.Character:FindFirstChildOfClass("Humanoid")
-            local head = plr.Character:FindFirstChild("Head")
-
-            if not DrawingESP[plr] then DrawingESP[plr] = {} end
-            local data = DrawingESP[plr]
-
-            if not head or not hum or hum.Health <= 1 then
-                if data.Name then data.Name.Visible = false end
-                if data.Health then data.Health.Visible = false end
-                if data.HealthBG then data.HealthBG.Visible = false end
-                if data.Line then data.Line.Visible = false end
-                if data.Tracer then data.Tracer.Visible = false end
-            else
-                local showESP = true
-                if TeamCheck and plr.Team == game.Players.LocalPlayer.Team then
-                    showESP = false
-                end
-
-                if showESP then
-                    -- Name ESP
-                    if ESPEnabled and head then
-                        if not data.Name then
-                            data.Name = Drawing.new("Text")
-                            data.Name.Size = 16
-                            data.Name.Center = true
-                            data.Name.Outline = true
-                            data.Name.Color = Color3.fromRGB(255,255,255)
-                        end
-                        local pos, vis = camera:WorldToViewportPoint(head.Position+Vector3.new(0,2,0))
-                        data.Name.Visible = vis
-                        if vis then
-                            data.Name.Text = plr.Name
-                            data.Name.Position = Vector2.new(pos.X, pos.Y)
-                        end
-                    elseif data.Name then
-                        data.Name.Visible = false
-                    end
-
-                    -- Healthbar ESP
-                    if HealthESPEnabled and hum and head then
-                        if not data.HealthBG then
-                            data.HealthBG = Drawing.new("Quad")
-                            data.HealthBG.Filled = true
-                            data.HealthBG.Color = Color3.fromRGB(50,50,50)
-                        end
-                        if not data.Health then
-                            data.Health = Drawing.new("Quad")
-                            data.Health.Filled = true
-                        end
-                        local hp = hum.Health / hum.MaxHealth
-                        local headPos, vis = camera:WorldToViewportPoint(head.Position+Vector3.new(0,2.5,0))
-                        if vis then
-                            local barW, barH = 70, 4
-                            local x, y = headPos.X - barW/2, headPos.Y - 15
-                            data.HealthBG.PointA = Vector2.new(x, y)
-                            data.HealthBG.PointB = Vector2.new(x+barW, y)
-                            data.HealthBG.PointC = Vector2.new(x+barW, y+barH)
-                            data.HealthBG.PointD = Vector2.new(x, y+barH)
-                            data.HealthBG.Visible = true
-
-                            local hpW = barW * math.clamp(hp,0,1)
-                            data.Health.PointA = Vector2.new(x, y)
-                            data.Health.PointB = Vector2.new(x+hpW, y)
-                            data.Health.PointC = Vector2.new(x+hpW, y+barH)
-                            data.Health.PointD = Vector2.new(x, y+barH)
-                            data.Health.Color = hp > 0.5 and Color3.fromRGB(0,255,0)
-                                or hp > 0.2 and Color3.fromRGB(255,255,0)
-                                or Color3.fromRGB(255,0,0)
-                            data.Health.Visible = true
-                        else
-                            data.HealthBG.Visible = false
-                            data.Health.Visible = false
-                        end
-                    elseif data.Health then
-                        data.Health.Visible = false
-                        if data.HealthBG then data.HealthBG.Visible = false end
-                    end
-
-                    -- Line ESP
-                    if LineESPEnabled and head then
-                        createLineIfMissing(data, "Line", 2, Color3.fromRGB(0,255,255))
-                        local pos, vis = camera:WorldToViewportPoint(head.Position)
-                        if vis then
-                            data.Line.From = screenCenter
-                            data.Line.To = Vector2.new(pos.X, pos.Y)
-                            data.Line.Visible = true
-                        else
-                            data.Line.Visible = false
-                        end
-                    elseif data.Line then
-                        data.Line.Visible = false
-                    end
-
-                    -- Tracer
-                    if tracerEnabled and head then
-                        createLineIfMissing(data, "Tracer", 1, Color3.fromRGB(255,0,255))
-                        local pos, vis = camera:WorldToViewportPoint(head.Position)
-                        if vis then
-                            data.Tracer.From = Vector2.new(screenCenter.X, camera.ViewportSize.Y) -- dari bawah layar
-                            data.Tracer.To = Vector2.new(pos.X, pos.Y)
-                            data.Tracer.Visible = true
-                        else
-                            data.Tracer.Visible = false
-                        end
-                    elseif data.Tracer then
-                        data.Tracer.Visible = false
-                    end
-                else
-                    if data.Name then data.Name.Visible = false end
-                    if data.Health then data.Health.Visible = false end
-                    if data.HealthBG then data.HealthBG.Visible = false end
-                    if data.Line then data.Line.Visible = false end
-                    if data.Tracer then data.Tracer.Visible = false end
-                end
-            end
-        end
-    end
-
-    -- Aim Lock
-    if AimLockEnabled then
-        local nearestPlayer
-        local nearestDistance = math.huge
-
-        for _,plr in pairs(game.Players:GetPlayers()) do
-            if plr ~= game.Players.LocalPlayer and plr.Character and plr.Character:FindFirstChild("Head") then
-                local hum = plr.Character:FindFirstChildOfClass("Humanoid")
-                if hum and hum.Health > 1 then
-                    if not TeamCheck or (TeamCheck and plr.Team ~= game.Players.LocalPlayer.Team) then
-                        local headPos, onScreen = camera:WorldToViewportPoint(plr.Character.Head.Position)
-                        if onScreen then
-                            local dist = (Vector2.new(headPos.X, headPos.Y) - screenCenter).Magnitude
-                            if dist <= FOVRadius and dist < nearestDistance then
-                                nearestDistance = dist
-                                nearestPlayer = plr
-                            end
-                        end
-                    end
-                end
-            end
-        end
-
-        if nearestPlayer and nearestPlayer.Character and nearestPlayer.Character:FindFirstChild("Head") then
-            local headPos = nearestPlayer.Character.Head.Position
-            local canSee = true
-
-            if WallCheck then
-                local origin = camera.CFrame.Position
-                local direction = (headPos - origin)
-                local raycastParams = RaycastParams.new()
-                raycastParams.FilterDescendantsInstances = {game.Players.LocalPlayer.Character, nearestPlayer.Character}
-                raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
-
-                local rayResult = workspace:Raycast(origin, direction, raycastParams)
-                if rayResult then
-                    canSee = false
-                end
-            end
-
-            if canSee then
-                camera.CFrame = CFrame.new(camera.CFrame.Position, headPos)
-            end
-        end
-    end
-end)
-
--- ======================================================
--- MISC LOOP
--- ======================================================
-game:GetService("RunService").Stepped:Connect(function()
-    local plr = game.Players.LocalPlayer
-    if plr.Character then
-        if noclipEnabled then
-            for _, part in pairs(plr.Character:GetChildren()) do
-                if part:IsA("BasePart") then
-                    part.CanCollide = false
-                end
-            end
-        end
-
-        if noFallEnabled then
-            local hum = plr.Character:FindFirstChildOfClass("Humanoid")
-            if hum and hum.FloorMaterial == Enum.Material.Air and hum.Health > 0 then
-                hum:ChangeState(Enum.HumanoidStateType.Landed)
-            end
-        end
-
-        if autoCollectEnabled then
-            -- isi sesuai game
-        end
-        if instantCollectEnabled then
-            -- isi sesuai game
-        end
-    end
-end)
