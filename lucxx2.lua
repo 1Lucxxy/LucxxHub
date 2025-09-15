@@ -1,4 +1,4 @@
--- HUD Executor Lengkap (Player-only Delete + Fly analog)
+-- HUD Executor Lengkap (Tanpa Delete)
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
@@ -57,9 +57,8 @@ local noclipBtn = new("TextButton",{Parent=mainFrame,Text="Noclip", Size=UDim2.n
 local speedBtn = new("TextButton",{Parent=mainFrame,Text="SpeedWalk", Size=UDim2.new(0,80,0,25), Position=UDim2.new(0,150,0,10), BackgroundColor3=Color3.fromRGB(70,70,70), TextColor3=Color3.new(1,1,1)})
 local coordBtn = new("TextButton",{Parent=mainFrame,Text="Coordinate", Size=UDim2.new(0,90,0,25), Position=UDim2.new(0,10,0,40), BackgroundColor3=Color3.fromRGB(70,70,70), TextColor3=Color3.new(1,1,1)})
 local copyBtn = new("TextButton",{Parent=mainFrame,Text="Copy", Size=UDim2.new(0,60,0,25), Position=UDim2.new(0,110,0,40), BackgroundColor3=Color3.fromRGB(100,100,100), TextColor3=Color3.new(1,1,1)})
-local delBtn = new("TextButton",{Parent=mainFrame,Text="Delete OFF", Size=UDim2.new(0,80,0,25), Position=UDim2.new(0,180,0,40), BackgroundColor3=Color3.fromRGB(200,60,60), TextColor3=Color3.new(1,1,1)})
 
-for _,v in pairs({flyBtn,noclipBtn,speedBtn,coordBtn,copyBtn,delBtn}) do new("UICorner",{Parent=v,CornerRadius=UDim.new(0,6)}) end
+for _,v in pairs({flyBtn,noclipBtn,speedBtn,coordBtn,copyBtn}) do new("UICorner",{Parent=v,CornerRadius=UDim.new(0,6)}) end
 
 -- SpeedWalk frame
 local speedFrame = new("Frame",{Parent=gui,BackgroundColor3=Color3.fromRGB(35,35,35),Size=UDim2.new(0,200,0,50), Position=UDim2.new(0.5,-100,0.5,-25),Visible=false})
@@ -140,13 +139,3 @@ end)
 copyBtn.MouseButton1Click:Connect(function()
     if setclipboard then setclipboard(mainTextBox.Text) end
 end)
-
--- ===== Delete Toggle (Hanya Part Player) =====
-local deleteActive=false
-delBtn.MouseButton1Click:Connect(function()
-    deleteActive = not deleteActive
-    delBtn.Text = deleteActive and "Delete ON" or "Delete OFF"
-end)
-
-local firedParts={}
-RunService.RenderStepped:Connect(function()
