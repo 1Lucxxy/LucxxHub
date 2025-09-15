@@ -1,11 +1,9 @@
 -- // Rayfield UI Library
 local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
-local LocalPlayer = game.Players.LocalPlayer
-local vim = game:GetService("VirtualInputManager")
 
 -- // Window
 local Window = Rayfield:CreateWindow({
-    Name = "Lucxx Hub V3",
+    Name = "Lucxx Hub",
     LoadingTitle = "Loading...",
     LoadingSubtitle = "by Lucxxy",
     ConfigurationSaving = {
@@ -20,10 +18,9 @@ local Window = Rayfield:CreateWindow({
 local PlayerTab = Window:CreateTab("Player", 4483362458)
 local VisualTab = Window:CreateTab("Visual", 4483362458)
 local CombatTab = Window:CreateTab("Combat", 4483362458)
-local MiscTab   = Window:CreateTab("Miscellaneous", 4483362458)
 
 -- ======================================================
--- PLAYER TAB
+-- PLAYER SETTINGS
 -- ======================================================
 PlayerTab:CreateSlider({
     Name = "WalkSpeed",
@@ -31,7 +28,7 @@ PlayerTab:CreateSlider({
     Increment = 1,
     CurrentValue = 16,
     Callback = function(Value)
-        local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+        local hum = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
         if hum then hum.WalkSpeed = Value end
     end,
 })
@@ -42,7 +39,7 @@ PlayerTab:CreateSlider({
     Increment = 1,
     CurrentValue = 50,
     Callback = function(Value)
-        local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+        local hum = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
         if hum then hum.JumpPower = Value end
     end,
 })
@@ -63,7 +60,7 @@ PlayerTab:CreateSlider({
     Increment = 10,
     CurrentValue = 128,
     Callback = function(Value)
-        LocalPlayer.CameraMaxZoomDistance = Value
+        game.Players.LocalPlayer.CameraMaxZoomDistance = Value
     end,
 })
 
@@ -75,16 +72,14 @@ PlayerTab:CreateButton({
 })
 
 -- ======================================================
--- COMBAT TAB (FOV, AimLock, Wallbang, Tracer)
+-- COMBAT SETTINGS
 -- ======================================================
 local TeamCheck = false
 local AimLockEnabled = false
 local WallCheck = false
-local TracerEnabled = false
 local FOVRadius = 100
 
 local camera = workspace.CurrentCamera
-local screenCenter = Vector2.new(camera.ViewportSize.X/2, camera.ViewportSize.Y/2)
 
 -- POV circle
 local FOVCircle = Drawing.new("Circle")
@@ -109,7 +104,9 @@ CombatTab:CreateSlider({
 CombatTab:CreateToggle({
     Name = "Team Check",
     CurrentValue = false,
-    Callback = function(Value) TeamCheck = Value end
+    Callback = function(Value)
+        TeamCheck = Value
+    end
 })
 
 CombatTab:CreateToggle({
@@ -124,27 +121,26 @@ CombatTab:CreateToggle({
 CombatTab:CreateToggle({
     Name = "Wall Check",
     CurrentValue = false,
-    Callback = function(Value) WallCheck = Value end
-})
-
-CombatTab:CreateToggle({
-    Name = "Tracer",
-    CurrentValue = false,
-    Callback = function(Value) TracerEnabled = Value end
+    Callback = function(Value)
+        WallCheck = Value
+    end
 })
 
 -- ======================================================
--- VISUAL TAB (Highlight, Name ESP, Health ESP)
+-- VISUAL SETTINGS
 -- ======================================================
 local HighlightESPEnabled = false
 local ESPEnabled = false
 local HealthESPEnabled = false
+local LineESPEnabled = false
 local DrawingESP = {}
 
 VisualTab:CreateToggle({
     Name = "Player Highlight",
     CurrentValue = false,
-    Callback = function(Value) HighlightESPEnabled = Value end,
+    Callback = function(Value)
+        HighlightESPEnabled = Value
+    end,
 })
 
 VisualTab:CreateToggle({
@@ -159,103 +155,42 @@ VisualTab:CreateToggle({
     Callback = function(Value) HealthESPEnabled = Value end,
 })
 
--- ======================================================
--- MISC TAB
--- ======================================================
--- Macro Buttons
-local macroGui = nil
-
-MiscTab:CreateToggle({
-    Name = "Macro Buttons",
+VisualTab:CreateToggle({
+    Name = "Line ESP",
     CurrentValue = false,
-    Callback = function(state)
-        if state then
-            -- Buat GUI
-            macroGui = Instance.new("ScreenGui")
-            macroGui.Name = "MacroButtonsGui"
-            macroGui.ResetOnSpawn = false
-            macroGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
-
-            -- Tombol 1: Hotbar 1 -> F
-            local Button1 = Instance.new("TextButton")
-            Button1.Parent = macroGui
-            Button1.Text = "GUN"
-            Button1.TextSize = 14
-            Button1.Size = UDim2.new(0, 70, 0, 70)
-            Button1.AnchorPoint = Vector2.new(1, 0)
-            Button1.Position = UDim2.new(0.98, 0, 0.02, 0)
-            Button1.BackgroundTransparency = 1
-            Button1.TextColor3 = Color3.fromRGB(255, 255, 255)
-            Button1.Font = Enum.Font.SourceSans
-            Button1.ZIndex = 9999
-
-            local stroke1 = Instance.new("UIStroke", Button1)
-            stroke1.Color = Color3.fromRGB(255, 255, 255)
-            stroke1.Thickness = 1.2
-
-            local corner1 = Instance.new("UICorner", Button1)
-            corner1.CornerRadius = UDim.new(1, 0)
-
-            Button1.MouseButton1Click:Connect(function()
-                vim:SendKeyEvent(true, Enum.KeyCode.One, false, game)
-                vim:SendKeyEvent(false, Enum.KeyCode.One, false, game)
-                task.wait(1)
-                vim:SendKeyEvent(true, Enum.KeyCode.F, false, game)
-                vim:SendKeyEvent(false, Enum.KeyCode.F, false, game)
-            end)
-
-            -- Tombol 2: R -> F
-            local Button2 = Instance.new("TextButton")
-            Button2.Parent = macroGui
-            Button2.Text = "RELOAD"
-            Button2.TextSize = 14
-            Button2.Size = UDim2.new(0, 70, 0, 70)
-            Button2.AnchorPoint = Vector2.new(1, 0)
-            Button2.Position = UDim2.new(0.85, 0, 0.02, 0)
-            Button2.BackgroundTransparency = 1
-            Button2.TextColor3 = Color3.fromRGB(255, 255, 255)
-            Button2.Font = Enum.Font.SourceSans
-            Button2.ZIndex = 9999
-
-            local stroke2 = Instance.new("UIStroke", Button2)
-            stroke2.Color = Color3.fromRGB(255, 255, 255)
-            stroke2.Thickness = 1.2
-
-            local corner2 = Instance.new("UICorner", Button2)
-            corner2.CornerRadius = UDim.new(1, 0)
-
-            Button2.MouseButton1Click:Connect(function()
-                vim:SendKeyEvent(true, Enum.KeyCode.R, false, game)
-                vim:SendKeyEvent(false, Enum.KeyCode.R, false, game)
-                task.wait(2)
-                vim:SendKeyEvent(true, Enum.KeyCode.F, false, game)
-                vim:SendKeyEvent(false, Enum.KeyCode.F, false, game)
-            end)
-
-        else
-            if macroGui then
-                macroGui:Destroy()
-                macroGui = nil
-            end
-        end
-    end
+    Callback = function(Value) LineESPEnabled = Value end,
 })
+
+-- ======================================================
+-- CLEANUP SYSTEM
+-- ======================================================
+game.Players.PlayerRemoving:Connect(function(plr)
+    if DrawingESP[plr] then
+        for _, obj in pairs(DrawingESP[plr]) do
+            if obj.Remove then obj:Remove() end
+        end
+        DrawingESP[plr] = nil
+    end
+end)
 
 -- ======================================================
 -- MAIN LOOP
 -- ======================================================
 game:GetService("RunService").RenderStepped:Connect(function()
-    screenCenter = Vector2.new(camera.ViewportSize.X/2, camera.ViewportSize.Y/2)
+    local screenCenter = Vector2.new(camera.ViewportSize.X/2, camera.ViewportSize.Y/2)
+
+    -- update POV circle
     FOVCircle.Position = screenCenter
+    FOVCircle.Radius = FOVRadius
 
     -- Highlight ESP
     if HighlightESPEnabled then
         for _, plr in pairs(game.Players:GetPlayers()) do
-            if plr ~= LocalPlayer and plr.Character then
+            if plr ~= game.Players.LocalPlayer and plr.Character then
                 local hl = plr.Character:FindFirstChild("Highlight")
                 local hum = plr.Character:FindFirstChildOfClass("Humanoid")
                 local showHighlight = true
-                if TeamCheck and plr.Team == LocalPlayer.Team then
+                if TeamCheck and plr.Team == game.Players.LocalPlayer.Team then
                     showHighlight = false
                 end
                 if showHighlight and hum and hum.Health > 0 then
@@ -280,27 +215,31 @@ game:GetService("RunService").RenderStepped:Connect(function()
         end
     end
 
-    -- ESP Loop (Name + Healthbar)
+    -- ESP Loop (Name, Health, Line)
     for _,plr in pairs(game.Players:GetPlayers()) do
-        if plr ~= LocalPlayer and plr.Character then
+        if plr ~= game.Players.LocalPlayer and plr.Character then
             local hum = plr.Character:FindFirstChildOfClass("Humanoid")
             local head = plr.Character:FindFirstChild("Head")
+
             if not DrawingESP[plr] then DrawingESP[plr] = {} end
             local data = DrawingESP[plr]
 
+            -- sembunyikan jika mati / head hilang
             if not head or not hum or hum.Health <= 1 then
                 if data.Name then data.Name.Visible = false end
                 if data.Health then data.Health.Visible = false end
                 if data.HealthBG then data.HealthBG.Visible = false end
+                if data.Line then data.Line.Visible = false end
                 continue
             end
 
             local showESP = true
-            if TeamCheck and plr.Team == LocalPlayer.Team then
+            if TeamCheck and plr.Team == game.Players.LocalPlayer.Team then
                 showESP = false
             end
 
             if showESP then
+                -- Name ESP
                 if ESPEnabled and head then
                     if not data.Name then
                         data.Name = Drawing.new("Text")
@@ -319,6 +258,7 @@ game:GetService("RunService").RenderStepped:Connect(function()
                     data.Name.Visible = false
                 end
 
+                -- Healthbar ESP
                 if HealthESPEnabled and hum and head then
                     if not data.HealthBG then
                         data.HealthBG = Drawing.new("Quad")
@@ -357,24 +297,46 @@ game:GetService("RunService").RenderStepped:Connect(function()
                     data.Health.Visible = false
                     if data.HealthBG then data.HealthBG.Visible = false end
                 end
+
+                -- Line ESP
+                if LineESPEnabled and head then
+                    if not data.Line then
+                        data.Line = Drawing.new("Line")
+                        data.Line.Thickness = 2
+                        data.Line.Color = Color3.fromRGB(0,255,255)
+                    end
+                    local pos, vis = camera:WorldToViewportPoint(head.Position)
+                    if vis then
+                        data.Line.From = screenCenter
+                        data.Line.To = Vector2.new(pos.X, pos.Y)
+                        data.Line.Visible = true
+                    else
+                        data.Line.Visible = false
+                    end
+                elseif data.Line then
+                    data.Line.Visible = false
+                end
             else
                 if data.Name then data.Name.Visible = false end
                 if data.Health then data.Health.Visible = false end
                 if data.HealthBG then data.HealthBG.Visible = false end
+                if data.Line then data.Line.Visible = false end
             end
         end
     end
 
-    -- Combat: Aim Lock + WallCheck + Tracer
+    -- ======================================================
+    -- Aim Lock + WallCheck
+    -- ======================================================
     if AimLockEnabled then
         local nearestPlayer
         local nearestDistance = math.huge
 
         for _,plr in pairs(game.Players:GetPlayers()) do
-            if plr ~= LocalPlayer and plr.Character and plr.Character:FindFirstChild("Head") then
+            if plr ~= game.Players.LocalPlayer and plr.Character and plr.Character:FindFirstChild("Head") then
                 local hum = plr.Character:FindFirstChildOfClass("Humanoid")
-                if hum and hum.Health > 1 then
-                    if not TeamCheck or (TeamCheck and plr.Team ~= LocalPlayer.Team) then
+                if hum and hum.Health > 1 then -- ✅ hanya hidup
+                    if not TeamCheck or (TeamCheck and plr.Team ~= game.Players.LocalPlayer.Team) then
                         local headPos, onScreen = camera:WorldToViewportPoint(plr.Character.Head.Position)
                         if onScreen then
                             local dist = (Vector2.new(headPos.X, headPos.Y) - screenCenter).Magnitude
@@ -396,7 +358,7 @@ game:GetService("RunService").RenderStepped:Connect(function()
                 local origin = camera.CFrame.Position
                 local direction = (headPos - origin)
                 local raycastParams = RaycastParams.new()
-                raycastParams.FilterDescendantsInstances = {LocalPlayer.Character, nearestPlayer.Character}
+                raycastParams.FilterDescendantsInstances = {game.Players.LocalPlayer.Character, nearestPlayer.Character}
                 raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
 
                 local rayResult = workspace:Raycast(origin, direction, raycastParams)
@@ -408,39 +370,6 @@ game:GetService("RunService").RenderStepped:Connect(function()
             if canSee then
                 camera.CFrame = CFrame.new(camera.CFrame.Position, headPos)
             end
-        end
-    end
-
-    -- Tracer (simple line from screen center)
-    if TracerEnabled then
-        for _, plr in pairs(game.Players:GetPlayers()) do
-            if plr ~= LocalPlayer and plr.Character and plr.Character:FindFirstChild("Head") then
-                local hum = plr.Character:FindFirstChildOfClass("Humanoid")
-                local head = plr.Character.Head
-                if hum and hum.Health > 1 then
-                    if not DrawingESP[plr].Tracer then
-                        DrawingESP[plr].Tracer = Drawing.new("Line")
-                        DrawingESP[plr].Tracer.Thickness = 1.5
-                        DrawingESP[plr].Tracer.Color = Color3.fromRGB(0,255,255)
-                    end
-                    local pos, vis = camera:WorldToViewportPoint(head.Position)
-                    if vis then
-                        DrawingESP[plr].Tracer.From = screenCenter
-                        DrawingESP[plr].Tracer.To = Vector2.new(pos.X, pos.Y)
-                        DrawingESP[plr].Tracer.Visible = true
-                    else
-                        DrawingESP[plr].Tracer.Visible = false
-                    end
-                end
-            else
-                if DrawingESP[plr] and DrawingESP[plr].Tracer then
-                    DrawingESP[plr].Tracer.Visible = false
-                end
-            end
-        end
-    else
-        for _, plr in pairs(DrawingESP) do
-            if plr.Tracer then plr.Tracer.Visible = false end
         end
     end
 end)
