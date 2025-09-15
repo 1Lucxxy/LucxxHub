@@ -570,5 +570,3 @@ RunService.Stepped:Connect(function()
         end
     end
 end)
-
--- End of script
