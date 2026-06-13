@@ -1,82 +1,160 @@
 local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
 
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+
 local Window = Rayfield:CreateWindow({
-    Name = "Ground Item ESP",
-    LoadingTitle = "Loading...",
-    LoadingSubtitle = "by ChatGPT"
+    Name = "Testing ESP",
+    LoadingTitle = "ESP System",
+    LoadingSubtitle = "Studio Testing"
 })
 
-local Tab = Window:CreateTab("ESP", 4483362458)
+local Main = Window:CreateTab("ESP", 4483362458)
 
-local Enabled = false
-local ESPs = {}
+local PlayerESPEnabled = false
+local InteractESPEnabled = false
 
-local function IsGroundItem(tool)
-    if not tool:IsA("Tool") then
-        return false
-    end
+local PlayerHighlights = {}
+local InteractHighlights = {}
 
-    local parent = tool.Parent
+-- PLAYER ESP
 
-    -- Jangan highlight item yang dipegang pemain
-    if parent and parent:FindFirstChild("Humanoid") then
-        return false
-    end
-
-    return tool:IsDescendantOf(workspace)
-end
-
-local function AddESP(tool)
-    if ESPs[tool] or not IsGroundItem(tool) then
+local function AddPlayerESP(Character)
+    if not PlayerESPEnabled then
         return
     end
 
-    local highlight = Instance.new("Highlight")
-    highlight.FillColor = Color3.fromRGB(255, 255, 0)
-    highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
-    highlight.FillTransparency = 0.4
-    highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-    highlight.Parent = tool
-
-    ESPs[tool] = highlight
-end
-
-local function RemoveAllESP()
-    for _, esp in pairs(ESPs) do
-        pcall(function()
-            esp:Destroy()
-        end)
+    if PlayerHighlights[Character] then
+        return
     end
 
-    table.clear(ESPs)
+    local Highlight = Instance.new("Highlight")
+    Highlight.Name = "PlayerESP"
+    Highlight.FillTransparency = 0.5
+    Highlight.OutlineTransparency = 0
+    Highlight.Parent = Character
+
+    PlayerHighlights[Character] = Highlight
 end
 
-local function Scan()
-    for _, obj in ipairs(workspace:GetDescendants()) do
-        if obj:IsA("Tool") then
-            AddESP(obj)
+local function ScanPlayers()
+    for _, Player in ipairs(Players:GetPlayers()) do
+        if Player.Character then
+            AddPlayerESP(Player.Character)
         end
     end
 end
 
-Tab:CreateToggle({
-    Name = "Ground Item ESP",
+local function RemovePlayerESP()
+    for Character, Highlight in pairs(PlayerHighlights) do
+        if Highlight then
+            Highlight:Destroy()
+        end
+    end
+
+    table.clear(PlayerHighlights)
+end
+
+-- INTERACT ESP
+
+local function AddInteractESP(Object)
+    if InteractHighlights[Object] then
+        return
+    end
+
+    local Target = Object:FindFirstAncestorOfClass("Model") or Object.Parent
+
+    if not Target then
+        return
+    end
+
+    local Highlight = Instance.new("Highlight")
+    Highlight.Name = "InteractESP"
+    Highlight.FillColor = Color3.fromRGB(255, 255, 0)
+    Highlight.FillTransparency = 0.6
+    Highlight.OutlineTransparency = 0
+    Highlight.Parent = Target
+
+    InteractHighlights[Object] = Highlight
+end
+
+local function ScanInteractables()
+    for _, Object in ipairs(Workspace:GetDescendants()) do
+        if Object:IsA("ProximityPrompt") then
+            AddInteractESP(Object)
+        end
+    end
+end
+
+local function RemoveInteractESP()
+    for _, Highlight in pairs(InteractHighlights) do
+        if Highlight then
+            Highlight:Destroy()
+        end
+    end
+
+    table.clear(InteractHighlights)
+end
+
+-- TOGGLES
+
+Main:CreateToggle({
+    Name = "Player Highlight",
     CurrentValue = false,
-    Flag = "GroundItemESP",
     Callback = function(Value)
-        Enabled = Value
+        PlayerESPEnabled = Value
 
         if Value then
-            Scan()
+            ScanPlayers()
         else
-            RemoveAllESP()
+            RemovePlayerESP()
         end
     end
 })
 
-workspace.DescendantAdded:Connect(function(obj)
-    if Enabled and obj:IsA("Tool") then
+Main:CreateToggle({
+    Name = "Interact Highlight",
+    CurrentValue = false,
+    Callback = function(Value)
+        InteractESPEnabled = Value
+
+        if Value then
+            ScanInteractables()
+        else
+            RemoveInteractESP()
+        end
+    end
+})
+
+-- PLAYER JOIN
+
+Players.PlayerAdded:Connect(function(Player)
+    Player.CharacterAdded:Connect(function(Character)
+        task.wait(1)
+
+        if PlayerESPEnabled then
+            AddPlayerESP(Character)
+        end
+    end)
+end)
+
+-- EXISTING PLAYERS
+
+for _, Player in ipairs(Players:GetPlayers()) do
+    Player.CharacterAdded:Connect(function(Character)
+        task.wait(1)
+
+        if PlayerESPEnabled then
+            AddPlayerESP(Character)
+        end
+    end)
+end
+
+-- NEW INTERACTABLES
+
+Workspace.DescendantAdded:Connect(function(Object)
+    if InteractESPEnabled and Object:IsA("ProximityPrompt") then
         task.wait(0.1)
-        AddESP(obj)
+        AddInteractESP(Object)
     end
 end)
