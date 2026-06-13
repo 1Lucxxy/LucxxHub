@@ -1,4 +1,13 @@
 -- ====================================================
+-- SISTEM CLEANUP (MENCEGAH OVERLAP SAAT RE-EXECUTE)
+-- ====================================================
+if getgenv()._LucxxHubCleanup then
+    pcall(getgenv()._LucxxHubCleanup)
+end
+
+local scriptConnections = {} -- Tabel untuk menyimpan semua koneksi event
+
+-- ====================================================
 -- GLOBAL CONFIG & UTILITIES
 -- ====================================================
 local Players = game:GetService("Players")
@@ -205,6 +214,7 @@ local function applyKorblox(char)
             if v:IsA("SpecialMesh") or v:IsA("CharacterMesh") then v:Destroy() end
         end
         local mesh = Instance.new("SpecialMesh")
+        mesh.Name = "LucxxKorbloxMesh"
         mesh.MeshType, mesh.MeshId, mesh.TextureId = Enum.MeshType.FileMesh, KORBLOX_MESH_ID, KORBLOX_TEXTURE_ID
         mesh.Scale = Vector3.new(1, 1, 1)
         mesh.Archivable = true
@@ -285,17 +295,18 @@ local function getTargetPlayer(nameStr)
 end
 
 local function monitorPlayer(p)
-    p.CharacterAdded:Connect(function(char)
+    table.insert(scriptConnections, p.CharacterAdded:Connect(function(char)
         task.wait(1)
         if targetPlayersRegistry[p.UserId] then refreshCharacter(char, targetPlayersRegistry[p.UserId]) end
-    end)
+    end))
 end
+
 for _, p in ipairs(Players:GetPlayers()) do monitorPlayer(p) end
-Players.PlayerAdded:Connect(monitorPlayer)
-Players.PlayerRemoving:Connect(function(p) targetPlayersRegistry[p.UserId] = nil end)
+table.insert(scriptConnections, Players.PlayerAdded:Connect(monitorPlayer))
+table.insert(scriptConnections, Players.PlayerRemoving:Connect(function(p) targetPlayersRegistry[p.UserId] = nil end))
 
 -- [NEW] DETEKSI CLONE UNTUK CUTSCENE
-workspace.DescendantAdded:Connect(function(obj)
+table.insert(scriptConnections, workspace.DescendantAdded:Connect(function(obj)
     if obj:IsA("Model") and obj:FindFirstChild("Humanoid") then
         -- Jika ini Dummy untuk diri kita sendiri
         if obj.Name == localPlayer.Name and obj ~= localPlayer.Character then
@@ -312,8 +323,7 @@ workspace.DescendantAdded:Connect(function(obj)
             end
         end
     end
-end)
-
+end))
 
 -- ====================================================
 -- PEMBUATAN GUI EDITOR (Sama seperti V4.1)
@@ -360,7 +370,7 @@ content.Parent = main
 local listFrame = Instance.new("ScrollingFrame")
 listFrame.Size, listFrame.Position, listFrame.BackgroundColor3 = UDim2.new(0, 130, 1, -10), UDim2.new(0, 5, 0, 5), Color3.fromRGB(20, 20, 20)
 listFrame.BackgroundTransparency = 0.2
-listFrame.BorderSizePixel, listFrame.ScrollBarThickness, listFrame.CanvasSize = 0, 4, UDim2.new(0, 0, 0, 400)
+listFrame.BorderSizePixel, listFrame.ScrollBarThickness, listFrame.CanvasSize = UDim2.new(0, 0, 0, 400), 4, UDim2.new(0, 0, 0, 400)
 listFrame.Parent = content
 local listLayout = Instance.new("UIListLayout")
 listLayout.Padding = UDim.new(0, 2)
@@ -581,5 +591,69 @@ end)
 
 populateList()
 if localPlayer.Character then refreshCharacter(localPlayer.Character, currentConfig) end
-localPlayer.CharacterAdded:Connect(function(char) task.wait(1); refreshCharacter(char, currentConfig) end)
+table.insert(scriptConnections, localPlayer.CharacterAdded:Connect(function(char) task.wait(1); refreshCharacter(char, currentConfig) end))
 task.spawn(function() btnLoad.MouseButton1Click:Fire() end)
+
+-- ====================================================
+-- MENDAFTARKAN FUNGSI CLEANUP UNTUK EKSEKUSI BERIKUTNYA
+-- ====================================================
+getgenv()._LucxxHubCleanup = function()
+    -- 1. Putuskan semua koneksi event agar tidak lag/bertumpuk
+    for _, conn in ipairs(scriptConnections) do
+        if conn.Connected then conn:Disconnect() end
+    end
+    table.clear(scriptConnections)
+
+    -- 2. Hapus UI
+    if CoreGui:FindFirstChild("AccessoryEditorUI") then
+        CoreGui.AccessoryEditorUI:Destroy()
+    end
+
+    -- 3. Hapus Aksesoris yang sudah dimunculkan script ini dari karakter
+    for char, accs in pairs(spawnedAccessories) do
+        for _, acc in pairs(accs) do
+            if acc and acc.Parent then acc:Destroy() end
+        end
+    end
+    
+    -- 4. Kembalikan kondisi karakter ke normal
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p.Character then
+            local char = p.Character
+            
+            -- Hapus Custom Head
+            local customHead = char:FindFirstChild("CustomHeadModel")
+            if customHead then customHead:Destroy() end
+            
+            -- Kembalikan Kepala Original
+            local origHead = char:FindFirstChild("Head")
+            if origHead then 
+                origHead.Transparency = 0
+                local face = origHead:FindFirstChildOfClass("Decal")
+                if face then face.Transparency = 0 end
+                local mesh = origHead:FindFirstChildOfClass("SpecialMesh")
+                if mesh and mesh.MeshType == Enum.MeshType.Head then mesh.Scale = Vector3.new(1.25, 1.25, 1.25) end
+            end
+            
+            -- Hapus Fake Korblox & Kembalikan Kaki Original (Khusus R15 / R6 partial)
+            local fakeLeg = char:FindFirstChild("FakeKorbloxLeg")
+            if fakeLeg then fakeLeg:Destroy() end
+            
+            local rLeg = char:FindFirstChild("Right Leg")
+            if rLeg then
+                -- Hapus mesh korblox di R6 jika ada
+                local kMesh = rLeg:FindFirstChild("LucxxKorbloxMesh")
+                if kMesh then kMesh:Destroy() end
+            end
+            
+            local rUpper = char:FindFirstChild("RightUpperLeg")
+            local rLower = char:FindFirstChild("RightLowerLeg")
+            local rFoot = char:FindFirstChild("RightFoot")
+            if rUpper then rUpper.Transparency = 0 end
+            if rLower then rLower.Transparency = 0 end
+            if rFoot then rFoot.Transparency = 0 end
+        end
+    end
+    
+    getgenv()._LucxxHubCleanup = nil
+end
