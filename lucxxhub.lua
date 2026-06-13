@@ -5,7 +5,7 @@ if getgenv()._LucxxHubCleanup then
     pcall(getgenv()._LucxxHubCleanup)
 end
 
-local scriptConnections = {} -- Tabel untuk menyimpan semua koneksi event
+local scriptConnections = {}
 
 -- ====================================================
 -- GLOBAL CONFIG & UTILITIES
@@ -16,9 +16,8 @@ local MarketplaceService = game:GetService("MarketplaceService")
 local CoreGui = game:GetService("CoreGui")
 
 local localPlayer = Players.LocalPlayer
-local FILE_NAME = "AccessoryCustomConfigV4_2.json"
+local FILE_NAME = "AccessoryCustomConfigV4_4.json"
 
--- Daftar Aksesoris Default
 local accessoryIds = {
     ["Black Valk"] = 124730194,
     ["Violet Valk"] = 1402432199,
@@ -29,7 +28,6 @@ local accessoryIds = {
     ["Fiery Horns"] = 215718515
 }
 
--- ID Khusus Model Kepala
 local HEAD_IDS = {
     ["Death Walker"] = 99223542650102,
     ["UGC Headless"] = 15093053680
@@ -38,7 +36,6 @@ local HEAD_IDS = {
 local KORBLOX_MESH_ID = "rbxassetid://101851696"
 local KORBLOX_TEXTURE_ID = "rbxassetid://101851254"
 
--- Struktur Data
 local spawnedAccessories = {}
 local baseCFrames = {}
 local currentConfig = { _HeadType = "Default" }
@@ -60,7 +57,7 @@ end
 for name, _ in pairs(accessoryIds) do initConfig(name) end
 
 -- ====================================================
--- FUNGSI KEPALA (HEAD)
+-- FUNGSI KEPALA & AKSESORIS
 -- ====================================================
 local function wearHeadModel(char, headType)
     local assetId = HEAD_IDS[headType]
@@ -132,9 +129,6 @@ local function applyHeadState(char, configTable)
     end
 end
 
--- ====================================================
--- FUNGSI AKSESORIS UMUM & KORBLOX (R6 & R15)
--- ====================================================
 local function applyConfigToSpecific(char, name, configTable)
     local acc = spawnedAccessories[char] and spawnedAccessories[char][name]
     local cfg = configTable[name]
@@ -259,9 +253,6 @@ local function applyKorblox(char)
     end
 end
 
--- ====================================================
--- SISTEM REFRESH KARAKTER
--- ====================================================
 local function refreshCharacter(char, configTable)
     if not char then return end
     local cfg = configTable or currentConfig
@@ -284,7 +275,7 @@ local function refreshCharacter(char, configTable)
 end
 
 -- ====================================================
--- SISTEM LOCK & DETEKSI CUTSCENE/LOBBY (DUMMY SCANNER)
+-- SISTEM LOCK & DETEKSI DUMMY OTOMATIS (ALWAYS ACTIVE)
 -- ====================================================
 local function getTargetPlayer(nameStr)
     nameStr = nameStr:lower()
@@ -305,29 +296,65 @@ for _, p in ipairs(Players:GetPlayers()) do monitorPlayer(p) end
 table.insert(scriptConnections, Players.PlayerAdded:Connect(monitorPlayer))
 table.insert(scriptConnections, Players.PlayerRemoving:Connect(function(p) targetPlayersRegistry[p.UserId] = nil end))
 
--- Fungsi untuk mengecek apakah sebuah model adalah Dummy/Clone yang valid
-local function checkAndApplyClone(obj)
-    if obj:IsA("Model") and obj:FindFirstChild("Humanoid") and obj ~= localPlayer.Character then
-        -- Cek apakah ini dummy lobby diri sendiri (Berdasarkan nama umum atau kedekatan dengan kamera)
-        local isSelfClone = (obj.Name == localPlayer.Name) or (obj.Name:find("Menu")) or (obj.Name:find("Lobby"))
-        
-        if isSelfClone then
-            task.wait(0.3) -- Jeda agar game memuat dummy sepenuhnya dulu
-            refreshCharacter(obj, currentConfig)
-        else
-            -- Cek apakah ini Dummy untuk target player yang sedang dilock
-            local tPlayer = getTargetPlayer(obj.Name)
-            if tPlayer and obj.Name == tPlayer.Name and targetPlayersRegistry[tPlayer.UserId] then
-                task.wait(0.3)
-                refreshCharacter(obj, targetPlayersRegistry[tPlayer.UserId])
+-- Fungsi Update Masal: Mengupdate Player Asli & Dummy sekaligus saat UI diubah
+local function updateAllActiveCharacters(isSpecific, accName)
+    local charsToUpdate = {}
+    if localPlayer.Character then table.insert(charsToUpdate, {char = localPlayer.Character, cfg = currentConfig}) end
+    
+    for charObj, _ in pairs(spawnedAccessories) do
+        if charObj ~= localPlayer.Character and charObj.Parent then
+            local isSelfClone = (charObj.Name == localPlayer.Name) or (charObj.Name:find("Menu")) or (charObj.Name:find("Lobby"))
+            if isSelfClone then
+                table.insert(charsToUpdate, {char = charObj, cfg = currentConfig})
+            else
+                local tPlayer = getTargetPlayer(charObj.Name)
+                if tPlayer and targetPlayersRegistry[tPlayer.UserId] then
+                    table.insert(charsToUpdate, {char = charObj, cfg = targetPlayersRegistry[tPlayer.UserId]})
+                end
             end
+        end
+    end
+    
+    for _, data in ipairs(charsToUpdate) do
+        if isSpecific and accName then
+            applyConfigToSpecific(data.char, accName, data.cfg)
+        else
+            refreshCharacter(data.char, data.cfg)
         end
     end
 end
 
--- Deteksi Dummy yang masuk ke Workspace ATAU Camera (Lobby Evade biasanya pakai Camera)
-table.insert(scriptConnections, workspace.DescendantAdded:Connect(checkAndApplyClone))
-table.insert(scriptConnections, workspace.CurrentCamera.DescendantAdded:Connect(checkAndApplyClone))
+-- LOOP AUTO-SCANNER DUMMY (SELALU AKTIF)
+local runAutoScan = true
+table.insert(scriptConnections, {Connected = true, Disconnect = function() runAutoScan = false end})
+
+task.spawn(function()
+    while task.wait(1.5) and runAutoScan do
+        pcall(function()
+            local function scanLoop(parentObj)
+                for _, obj in ipairs(parentObj:GetDescendants()) do
+                    if obj:IsA("Model") and obj:FindFirstChild("Humanoid") and obj ~= localPlayer.Character then
+                        -- Jika dummy belum dilacak, aplikasikan config
+                        if not spawnedAccessories[obj] then
+                            local isSelfClone = (obj.Name == localPlayer.Name) or (obj.Name:find("Menu")) or (obj.Name:find("Lobby"))
+                            if isSelfClone then
+                                refreshCharacter(obj, currentConfig)
+                            else
+                                local tPlayer = getTargetPlayer(obj.Name)
+                                if tPlayer and obj.Name == tPlayer.Name and targetPlayersRegistry[tPlayer.UserId] then
+                                    refreshCharacter(obj, targetPlayersRegistry[tPlayer.UserId])
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+            
+            scanLoop(workspace)
+            scanLoop(workspace.CurrentCamera)
+        end)
+    end
+end)
 
 -- ====================================================
 -- PEMBUATAN GUI EDITOR
@@ -346,7 +373,7 @@ minSquare.BorderSizePixel, minSquare.Visible, minSquare.Draggable, minSquare.Act
 minSquare.Parent = sg
 
 local main = Instance.new("Frame")
-main.Size, main.Position = UDim2.new(0, 480, 0, 300), UDim2.new(0.5, -240, 0.5, -150)
+main.Size, main.Position = UDim2.new(0, 420, 0, 300), UDim2.new(0.5, -210, 0.5, -150)
 main.BackgroundColor3, main.BorderSizePixel = Color3.fromRGB(25, 25, 25), 0
 main.BackgroundTransparency = 0.2
 main.Active, main.Draggable = true, true
@@ -355,7 +382,7 @@ main.Parent = sg
 local title = Instance.new("TextLabel")
 title.Size, title.BackgroundColor3 = UDim2.new(1, 0, 0, 25), Color3.fromRGB(40, 40, 40)
 title.BackgroundTransparency = 0.2
-title.Text, title.TextColor3 = "  Accessory Configurator PRO V4.3", Color3.fromRGB(255, 255, 255)
+title.Text, title.TextColor3 = "  Accessory Configurator PRO V4.4", Color3.fromRGB(255, 255, 255)
 title.Font, title.TextSize, title.TextXAlignment = Enum.Font.SourceSansBold, 14, Enum.TextXAlignment.Left
 title.Parent = main
 
@@ -452,25 +479,6 @@ targetBox.Parent = panel
 local btnTarget = createBtn("Lock to Player", UDim2.new(0, 160, 0, 190), Color3.fromRGB(180, 20, 50), panel)
 btnTarget.Size = UDim2.new(0, 80, 0, 22)
 
--- TOMBOL FORCE LOBBY BARU
-local btnForceLobby = createBtn("Force Lobby", UDim2.new(0, 245, 0, 190), Color3.fromRGB(150, 100, 20), panel)
-btnForceLobby.Size = UDim2.new(0, 80, 0, 22)
-
-btnForceLobby.MouseButton1Click:Connect(function()
-    -- Scan semua model di Workspace dan Camera untuk mencari Dummy
-    local function scanAndForce(parentObj)
-        for _, obj in ipairs(parentObj:GetDescendants()) do
-            if obj:IsA("Model") and obj:FindFirstChild("Humanoid") and obj ~= localPlayer.Character then
-                -- Paksa pakaikan config ke semua dummy/clone yang ada di layar
-                refreshCharacter(obj, currentConfig)
-            end
-        end
-    end
-    
-    scanAndForce(workspace.CurrentCamera)
-    scanAndForce(workspace)
-end)
-
 local lblHead = Instance.new("TextLabel")
 lblHead.Size, lblHead.Position = UDim2.new(0, 60, 0, 20), UDim2.new(0, 0, 0, 220)
 lblHead.Text, lblHead.TextColor3 = "Head:", Color3.fromRGB(200, 200, 200)
@@ -487,7 +495,7 @@ btnHeadHeadless.Size = UDim2.new(0, 65, 0, 22)
 
 local function changeHead(typeStr)
     currentConfig._HeadType = typeStr
-    if localPlayer.Character then refreshCharacter(localPlayer.Character, currentConfig) end
+    updateAllActiveCharacters(false, nil)
 end
 btnHeadDefault.MouseButton1Click:Connect(function() changeHead("Default") end)
 btnHeadDeath.MouseButton1Click:Connect(function() changeHead("Death Walker") end)
@@ -534,14 +542,23 @@ btnToggle.MouseButton1Click:Connect(function()
     currentConfig[selectedAccessory].enabled = not currentConfig[selectedAccessory].enabled
     updateUIText()
     
-    if localPlayer.Character then
-        if currentConfig[selectedAccessory].enabled then
-            wearAccessory(localPlayer.Character, selectedAccessory, accessoryIds[selectedAccessory], currentConfig)
+    local function toggleChar(char, cfg)
+        if cfg[selectedAccessory].enabled then
+            wearAccessory(char, selectedAccessory, accessoryIds[selectedAccessory], cfg)
         else
-            if spawnedAccessories[localPlayer.Character] and spawnedAccessories[localPlayer.Character][selectedAccessory] then
-                spawnedAccessories[localPlayer.Character][selectedAccessory]:Destroy()
-                spawnedAccessories[localPlayer.Character][selectedAccessory] = nil
+            if spawnedAccessories[char] and spawnedAccessories[char][selectedAccessory] then
+                spawnedAccessories[char][selectedAccessory]:Destroy()
+                spawnedAccessories[char][selectedAccessory] = nil
             end
+        end
+    end
+
+    if localPlayer.Character then toggleChar(localPlayer.Character, currentConfig) end
+    
+    for charObj, _ in pairs(spawnedAccessories) do
+        if charObj ~= localPlayer.Character and charObj.Parent then
+            local isSelfClone = (charObj.Name == localPlayer.Name) or (charObj.Name:find("Menu")) or (charObj.Name:find("Lobby"))
+            if isSelfClone then toggleChar(charObj, currentConfig) end
         end
     end
 end)
@@ -552,14 +569,15 @@ btnApply.MouseButton1Click:Connect(function()
     currentConfig[selectedAccessory].rot = {tonumber(inputs.rot.X.Text) or 0, tonumber(inputs.rot.Y.Text) or 0, tonumber(inputs.rot.Z.Text) or 0}
     currentConfig[selectedAccessory].scale = tonumber(inputs.scale.Text) or 1
     
-    if localPlayer.Character then applyConfigToSpecific(localPlayer.Character, selectedAccessory, currentConfig) end
+    updateAllActiveCharacters(true, selectedAccessory)
 end)
 
 btnReset.MouseButton1Click:Connect(function()
     if not selectedAccessory then return end
     currentConfig[selectedAccessory] = { pos = {0,0,0}, rot = {0,0,0}, scale = 1, enabled = true }
     updateUIText()
-    if localPlayer.Character then applyConfigToSpecific(localPlayer.Character, selectedAccessory, currentConfig) end
+    
+    updateAllActiveCharacters(true, selectedAccessory)
 end)
 
 btnSave.MouseButton1Click:Connect(function()
@@ -581,7 +599,7 @@ btnLoad.MouseButton1Click:Connect(function()
         end
     end
     updateUIText()
-    if localPlayer.Character then refreshCharacter(localPlayer.Character, currentConfig) end
+    updateAllActiveCharacters(false, nil)
 end)
 
 local function populateList()
@@ -608,7 +626,8 @@ btnAddId.MouseButton1Click:Connect(function()
         populateList()
         addIdBox.Text = ""
         addIdBox.PlaceholderText = "Added: " .. newName
-        if localPlayer.Character then wearAccessory(localPlayer.Character, newName, id, currentConfig) end
+        
+        updateAllActiveCharacters(false, nil)
     end
 end)
 
@@ -621,34 +640,26 @@ task.spawn(function() btnLoad.MouseButton1Click:Fire() end)
 -- MENDAFTARKAN FUNGSI CLEANUP UNTUK EKSEKUSI BERIKUTNYA
 -- ====================================================
 getgenv()._LucxxHubCleanup = function()
-    -- 1. Putuskan semua koneksi event agar tidak lag/bertumpuk
     for _, conn in ipairs(scriptConnections) do
-        if conn.Connected then conn:Disconnect() end
+        if type(conn) == "table" and conn.Disconnect then conn:Disconnect()
+        elseif typeof(conn) == "RBXScriptConnection" and conn.Connected then conn:Disconnect() end
     end
     table.clear(scriptConnections)
 
-    -- 2. Hapus UI
-    if CoreGui:FindFirstChild("AccessoryEditorUI") then
-        CoreGui.AccessoryEditorUI:Destroy()
-    end
+    if CoreGui:FindFirstChild("AccessoryEditorUI") then CoreGui.AccessoryEditorUI:Destroy() end
 
-    -- 3. Hapus Aksesoris yang sudah dimunculkan script ini dari karakter
     for char, accs in pairs(spawnedAccessories) do
         for _, acc in pairs(accs) do
             if acc and acc.Parent then acc:Destroy() end
         end
     end
     
-    -- 4. Kembalikan kondisi karakter ke normal
     for _, p in ipairs(Players:GetPlayers()) do
         if p.Character then
             local char = p.Character
-            
-            -- Hapus Custom Head
             local customHead = char:FindFirstChild("CustomHeadModel")
             if customHead then customHead:Destroy() end
             
-            -- Kembalikan Kepala Original
             local origHead = char:FindFirstChild("Head")
             if origHead then 
                 origHead.Transparency = 0
@@ -658,25 +669,18 @@ getgenv()._LucxxHubCleanup = function()
                 if mesh and mesh.MeshType == Enum.MeshType.Head then mesh.Scale = Vector3.new(1.25, 1.25, 1.25) end
             end
             
-            -- Hapus Fake Korblox & Kembalikan Kaki Original (Khusus R15 / R6 partial)
             local fakeLeg = char:FindFirstChild("FakeKorbloxLeg")
             if fakeLeg then fakeLeg:Destroy() end
-            
             local rLeg = char:FindFirstChild("Right Leg")
             if rLeg then
-                -- Hapus mesh korblox di R6 jika ada
                 local kMesh = rLeg:FindFirstChild("LucxxKorbloxMesh")
                 if kMesh then kMesh:Destroy() end
             end
-            
-            local rUpper = char:FindFirstChild("RightUpperLeg")
-            local rLower = char:FindFirstChild("RightLowerLeg")
-            local rFoot = char:FindFirstChild("RightFoot")
+            local rUpper, rLower, rFoot = char:FindFirstChild("RightUpperLeg"), char:FindFirstChild("RightLowerLeg"), char:FindFirstChild("RightFoot")
             if rUpper then rUpper.Transparency = 0 end
             if rLower then rLower.Transparency = 0 end
             if rFoot then rFoot.Transparency = 0 end
         end
     end
-    
     getgenv()._LucxxHubCleanup = nil
 end
