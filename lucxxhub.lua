@@ -3,7 +3,7 @@ local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
 local Window = Rayfield:CreateWindow({
     Name = "Ground Item ESP",
     LoadingTitle = "Loading...",
-    LoadingSubtitle = "by CtGPT"
+    LoadingSubtitle = "by ChatGPT"
 })
 
 local Tab = Window:CreateTab("ESP", 4483362458)
