@@ -594,32 +594,6 @@ if localPlayer.Character then refreshCharacter(localPlayer.Character, currentCon
 table.insert(scriptConnections, localPlayer.CharacterAdded:Connect(function(char) task.wait(1); refreshCharacter(char, currentConfig) end))
 task.spawn(function() btnLoad.MouseButton1Click:Fire() end)
 
-
-
--- ====================================================
--- LOBBY / VIEWPORT / CLONE CHARACTER SUPPORT
--- ====================================================
-task.spawn(function()
-    while task.wait(2) do
-        for _,v in ipairs(workspace:GetDescendants()) do
-            if v:IsA("Model")
-            and v:FindFirstChildOfClass("Humanoid")
-            and v:FindFirstChild("Head") then
-
-                if not v:FindFirstChild("LucxxLobbyApplied") then
-                    local tag = Instance.new("BoolValue")
-                    tag.Name = "LucxxLobbyApplied"
-                    tag.Parent = v
-
-                    pcall(function()
-                        refreshCharacter(v, currentConfig)
-                    end)
-                end
-            end
-        end
-    end
-end)
-
 -- ====================================================
 -- MENDAFTARKAN FUNGSI CLEANUP UNTUK EKSEKUSI BERIKUTNYA
 -- ====================================================
