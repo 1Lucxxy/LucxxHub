@@ -1,24 +1,4 @@
 -- ====================================================
--- SISTEM CLEANUP (MENCEGAH OVERLAP EKSEKUSI)
--- ====================================================
--- Memastikan environment mendukung getgenv, jika tidak pakai _G
-local env = (type(getgenv) == "function" and getgenv()) or _G
-
-if env.AccConfigV4_Connections then
-    for _, conn in ipairs(env.AccConfigV4_Connections) do
-        if typeof(conn) == "RBXScriptConnection" and conn.Connected then
-            conn:Disconnect()
-        end
-    end
-end
-env.AccConfigV4_Connections = {}
-
-local function trackConn(conn)
-    table.insert(env.AccConfigV4_Connections, conn)
-    return conn
-end
-
--- ====================================================
 -- GLOBAL CONFIG & UTILITIES
 -- ====================================================
 local Players = game:GetService("Players")
@@ -27,8 +7,9 @@ local MarketplaceService = game:GetService("MarketplaceService")
 local CoreGui = game:GetService("CoreGui")
 
 local localPlayer = Players.LocalPlayer
-local FILE_NAME = "AccessoryCustomConfigV4_3.json"
+local FILE_NAME = "AccessoryCustomConfigV4_2.json"
 
+-- Daftar Aksesoris Default
 local accessoryIds = {
     ["Black Valk"] = 124730194,
     ["Violet Valk"] = 1402432199,
@@ -39,6 +20,7 @@ local accessoryIds = {
     ["Fiery Horns"] = 215718515
 }
 
+-- ID Khusus Model Kepala
 local HEAD_IDS = {
     ["Death Walker"] = 99223542650102,
     ["UGC Headless"] = 15093053680
@@ -47,6 +29,7 @@ local HEAD_IDS = {
 local KORBLOX_MESH_ID = "rbxassetid://101851696"
 local KORBLOX_TEXTURE_ID = "rbxassetid://101851254"
 
+-- Struktur Data
 local spawnedAccessories = {}
 local baseCFrames = {}
 local currentConfig = { _HeadType = "Default" }
@@ -135,12 +118,13 @@ local function applyHeadState(char, configTable)
         if face then face.Transparency = 1 end
         local mesh = head:FindFirstChildOfClass("SpecialMesh")
         if mesh then mesh.Scale = Vector3.new(0, 0, 0) end
+        
         wearHeadModel(char, headType)
     end
 end
 
 -- ====================================================
--- FUNGSI AKSESORIS UMUM & KORBLOX
+-- FUNGSI AKSESORIS UMUM & KORBLOX (R6 & R15)
 -- ====================================================
 local function applyConfigToSpecific(char, name, configTable)
     local acc = spawnedAccessories[char] and spawnedAccessories[char][name]
@@ -265,6 +249,9 @@ local function applyKorblox(char)
     end
 end
 
+-- ====================================================
+-- SISTEM REFRESH KARAKTER
+-- ====================================================
 local function refreshCharacter(char, configTable)
     if not char then return end
     local cfg = configTable or currentConfig
@@ -287,7 +274,7 @@ local function refreshCharacter(char, configTable)
 end
 
 -- ====================================================
--- SISTEM LOCK & DETEKSI (MENGGUNAKAN CLEANUP)
+-- SISTEM LOCK & DETEKSI CUTSCENE (DUMMY SCANNER)
 -- ====================================================
 local function getTargetPlayer(nameStr)
     nameStr = nameStr:lower()
@@ -298,25 +285,24 @@ local function getTargetPlayer(nameStr)
 end
 
 local function monitorPlayer(p)
-    -- Daftarkan event ini ke trackConn agar bersih saat re-execute
-    trackConn(p.CharacterAdded:Connect(function(char)
+    p.CharacterAdded:Connect(function(char)
         task.wait(1)
         if targetPlayersRegistry[p.UserId] then refreshCharacter(char, targetPlayersRegistry[p.UserId]) end
-    end))
+    end)
 end
-
 for _, p in ipairs(Players:GetPlayers()) do monitorPlayer(p) end
+Players.PlayerAdded:Connect(monitorPlayer)
+Players.PlayerRemoving:Connect(function(p) targetPlayersRegistry[p.UserId] = nil end)
 
-trackConn(Players.PlayerAdded:Connect(monitorPlayer))
-trackConn(Players.PlayerRemoving:Connect(function(p) targetPlayersRegistry[p.UserId] = nil end))
-
--- Deteksi Cutscene yang terbungkus trackConn
-trackConn(workspace.DescendantAdded:Connect(function(obj)
+-- [NEW] DETEKSI CLONE UNTUK CUTSCENE
+workspace.DescendantAdded:Connect(function(obj)
     if obj:IsA("Model") and obj:FindFirstChild("Humanoid") then
+        -- Jika ini Dummy untuk diri kita sendiri
         if obj.Name == localPlayer.Name and obj ~= localPlayer.Character then
-            task.wait(0.2)
+            task.wait(0.2) -- Jeda sebentar membiarkan game me-load dummy
             refreshCharacter(obj, currentConfig)
         else
+            -- Jika ini Dummy untuk player yang sedang kita Lock
             local tPlayer = getTargetPlayer(obj.Name)
             if tPlayer and tPlayer.Name == obj.Name and obj ~= tPlayer.Character then
                 if targetPlayersRegistry[tPlayer.UserId] then
@@ -326,10 +312,11 @@ trackConn(workspace.DescendantAdded:Connect(function(obj)
             end
         end
     end
-end))
+end)
+
 
 -- ====================================================
--- PEMBUATAN GUI EDITOR (Hancurkan GUI lama dulu)
+-- PEMBUATAN GUI EDITOR (Sama seperti V4.1)
 -- ====================================================
 if CoreGui:FindFirstChild("AccessoryEditorUI") then CoreGui.AccessoryEditorUI:Destroy() end
 
@@ -354,7 +341,7 @@ main.Parent = sg
 local title = Instance.new("TextLabel")
 title.Size, title.BackgroundColor3 = UDim2.new(1, 0, 0, 25), Color3.fromRGB(40, 40, 40)
 title.BackgroundTransparency = 0.2
-title.Text, title.TextColor3 = "  Accessory Configurator PRO V4.3", Color3.fromRGB(255, 255, 255)
+title.Text, title.TextColor3 = "  Accessory Configurator PRO V4.2", Color3.fromRGB(255, 255, 255)
 title.Font, title.TextSize, title.TextXAlignment = Enum.Font.SourceSansBold, 14, Enum.TextXAlignment.Left
 title.Parent = main
 
@@ -404,7 +391,7 @@ local function createXYZRow(labelName, yPos, key)
     for i, axis in ipairs({"X", "Y", "Z"}) do
         local box = Instance.new("TextBox")
         box.Size, box.Position, box.BackgroundColor3 = UDim2.new(0, 50, 0, 20), UDim2.new(0, 35 + (i-1)*55, 0, yPos), Color3.fromRGB(40, 40, 40)
-        box.TextColor3, box.Font, box.TextSize, box.Text = "0", Color3.fromRGB(255, 255, 255), Enum.Font.Code, 11
+        box.TextColor3, box.Font, box.TextSize, box.Text = Color3.fromRGB(255, 255, 255), Enum.Font.Code, 11, "0"
         box.Parent = panel
         inputs[key][axis] = box
     end
@@ -594,8 +581,5 @@ end)
 
 populateList()
 if localPlayer.Character then refreshCharacter(localPlayer.Character, currentConfig) end
-
--- Masukkan event karakter sendiri ke sistem tracker
-trackConn(localPlayer.CharacterAdded:Connect(function(char) task.wait(1); refreshCharacter(char, currentConfig) end))
-
+localPlayer.CharacterAdded:Connect(function(char) task.wait(1); refreshCharacter(char, currentConfig) end)
 task.spawn(function() btnLoad.MouseButton1Click:Fire() end)
