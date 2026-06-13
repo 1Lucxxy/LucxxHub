@@ -284,7 +284,7 @@ local function refreshCharacter(char, configTable)
 end
 
 -- ====================================================
--- SISTEM LOCK & DETEKSI CUTSCENE (DUMMY SCANNER)
+-- SISTEM LOCK & DETEKSI CUTSCENE/LOBBY (DUMMY SCANNER)
 -- ====================================================
 local function getTargetPlayer(nameStr)
     nameStr = nameStr:lower()
@@ -305,28 +305,32 @@ for _, p in ipairs(Players:GetPlayers()) do monitorPlayer(p) end
 table.insert(scriptConnections, Players.PlayerAdded:Connect(monitorPlayer))
 table.insert(scriptConnections, Players.PlayerRemoving:Connect(function(p) targetPlayersRegistry[p.UserId] = nil end))
 
--- [NEW] DETEKSI CLONE UNTUK CUTSCENE
-table.insert(scriptConnections, workspace.DescendantAdded:Connect(function(obj)
-    if obj:IsA("Model") and obj:FindFirstChild("Humanoid") then
-        -- Jika ini Dummy untuk diri kita sendiri
-        if obj.Name == localPlayer.Name and obj ~= localPlayer.Character then
-            task.wait(0.2) -- Jeda sebentar membiarkan game me-load dummy
+-- Fungsi untuk mengecek apakah sebuah model adalah Dummy/Clone yang valid
+local function checkAndApplyClone(obj)
+    if obj:IsA("Model") and obj:FindFirstChild("Humanoid") and obj ~= localPlayer.Character then
+        -- Cek apakah ini dummy lobby diri sendiri (Berdasarkan nama umum atau kedekatan dengan kamera)
+        local isSelfClone = (obj.Name == localPlayer.Name) or (obj.Name:find("Menu")) or (obj.Name:find("Lobby"))
+        
+        if isSelfClone then
+            task.wait(0.3) -- Jeda agar game memuat dummy sepenuhnya dulu
             refreshCharacter(obj, currentConfig)
         else
-            -- Jika ini Dummy untuk player yang sedang kita Lock
+            -- Cek apakah ini Dummy untuk target player yang sedang dilock
             local tPlayer = getTargetPlayer(obj.Name)
-            if tPlayer and tPlayer.Name == obj.Name and obj ~= tPlayer.Character then
-                if targetPlayersRegistry[tPlayer.UserId] then
-                    task.wait(0.2)
-                    refreshCharacter(obj, targetPlayersRegistry[tPlayer.UserId])
-                end
+            if tPlayer and obj.Name == tPlayer.Name and targetPlayersRegistry[tPlayer.UserId] then
+                task.wait(0.3)
+                refreshCharacter(obj, targetPlayersRegistry[tPlayer.UserId])
             end
         end
     end
-end))
+end
+
+-- Deteksi Dummy yang masuk ke Workspace ATAU Camera (Lobby Evade biasanya pakai Camera)
+table.insert(scriptConnections, workspace.DescendantAdded:Connect(checkAndApplyClone))
+table.insert(scriptConnections, workspace.CurrentCamera.DescendantAdded:Connect(checkAndApplyClone))
 
 -- ====================================================
--- PEMBUATAN GUI EDITOR (Sama seperti V4.1)
+-- PEMBUATAN GUI EDITOR
 -- ====================================================
 if CoreGui:FindFirstChild("AccessoryEditorUI") then CoreGui.AccessoryEditorUI:Destroy() end
 
@@ -342,7 +346,7 @@ minSquare.BorderSizePixel, minSquare.Visible, minSquare.Draggable, minSquare.Act
 minSquare.Parent = sg
 
 local main = Instance.new("Frame")
-main.Size, main.Position = UDim2.new(0, 420, 0, 300), UDim2.new(0.5, -210, 0.5, -150)
+main.Size, main.Position = UDim2.new(0, 480, 0, 300), UDim2.new(0.5, -240, 0.5, -150)
 main.BackgroundColor3, main.BorderSizePixel = Color3.fromRGB(25, 25, 25), 0
 main.BackgroundTransparency = 0.2
 main.Active, main.Draggable = true, true
@@ -351,7 +355,7 @@ main.Parent = sg
 local title = Instance.new("TextLabel")
 title.Size, title.BackgroundColor3 = UDim2.new(1, 0, 0, 25), Color3.fromRGB(40, 40, 40)
 title.BackgroundTransparency = 0.2
-title.Text, title.TextColor3 = "  Accessory Configurator PRO V4.2", Color3.fromRGB(255, 255, 255)
+title.Text, title.TextColor3 = "  Accessory Configurator PRO V4.3", Color3.fromRGB(255, 255, 255)
 title.Font, title.TextSize, title.TextXAlignment = Enum.Font.SourceSansBold, 14, Enum.TextXAlignment.Left
 title.Parent = main
 
@@ -370,7 +374,7 @@ content.Parent = main
 local listFrame = Instance.new("ScrollingFrame")
 listFrame.Size, listFrame.Position, listFrame.BackgroundColor3 = UDim2.new(0, 130, 1, -10), UDim2.new(0, 5, 0, 5), Color3.fromRGB(20, 20, 20)
 listFrame.BackgroundTransparency = 0.2
-listFrame.BorderSizePixel, listFrame.ScrollBarThickness, listFrame.CanvasSize = UDim2.new(0, 0, 0, 400), 4, UDim2.new(0, 0, 0, 400)
+listFrame.BorderSizePixel, listFrame.ScrollBarThickness, listFrame.CanvasSize = 0, 4, UDim2.new(0, 0, 0, 400)
 listFrame.Parent = content
 local listLayout = Instance.new("UIListLayout")
 listLayout.Padding = UDim.new(0, 2)
@@ -447,6 +451,25 @@ targetBox.Parent = panel
 
 local btnTarget = createBtn("Lock to Player", UDim2.new(0, 160, 0, 190), Color3.fromRGB(180, 20, 50), panel)
 btnTarget.Size = UDim2.new(0, 80, 0, 22)
+
+-- TOMBOL FORCE LOBBY BARU
+local btnForceLobby = createBtn("Force Lobby", UDim2.new(0, 245, 0, 190), Color3.fromRGB(150, 100, 20), panel)
+btnForceLobby.Size = UDim2.new(0, 80, 0, 22)
+
+btnForceLobby.MouseButton1Click:Connect(function()
+    -- Scan semua model di Workspace dan Camera untuk mencari Dummy
+    local function scanAndForce(parentObj)
+        for _, obj in ipairs(parentObj:GetDescendants()) do
+            if obj:IsA("Model") and obj:FindFirstChild("Humanoid") and obj ~= localPlayer.Character then
+                -- Paksa pakaikan config ke semua dummy/clone yang ada di layar
+                refreshCharacter(obj, currentConfig)
+            end
+        end
+    end
+    
+    scanAndForce(workspace.CurrentCamera)
+    scanAndForce(workspace)
+end)
 
 local lblHead = Instance.new("TextLabel")
 lblHead.Size, lblHead.Position = UDim2.new(0, 60, 0, 20), UDim2.new(0, 0, 0, 220)
