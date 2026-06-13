@@ -305,19 +305,22 @@ for _, p in ipairs(Players:GetPlayers()) do monitorPlayer(p) end
 table.insert(scriptConnections, Players.PlayerAdded:Connect(monitorPlayer))
 table.insert(scriptConnections, Players.PlayerRemoving:Connect(function(p) targetPlayersRegistry[p.UserId] = nil end))
 
--- [NEW] DETEKSI CLONE UNTUK CUTSCENE
+-- [NEW] DETEKSI CLONE UNTUK CUTSCENE & LOBBY EVADE
 table.insert(scriptConnections, workspace.DescendantAdded:Connect(function(obj)
     if obj:IsA("Model") and obj:FindFirstChild("Humanoid") then
-        -- Jika ini Dummy untuk diri kita sendiri
-        if obj.Name == localPlayer.Name and obj ~= localPlayer.Character then
-            task.wait(0.2) -- Jeda sebentar membiarkan game me-load dummy
+        -- Tambahkan nama-nama Dummy generik yang sering dipakai di Lobby Evade
+        local isLobbyDummy = (obj.Name == "MenuCharacter" or obj.Name == "LobbyCharacter" or obj.Name == "Player" or obj.Name == "Dummy")
+        
+        -- Jika ini Dummy untuk diri kita sendiri ATAU karakter yang ada di Lobby
+        if (obj.Name == localPlayer.Name or isLobbyDummy) and obj ~= localPlayer.Character then
+            task.wait(0.5) -- Jeda diperpanjang agar Evade selesai memuat part (Head/RightUpperLeg) di Lobby
             refreshCharacter(obj, currentConfig)
         else
             -- Jika ini Dummy untuk player yang sedang kita Lock
             local tPlayer = getTargetPlayer(obj.Name)
             if tPlayer and tPlayer.Name == obj.Name and obj ~= tPlayer.Character then
                 if targetPlayersRegistry[tPlayer.UserId] then
-                    task.wait(0.2)
+                    task.wait(0.5)
                     refreshCharacter(obj, targetPlayersRegistry[tPlayer.UserId])
                 end
             end
