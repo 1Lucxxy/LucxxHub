@@ -463,4 +463,139 @@ btnHeadDefault.Size = UDim2.new(0, 55, 0, 22)
 local btnHeadDeath = createBtn("Death W.", UDim2.new(0, 105, 0, 220), Color3.fromRGB(150, 20, 20), panel)
 btnHeadDeath.Size = UDim2.new(0, 65, 0, 22)
 local btnHeadHeadless = createBtn("Headless", UDim2.new(0, 175, 0, 220), Color3.fromRGB(100, 20, 150), panel)
-btnHeadHeadless.Size = UD
+btnHeadHeadless.Size = UDim2.new(0, 65, 0, 22)
+
+local function changeHead(typeStr)
+    currentConfig._HeadType = typeStr
+    if localPlayer.Character then refreshCharacter(localPlayer.Character, currentConfig) end
+end
+btnHeadDefault.MouseButton1Click:Connect(function() changeHead("Default") end)
+btnHeadDeath.MouseButton1Click:Connect(function() changeHead("Death Walker") end)
+btnHeadHeadless.MouseButton1Click:Connect(function() changeHead("UGC Headless") end)
+
+btnTarget.MouseButton1Click:Connect(function()
+    local p = getTargetPlayer(targetBox.Text)
+    if p then
+        targetPlayersRegistry[p.UserId] = deepCopy(currentConfig)
+        if p.Character then refreshCharacter(p.Character, targetPlayersRegistry[p.UserId]) end
+        
+        targetBox.Text = "Locked: " .. p.Name
+        task.delay(2, function() if targetBox.Text:find("Locked:") then targetBox.Text = "" end end)
+    else
+        targetBox.Text = "Player Not Found!"
+        task.delay(2, function() if targetBox.Text == "Player Not Found!" then targetBox.Text = "" end end)
+    end
+end)
+
+local function updateUIText()
+    if not selectedAccessory then return end
+    activeLabel.Text = "Editing: " .. selectedAccessory
+
+    local cfg = currentConfig[selectedAccessory]
+    if cfg then
+        for i, axis in ipairs({"X", "Y", "Z"}) do
+            inputs["pos"][axis].Text = tostring(cfg.pos[i])
+            inputs["rot"][axis].Text = tostring(cfg.rot[i])
+        end
+        inputs.scale.Text = tostring(cfg.scale)
+        
+        if cfg.enabled then
+            btnToggle.Text = "Status: ON"
+            btnToggle.BackgroundColor3 = Color3.fromRGB(46, 125, 50)
+        else
+            btnToggle.Text = "Status: OFF"
+            btnToggle.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+        end
+    end
+end
+
+btnToggle.MouseButton1Click:Connect(function()
+    if not selectedAccessory then return end
+    currentConfig[selectedAccessory].enabled = not currentConfig[selectedAccessory].enabled
+    updateUIText()
+    
+    if localPlayer.Character then
+        if currentConfig[selectedAccessory].enabled then
+            wearAccessory(localPlayer.Character, selectedAccessory, accessoryIds[selectedAccessory], currentConfig)
+        else
+            if spawnedAccessories[localPlayer.Character] and spawnedAccessories[localPlayer.Character][selectedAccessory] then
+                spawnedAccessories[localPlayer.Character][selectedAccessory]:Destroy()
+                spawnedAccessories[localPlayer.Character][selectedAccessory] = nil
+            end
+        end
+    end
+end)
+
+btnApply.MouseButton1Click:Connect(function()
+    if not selectedAccessory then return end
+    currentConfig[selectedAccessory].pos = {tonumber(inputs.pos.X.Text) or 0, tonumber(inputs.pos.Y.Text) or 0, tonumber(inputs.pos.Z.Text) or 0}
+    currentConfig[selectedAccessory].rot = {tonumber(inputs.rot.X.Text) or 0, tonumber(inputs.rot.Y.Text) or 0, tonumber(inputs.rot.Z.Text) or 0}
+    currentConfig[selectedAccessory].scale = tonumber(inputs.scale.Text) or 1
+    
+    if localPlayer.Character then applyConfigToSpecific(localPlayer.Character, selectedAccessory, currentConfig) end
+end)
+
+btnReset.MouseButton1Click:Connect(function()
+    if not selectedAccessory then return end
+    currentConfig[selectedAccessory] = { pos = {0,0,0}, rot = {0,0,0}, scale = 1, enabled = true }
+    updateUIText()
+    if localPlayer.Character then applyConfigToSpecific(localPlayer.Character, selectedAccessory, currentConfig) end
+end)
+
+btnSave.MouseButton1Click:Connect(function()
+    if writefile then
+        local success, encoded = pcall(function() return HttpService:JSONEncode(currentConfig) end)
+        if success then writefile(FILE_NAME, encoded) end
+    end
+end)
+
+btnLoad.MouseButton1Click:Connect(function()
+    if readfile and isfile and isfile(FILE_NAME) then
+        local suc, c = pcall(function() return readfile(FILE_NAME) end)
+        if suc then
+            local ds, dec = pcall(function() return HttpService:JSONDecode(c) end)
+            if ds then 
+                for k, v in pairs(dec) do currentConfig[k] = v end 
+                for n, _ in pairs(accessoryIds) do initConfig(n) end
+            end
+        end
+    end
+    updateUIText()
+    if localPlayer.Character then refreshCharacter(localPlayer.Character, currentConfig) end
+end)
+
+local function populateList()
+    for _, child in ipairs(listFrame:GetChildren()) do if child:IsA("TextButton") then child:Destroy() end end
+    for name, _ in pairs(accessoryIds) do
+        local btn = Instance.new("TextButton")
+        btn.Size, btn.BackgroundColor3 = UDim2.new(1, 0, 0, 24), Color3.fromRGB(50, 50, 50)
+        btn.BackgroundTransparency = 0.2
+        btn.Text, btn.TextColor3 = name, Color3.fromRGB(255, 255, 255)
+        btn.Font, btn.TextSize, btn.BorderSizePixel = Enum.Font.SourceSans, 12, 0
+        btn.Parent = listFrame
+        btn.MouseButton1Click:Connect(function() selectedAccessory = name; updateUIText() end)
+    end
+end
+
+btnAddId.MouseButton1Click:Connect(function()
+    local id = tonumber(addIdBox.Text)
+    if id then
+        addIdBox.Text = "Loading..."
+        local success, info = pcall(function() return MarketplaceService:GetProductInfo(id) end)
+        local newName = success and info.Name or ("Custom_" .. id)
+        accessoryIds[newName] = id
+        initConfig(newName)
+        populateList()
+        addIdBox.Text = ""
+        addIdBox.PlaceholderText = "Added: " .. newName
+        if localPlayer.Character then wearAccessory(localPlayer.Character, newName, id, currentConfig) end
+    end
+end)
+
+populateList()
+if localPlayer.Character then refreshCharacter(localPlayer.Character, currentConfig) end
+
+-- Masukkan event karakter sendiri ke sistem tracker
+trackConn(localPlayer.CharacterAdded:Connect(function(char) task.wait(1); refreshCharacter(char, currentConfig) end))
+
+task.spawn(function() btnLoad.MouseButton1Click:Fire() end)
