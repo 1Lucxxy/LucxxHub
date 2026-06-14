@@ -42,9 +42,9 @@ local accessoryIds = {
     ["Fiery Horns"] = 215718515
 }
 
--- ID Khusus Model Kepala (Update ID Deathwalker)
+-- ID Khusus Model Kepala (FIXED: Menggunakan ID Akurat dari Kamu)
 local HEAD_IDS = {
-    ["Death Walker"] = 16580493236, -- ID Katalog Asli Deathwalker Head
+    ["Death Walker"] = 99223542650102, -- ID Kepala Deathwalker (Mata Doang)
     ["UGC Headless"] = 15093053680
 }
 
@@ -90,7 +90,7 @@ local function wearHeadModel(char, headType)
             end
         end
 
-        -- Support untuk Dynamic Head yang langsung berupa MeshPart
+        -- Fleksibel mengecek apakah aset berupa Part langsung atau Model ber-Handle
         local handle
         if result:IsA("BasePart") then
             handle = result
@@ -111,7 +111,7 @@ local function wearHeadModel(char, headType)
                 if charAttachment then baseC0, baseC1 = charAttachment.CFrame, attachment.CFrame end
             end
             
-            -- Jika result adalah part itu sendiri, kita jadikan model agar struktur rapi
+            -- Jika berupa BasePart murni, dibungkus Model agar rapi di Workspace
             if result:IsA("BasePart") then
                 local wrapModel = Instance.new("Model")
                 wrapModel.Name = "CustomHeadModel"
@@ -322,7 +322,7 @@ local function refreshCharacter(char, configTable)
 end
 
 -- ====================================================
--- SISTEM LOCK & DETEKSI CUTSCENE
+-- SISTEM LOCK & DETEKSI CUTSCENE / CLONE
 -- ====================================================
 local function getTargetPlayer(nameStr)
     nameStr = nameStr:lower()
