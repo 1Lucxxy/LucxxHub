@@ -13,11 +13,23 @@ local scriptConnections = {} -- Tabel untuk menyimpan semua koneksi event
 local Players = game:GetService("Players")
 local HttpService = game:GetService("HttpService")
 local MarketplaceService = game:GetService("MarketplaceService")
-local CoreGui = game:GetService("CoreGui")
-local RunService = game:GetService("RunService") -- Ditambahkan untuk mengunci transparency
+local RunService = game:GetService("RunService")
 
 local localPlayer = Players.LocalPlayer
 local FILE_NAME = "AccessoryCustomConfigV4_2.json"
+
+-- [PERBAIKAN] Menentukan tempat GUI yang aman (Support executor PC & Mobile)
+local GUI_PARENT
+if gethui then
+    GUI_PARENT = gethui()
+else
+    local success, cg = pcall(function() return game:GetService("CoreGui") end)
+    if success and cg then
+        GUI_PARENT = cg
+    else
+        GUI_PARENT = localPlayer:WaitForChild("PlayerGui")
+    end
+end
 
 -- Daftar Aksesoris Default
 local accessoryIds = {
@@ -134,7 +146,7 @@ local function applyHeadState(char, configTable)
 end
 
 -- ====================================================
--- FUNGSI AKSESORIS UMUM & KORBLOX (R6 & R15)
+-- FUNGSI AKSESORIS UMUM & KORBLOX
 -- ====================================================
 local function applyConfigToSpecific(char, name, configTable)
     local acc = spawnedAccessories[char] and spawnedAccessories[char][name]
@@ -260,9 +272,6 @@ local function applyKorblox(char)
     end
 end
 
--- ====================================================
--- SISTEM REFRESH KARAKTER
--- ====================================================
 local function refreshCharacter(char, configTable)
     if not char then return end
     local cfg = configTable or currentConfig
@@ -275,9 +284,7 @@ local function refreshCharacter(char, configTable)
     end
     
     for name, id in pairs(accessoryIds) do
-        if cfg[name] and cfg[name].enabled then
-            wearAccessory(char, name, id, cfg)
-        end
+        if cfg[name] and cfg[name].enabled then wearAccessory(char, name, id, cfg) end
     end
     
     applyKorblox(char)
@@ -285,7 +292,7 @@ local function refreshCharacter(char, configTable)
 end
 
 -- ====================================================
--- SISTEM LOCK & DETEKSI CUTSCENE (DIPERBARUI)
+-- SISTEM LOCK & DETEKSI CUTSCENE
 -- ====================================================
 local function getTargetPlayer(nameStr)
     nameStr = nameStr:lower()
@@ -306,17 +313,14 @@ for _, p in ipairs(Players:GetPlayers()) do monitorPlayer(p) end
 table.insert(scriptConnections, Players.PlayerAdded:Connect(monitorPlayer))
 table.insert(scriptConnections, Players.PlayerRemoving:Connect(function(p) targetPlayersRegistry[p.UserId] = nil end))
 
--- [UPDATED] DETEKSI CLONE UNTUK CUTSCENE DENGAN CEK PAKAIAN
 table.insert(scriptConnections, workspace.DescendantAdded:Connect(function(obj)
     if obj:IsA("Model") and obj:FindFirstChild("Humanoid") then
         task.wait(0.2)
         local isLocalClone = false
         
-        -- Deteksi Berdasarkan Nama
         if obj.Name == localPlayer.Name and obj ~= localPlayer.Character then
             isLocalClone = true
         else
-            -- Deteksi Berdasarkan Pakaian (Berguna jika nama dummy adalah "Clone" atau "CutsceneRig")
             local myShirt = localPlayer.Character and localPlayer.Character:FindFirstChildOfClass("Shirt")
             local cloneShirt = obj:FindFirstChildOfClass("Shirt")
             if myShirt and cloneShirt and myShirt.ShirtTemplate == cloneShirt.ShirtTemplate then
@@ -327,7 +331,6 @@ table.insert(scriptConnections, workspace.DescendantAdded:Connect(function(obj)
         if isLocalClone then
             refreshCharacter(obj, currentConfig)
         else
-            -- Target Player Lock
             local tPlayer = getTargetPlayer(obj.Name)
             if tPlayer and tPlayer.Name == obj.Name and obj ~= tPlayer.Character then
                 if targetPlayersRegistry[tPlayer.UserId] then
@@ -338,12 +341,10 @@ table.insert(scriptConnections, workspace.DescendantAdded:Connect(function(obj)
     end
 end))
 
--- [NEW] RUNSERVICE: MENGUNCI TRANSPARANSI UNTUK MENCEGAH SERVER RESET
 table.insert(scriptConnections, RunService.Stepped:Connect(function()
     local function enforceTransparency(char, config)
         if not char then return end
         
-        -- Kunci Transparansi Kaki Korblox
         local fakeLeg = char:FindFirstChild("FakeKorbloxLeg")
         local rUpper = char:FindFirstChild("RightUpperLeg")
         if fakeLeg and rUpper and rUpper.Transparency ~= 1 then
@@ -354,7 +355,6 @@ table.insert(scriptConnections, RunService.Stepped:Connect(function()
             if rFoot then rFoot.Transparency = 1 end
         end
         
-        -- Kunci Transparansi Kepala (Headless dll)
         if config and config._HeadType ~= "Default" then
             local head = char:FindFirstChild("Head")
             local customHead = char:FindFirstChild("CustomHeadModel")
@@ -374,13 +374,14 @@ table.insert(scriptConnections, RunService.Stepped:Connect(function()
 end))
 
 -- ====================================================
--- PEMBUATAN GUI EDITOR
+-- PEMBUATAN GUI EDITOR (DIPERBAIKAN)
 -- ====================================================
-if CoreGui:FindFirstChild("AccessoryEditorUI") then CoreGui.AccessoryEditorUI:Destroy() end
+if GUI_PARENT:FindFirstChild("AccessoryEditorUI") then GUI_PARENT.AccessoryEditorUI:Destroy() end
 
 local sg = Instance.new("ScreenGui")
 sg.Name = "AccessoryEditorUI"
-sg.Parent = CoreGui
+sg.ResetOnSpawn = false -- [PENTING] Mencegah UI hilang saat mati
+sg.Parent = GUI_PARENT
 
 local minSquare = Instance.new("TextButton")
 minSquare.Size, minSquare.Position = UDim2.new(0, 40, 0, 40), UDim2.new(0.5, -20, 0, 20)
@@ -646,34 +647,28 @@ task.spawn(function() btnLoad.MouseButton1Click:Fire() end)
 -- MENDAFTARKAN FUNGSI CLEANUP UNTUK EKSEKUSI BERIKUTNYA
 -- ====================================================
 getgenv()._LucxxHubCleanup = function()
-    -- 1. Putuskan semua koneksi event agar tidak lag/bertumpuk
     for _, conn in ipairs(scriptConnections) do
         if conn.Connected then conn:Disconnect() end
     end
     table.clear(scriptConnections)
 
-    -- 2. Hapus UI
-    if CoreGui:FindFirstChild("AccessoryEditorUI") then
-        CoreGui.AccessoryEditorUI:Destroy()
+    if GUI_PARENT:FindFirstChild("AccessoryEditorUI") then
+        GUI_PARENT.AccessoryEditorUI:Destroy()
     end
 
-    -- 3. Hapus Aksesoris yang sudah dimunculkan script ini dari karakter
     for char, accs in pairs(spawnedAccessories) do
         for _, acc in pairs(accs) do
             if acc and acc.Parent then acc:Destroy() end
         end
     end
     
-    -- 4. Kembalikan kondisi karakter ke normal
     for _, p in ipairs(Players:GetPlayers()) do
         if p.Character then
             local char = p.Character
             
-            -- Hapus Custom Head
             local customHead = char:FindFirstChild("CustomHeadModel")
             if customHead then customHead:Destroy() end
             
-            -- Kembalikan Kepala Original
             local origHead = char:FindFirstChild("Head")
             if origHead then 
                 origHead.Transparency = 0
@@ -683,13 +678,11 @@ getgenv()._LucxxHubCleanup = function()
                 if mesh and mesh.MeshType == Enum.MeshType.Head then mesh.Scale = Vector3.new(1.25, 1.25, 1.25) end
             end
             
-            -- Hapus Fake Korblox & Kembalikan Kaki Original (Khusus R15 / R6 partial)
             local fakeLeg = char:FindFirstChild("FakeKorbloxLeg")
             if fakeLeg then fakeLeg:Destroy() end
             
             local rLeg = char:FindFirstChild("Right Leg")
             if rLeg then
-                -- Hapus mesh korblox di R6 jika ada
                 local kMesh = rLeg:FindFirstChild("LucxxKorbloxMesh")
                 if kMesh then kMesh:Destroy() end
             end
