@@ -18,7 +18,7 @@ local RunService = game:GetService("RunService")
 local localPlayer = Players.LocalPlayer
 local FILE_NAME = "AccessoryCustomConfigV4_2.json"
 
--- [PERBAIKAN] Menentukan tempat GUI yang aman (Support executor PC & Mobile)
+-- Menentukan tempat GUI yang aman (Support executor PC & Mobile)
 local GUI_PARENT
 if gethui then
     GUI_PARENT = gethui()
@@ -42,9 +42,9 @@ local accessoryIds = {
     ["Fiery Horns"] = 215718515
 }
 
--- ID Khusus Model Kepala
+-- ID Khusus Model Kepala (FIXED: Menggunakan ID Akurat dari Kamu)
 local HEAD_IDS = {
-    ["Death Walker"] = 99223542650102,
+    ["Death Walker"] = 99223542650102, -- ID Kepala Deathwalker (Mata Doang)
     ["UGC Headless"] = 15093053680
 }
 
@@ -90,7 +90,14 @@ local function wearHeadModel(char, headType)
             end
         end
 
-        local handle = result:FindFirstChild("Handle") or result:FindFirstChildOfClass("Part") or result:FindFirstChildOfClass("MeshPart")
+        -- Fleksibel mengecek apakah aset berupa Part langsung atau Model ber-Handle
+        local handle
+        if result:IsA("BasePart") then
+            handle = result
+        else
+            handle = result:FindFirstChild("Handle") or result:FindFirstChildOfClass("Part") or result:FindFirstChildOfClass("MeshPart")
+        end
+
         if handle then
             handle.Transparency = 0
             local targetPart = char:WaitForChild("Head", 3)
@@ -104,8 +111,16 @@ local function wearHeadModel(char, headType)
                 if charAttachment then baseC0, baseC1 = charAttachment.CFrame, attachment.CFrame end
             end
             
-            result.Name = "CustomHeadModel"
-            result.Parent = char
+            -- Jika berupa BasePart murni, dibungkus Model agar rapi di Workspace
+            if result:IsA("BasePart") then
+                local wrapModel = Instance.new("Model")
+                wrapModel.Name = "CustomHeadModel"
+                result.Parent = wrapModel
+                wrapModel.Parent = char
+            else
+                result.Name = "CustomHeadModel"
+                result.Parent = char
+            end
             
             local weld = Instance.new("Weld")
             weld.Name = "HeadWeld"
@@ -155,7 +170,7 @@ local function applyConfigToSpecific(char, name, configTable)
     
     if not cfg or not acc or not base then return end
     
-    local handle = acc:FindFirstChild("Handle") or acc:FindFirstChildOfClass("Part") or acc:FindFirstChildOfClass("MeshPart")
+    local handle = acc:IsA("BasePart") and acc or acc:FindFirstChild("Handle") or acc:FindFirstChildOfClass("Part") or acc:FindFirstChildOfClass("MeshPart")
     if not handle then return end
     
     local weld = handle:FindFirstChild("ManualWeld")
@@ -189,7 +204,13 @@ local function wearAccessory(char, name, assetId, configTable)
             end
         end
 
-        local handle = result:FindFirstChild("Handle") or result:FindFirstChildOfClass("Part") or result:FindFirstChildOfClass("MeshPart")
+        local handle
+        if result:IsA("BasePart") then
+            handle = result
+        else
+            handle = result:FindFirstChild("Handle") or result:FindFirstChildOfClass("Part") or result:FindFirstChildOfClass("MeshPart")
+        end
+
         if handle then
             handle.Transparency = 0
             local attachment = handle:FindFirstChildOfClass("Attachment")
@@ -205,7 +226,17 @@ local function wearAccessory(char, name, assetId, configTable)
             end
             
             baseCFrames[char][name] = {C0 = baseC0, C1 = baseC1}
-            result.Parent = char
+            
+            if result:IsA("BasePart") then
+                local wrapModel = Instance.new("Model")
+                wrapModel.Name = name .. "_Model"
+                result.Parent = wrapModel
+                wrapModel.Parent = char
+                spawnedAccessories[char][name] = wrapModel
+            else
+                result.Parent = char
+                spawnedAccessories[char][name] = result
+            end
             
             local weld = Instance.new("Weld")
             weld.Name = "ManualWeld"
@@ -214,7 +245,6 @@ local function wearAccessory(char, name, assetId, configTable)
             weld.Archivable = true
             weld.Parent = handle
             
-            spawnedAccessories[char][name] = result
             applyConfigToSpecific(char, name, configTable)
         end
     end
@@ -292,7 +322,7 @@ local function refreshCharacter(char, configTable)
 end
 
 -- ====================================================
--- SISTEM LOCK & DETEKSI CUTSCENE
+-- SISTEM LOCK & DETEKSI CUTSCENE / CLONE
 -- ====================================================
 local function getTargetPlayer(nameStr)
     nameStr = nameStr:lower()
@@ -374,13 +404,13 @@ table.insert(scriptConnections, RunService.Stepped:Connect(function()
 end))
 
 -- ====================================================
--- PEMBUATAN GUI EDITOR (DIPERBAIKAN)
+-- PEMBUATAN GUI EDITOR
 -- ====================================================
 if GUI_PARENT:FindFirstChild("AccessoryEditorUI") then GUI_PARENT.AccessoryEditorUI:Destroy() end
 
 local sg = Instance.new("ScreenGui")
 sg.Name = "AccessoryEditorUI"
-sg.ResetOnSpawn = false -- [PENTING] Mencegah UI hilang saat mati
+sg.ResetOnSpawn = false 
 sg.Parent = GUI_PARENT
 
 local minSquare = Instance.new("TextButton")
@@ -514,6 +544,14 @@ btnHeadHeadless.Size = UDim2.new(0, 65, 0, 22)
 local function changeHead(typeStr)
     currentConfig._HeadType = typeStr
     if localPlayer.Character then refreshCharacter(localPlayer.Character, currentConfig) end
+    
+    for userId, config in pairs(targetPlayersRegistry) do
+        local p = Players:GetPlayerByUserId(userId)
+        if p and p.Character then
+            config._HeadType = typeStr
+            refreshCharacter(p.Character, config)
+        end
+    end
 end
 btnHeadDefault.MouseButton1Click:Connect(function() changeHead("Default") end)
 btnHeadDeath.MouseButton1Click:Connect(function() changeHead("Death Walker") end)
@@ -570,6 +608,21 @@ btnToggle.MouseButton1Click:Connect(function()
             end
         end
     end
+
+    for userId, config in pairs(targetPlayersRegistry) do
+        local p = Players:GetPlayerByUserId(userId)
+        if p and p.Character then
+            config[selectedAccessory].enabled = currentConfig[selectedAccessory].enabled
+            if config[selectedAccessory].enabled then
+                wearAccessory(p.Character, selectedAccessory, accessoryIds[selectedAccessory], config)
+            else
+                if spawnedAccessories[p.Character] and spawnedAccessories[p.Character][selectedAccessory] then
+                    spawnedAccessories[p.Character][selectedAccessory]:Destroy()
+                    spawnedAccessories[p.Character][selectedAccessory] = nil
+                end
+            end
+        end
+    end
 end)
 
 btnApply.MouseButton1Click:Connect(function()
@@ -579,13 +632,32 @@ btnApply.MouseButton1Click:Connect(function()
     currentConfig[selectedAccessory].scale = tonumber(inputs.scale.Text) or 1
     
     if localPlayer.Character then applyConfigToSpecific(localPlayer.Character, selectedAccessory, currentConfig) end
+
+    for userId, config in pairs(targetPlayersRegistry) do
+        local p = Players:GetPlayerByUserId(userId)
+        if p and p.Character then
+            config[selectedAccessory].pos = deepCopy(currentConfig[selectedAccessory].pos)
+            config[selectedAccessory].rot = deepCopy(currentConfig[selectedAccessory].rot)
+            config[selectedAccessory].scale = currentConfig[selectedAccessory].scale
+            applyConfigToSpecific(p.Character, selectedAccessory, config)
+        end
+    end
 end)
 
 btnReset.MouseButton1Click:Connect(function()
     if not selectedAccessory then return end
     currentConfig[selectedAccessory] = { pos = {0,0,0}, rot = {0,0,0}, scale = 1, enabled = true }
     updateUIText()
+    
     if localPlayer.Character then applyConfigToSpecific(localPlayer.Character, selectedAccessory, currentConfig) end
+
+    for userId, config in pairs(targetPlayersRegistry) do
+        local p = Players:GetPlayerByUserId(userId)
+        if p and p.Character then
+            config[selectedAccessory] = deepCopy(currentConfig[selectedAccessory])
+            applyConfigToSpecific(p.Character, selectedAccessory, config)
+        end
+    end
 end)
 
 btnSave.MouseButton1Click:Connect(function()
