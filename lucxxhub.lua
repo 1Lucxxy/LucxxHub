@@ -397,6 +397,60 @@ end
 -- ====================================================
 local AccDropdown -- Deklarasi awal agar bisa di-refresh
 
+Tabs.Player:Paragraph({ Title = "------------", Content = "Masukkan ID Baju, Celana, Wajah, atau Aksesoris." })
+
+Tabs.Player:Input({
+    Title = "Custom Catalog ID",
+    Placeholder = "Ketik ID Asset di sini...",
+    Text = "Ketik ID Asset di sini...",
+    Callback = function(Text) 
+        local newCatalogId = tonumber(Text)
+        if not newCatalogId then return end
+
+        local success, info = pcall(function() return MarketplaceService:GetProductInfo(newCatalogId) end)
+        local newName = success and info.Name or ("Custom_" .. newCatalogId)
+        
+        local objSuccess, objects = pcall(function() return game:GetObjects("rbxassetid://" .. newCatalogId) end)
+        if objSuccess and objects and objects[1] then
+            local obj = objects[1]
+            local char = localPlayer.Character
+            
+            -- Jika itu adalah pakaian (Baju/Celana/T-Shirt)
+            if obj:IsA("Shirt") or obj:IsA("Pants") or obj:IsA("ShirtGraphic") then
+                if char then
+                    for _, v in ipairs(char:GetChildren()) do
+                        if v.ClassName == obj.ClassName then v:Destroy() end
+                    end
+                    obj.Parent = char
+                end
+                WindUI:Notify({ Title = "Applied", Content = "Pakaian diterapkan: " .. newName, Duration = 3 })
+            
+            -- Jika itu adalah Wajah (Decal)
+            elseif obj:IsA("Decal") then
+                if char and char:FindFirstChild("Head") then
+                    for _, v in ipairs(char.Head:GetChildren()) do
+                        if v:IsA("Decal") then v:Destroy() end
+                    end
+                    obj.Parent = char.Head
+                end
+                WindUI:Notify({ Title = "Applied", Content = "Wajah diterapkan: " .. newName, Duration = 3 })
+                
+            -- Jika itu adalah Aksesoris atau Model (Topi, Rambut, Sayap, dsb)
+            else
+                accessoryIds[newName] = newCatalogId
+                initConfig(newName)
+                if AccDropdown then AccDropdown:Refresh(getAccessoryNames()) end
+                
+                WindUI:Notify({ Title = "Accessory Added", Content = newName .. " ditambahkan ke sistem Edit!", Duration = 3 })
+                
+                if char then wearAccessory(char, newName, newCatalogId, currentConfig) end
+            end
+        else
+            WindUI:Notify({ Title = "Error", Content = "ID Tidak Valid atau item Copylocked!", Duration = 2 })
+        end
+    end
+})
+
 Tabs.Player:Paragraph({ Title = " ", Content = "Atur posisi aksesoris yang sedang dipakai." })
 
 AccDropdown = Tabs.Player:Dropdown({
@@ -547,60 +601,6 @@ Tabs.Player:Button({
             WindUI:Notify({ Title = "Terkunci", Content = "Berhasil menargetkan " .. p.Name, Duration = 3 })
         else
             WindUI:Notify({ Title = "Error", Content = "Pemain tidak ditemukan!", Duration = 3 })
-        end
-    end
-})
-
-Tabs.Player:Paragraph({ Title = " ", Content = "Masukkan ID Baju, Celana, Wajah, atau Aksesoris." })
-
-Tabs.Player:Input({
-    Title = "Custom Catalog ID",
-    Placeholder = "Ketik ID Asset di sini...",
-    Text = "Ketik ID Asset di sini...",
-    Callback = function(Text) 
-        local newCatalogId = tonumber(Text)
-        if not newCatalogId then return end
-
-        local success, info = pcall(function() return MarketplaceService:GetProductInfo(newCatalogId) end)
-        local newName = success and info.Name or ("Custom_" .. newCatalogId)
-        
-        local objSuccess, objects = pcall(function() return game:GetObjects("rbxassetid://" .. newCatalogId) end)
-        if objSuccess and objects and objects[1] then
-            local obj = objects[1]
-            local char = localPlayer.Character
-            
-            -- Jika itu adalah pakaian (Baju/Celana/T-Shirt)
-            if obj:IsA("Shirt") or obj:IsA("Pants") or obj:IsA("ShirtGraphic") then
-                if char then
-                    for _, v in ipairs(char:GetChildren()) do
-                        if v.ClassName == obj.ClassName then v:Destroy() end
-                    end
-                    obj.Parent = char
-                end
-                WindUI:Notify({ Title = "Applied", Content = "Pakaian diterapkan: " .. newName, Duration = 3 })
-            
-            -- Jika itu adalah Wajah (Decal)
-            elseif obj:IsA("Decal") then
-                if char and char:FindFirstChild("Head") then
-                    for _, v in ipairs(char.Head:GetChildren()) do
-                        if v:IsA("Decal") then v:Destroy() end
-                    end
-                    obj.Parent = char.Head
-                end
-                WindUI:Notify({ Title = "Applied", Content = "Wajah diterapkan: " .. newName, Duration = 3 })
-                
-            -- Jika itu adalah Aksesoris atau Model (Topi, Rambut, Sayap, dsb)
-            else
-                accessoryIds[newName] = newCatalogId
-                initConfig(newName)
-                if AccDropdown then AccDropdown:Refresh(getAccessoryNames()) end
-                
-                WindUI:Notify({ Title = "Accessory Added", Content = newName .. " ditambahkan ke sistem Edit!", Duration = 3 })
-                
-                if char then wearAccessory(char, newName, newCatalogId, currentConfig) end
-            end
-        else
-            WindUI:Notify({ Title = "Error", Content = "ID Tidak Valid atau item Copylocked!", Duration = 2 })
         end
     end
 })
