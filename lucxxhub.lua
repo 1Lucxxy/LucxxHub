@@ -42,9 +42,9 @@ local accessoryIds = {
     ["Fiery Horns"] = 215718515
 }
 
--- ID Khusus Model Kepala (FIXED: Menggunakan ID Akurat dari Kamu)
+-- ID Khusus Model Kepala
 local HEAD_IDS = {
-    ["Death Walker"] = 99223542650102, -- ID Kepala Deathwalker (Mata Doang)
+    ["Death Walker"] = 99223542650102,
     ["UGC Headless"] = 15093053680
 }
 
@@ -65,12 +65,15 @@ local function deepCopy(t)
     return res
 end
 
-local function initConfig(name)
+-- FIX: Menambahkan parameter ID agar AssetId ikut tersimpan di Config
+local function initConfig(name, id)
     if not currentConfig[name] then
-        currentConfig[name] = { pos = {0,0,0}, rot = {0,0,0}, scale = 1, enabled = true }
+        currentConfig[name] = { pos = {0,0,0}, rot = {0,0,0}, scale = 1, enabled = true, assetId = id }
+    elseif id and not currentConfig[name].assetId then
+        currentConfig[name].assetId = id
     end
 end
-for name, _ in pairs(accessoryIds) do initConfig(name) end
+for name, id in pairs(accessoryIds) do initConfig(name, id) end
 
 -- ====================================================
 -- FUNGSI KEPALA (HEAD)
@@ -90,7 +93,6 @@ local function wearHeadModel(char, headType)
             end
         end
 
-        -- Fleksibel mengecek apakah aset berupa Part langsung atau Model ber-Handle
         local handle
         if result:IsA("BasePart") then
             handle = result
@@ -111,7 +113,6 @@ local function wearHeadModel(char, headType)
                 if charAttachment then baseC0, baseC1 = charAttachment.CFrame, attachment.CFrame end
             end
             
-            -- Jika berupa BasePart murni, dibungkus Model agar rapi di Workspace
             if result:IsA("BasePart") then
                 local wrapModel = Instance.new("Model")
                 wrapModel.Name = "CustomHeadModel"
@@ -371,9 +372,32 @@ table.insert(scriptConnections, workspace.DescendantAdded:Connect(function(obj)
     end
 end))
 
+-- FIX: Menyembunyikan Aksesoris Custom & Custom Head saat mode First Person
 table.insert(scriptConnections, RunService.Stepped:Connect(function()
     local function enforceTransparency(char, config)
         if not char then return end
+        
+        local head = char:FindFirstChild("Head")
+        local ltm = head and head.LocalTransparencyModifier or 0
+        
+        if spawnedAccessories[char] then
+            for _, acc in pairs(spawnedAccessories[char]) do
+                for _, v in ipairs(acc:GetDescendants()) do
+                    if v:IsA("BasePart") then
+                        v.LocalTransparencyModifier = ltm
+                    end
+                end
+            end
+        end
+
+        local customHead = char:FindFirstChild("CustomHeadModel")
+        if customHead then
+            for _, v in ipairs(customHead:GetDescendants()) do
+                if v:IsA("BasePart") then
+                    v.LocalTransparencyModifier = ltm
+                end
+            end
+        end
         
         local fakeLeg = char:FindFirstChild("FakeKorbloxLeg")
         local rUpper = char:FindFirstChild("RightUpperLeg")
@@ -386,8 +410,6 @@ table.insert(scriptConnections, RunService.Stepped:Connect(function()
         end
         
         if config and config._HeadType ~= "Default" then
-            local head = char:FindFirstChild("Head")
-            local customHead = char:FindFirstChild("CustomHeadModel")
             if head and customHead and head.Transparency ~= 1 then
                 head.Transparency = 1
                 local face = head:FindFirstChildOfClass("Decal")
@@ -644,22 +666,6 @@ btnApply.MouseButton1Click:Connect(function()
     end
 end)
 
-btnReset.MouseButton1Click:Connect(function()
-    if not selectedAccessory then return end
-    currentConfig[selectedAccessory] = { pos = {0,0,0}, rot = {0,0,0}, scale = 1, enabled = true }
-    updateUIText()
-    
-    if localPlayer.Character then applyConfigToSpecific(localPlayer.Character, selectedAccessory, currentConfig) end
-
-    for userId, config in pairs(targetPlayersRegistry) do
-        local p = Players:GetPlayerByUserId(userId)
-        if p and p.Character then
-            config[selectedAccessory] = deepCopy(currentConfig[selectedAccessory])
-            applyConfigToSpecific(p.Character, selectedAccessory, config)
-        end
-    end
-end)
-
 btnSave.MouseButton1Click:Connect(function()
     if writefile then
         local success, encoded = pcall(function() return HttpService:JSONEncode(currentConfig) end)
@@ -667,21 +673,9 @@ btnSave.MouseButton1Click:Connect(function()
     end
 end)
 
-btnLoad.MouseButton1Click:Connect(function()
-    if readfile and isfile and isfile(FILE_NAME) then
-        local suc, c = pcall(function() return readfile(FILE_NAME) end)
-        if suc then
-            local ds, dec = pcall(function() return HttpService:JSONDecode(c) end)
-            if ds then 
-                for k, v in pairs(dec) do currentConfig[k] = v end 
-                for n, _ in pairs(accessoryIds) do initConfig(n) end
-            end
-        end
-    end
-    updateUIText()
-    if localPlayer.Character then refreshCharacter(localPlayer.Character, currentConfig) end
-end)
-
+-- ====================================================
+-- FUNGSI POPULATE LIST
+-- ====================================================
 local function populateList()
     for _, child in ipairs(listFrame:GetChildren()) do if child:IsA("TextButton") then child:Destroy() end end
     for name, _ in pairs(accessoryIds) do
@@ -695,6 +689,30 @@ local function populateList()
     end
 end
 
+-- FIX: Menyesuaikan btnLoad agar bisa load Custom ID yang sebelumnya tersimpan
+btnLoad.MouseButton1Click:Connect(function()
+    if readfile and isfile and isfile(FILE_NAME) then
+        local suc, c = pcall(function() return readfile(FILE_NAME) end)
+        if suc then
+            local ds, dec = pcall(function() return HttpService:JSONDecode(c) end)
+            if ds then 
+                for k, v in pairs(dec) do 
+                    currentConfig[k] = v 
+                    -- Jika ada custom ID di config, tambahkan kembali ke accessoryIds
+                    if type(v) == "table" and v.assetId then
+                        accessoryIds[k] = v.assetId
+                    end
+                end 
+                for n, id in pairs(accessoryIds) do initConfig(n, id) end
+                populateList() -- Perbarui UI agar custom ID muncul di list
+            end
+        end
+    end
+    updateUIText()
+    if localPlayer.Character then refreshCharacter(localPlayer.Character, currentConfig) end
+end)
+
+-- FIX: btnAddId menggunakan initConfig dengan parameter ID
 btnAddId.MouseButton1Click:Connect(function()
     local id = tonumber(addIdBox.Text)
     if id then
@@ -702,7 +720,7 @@ btnAddId.MouseButton1Click:Connect(function()
         local success, info = pcall(function() return MarketplaceService:GetProductInfo(id) end)
         local newName = success and info.Name or ("Custom_" .. id)
         accessoryIds[newName] = id
-        initConfig(newName)
+        initConfig(newName, id) -- Menyimpan assetId ke dalam config
         populateList()
         addIdBox.Text = ""
         addIdBox.PlaceholderText = "Added: " .. newName
