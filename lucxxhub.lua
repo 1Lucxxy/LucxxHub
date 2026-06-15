@@ -374,7 +374,7 @@ local Window = WindUI:CreateWindow({
     Author = "Fayyxie",
     Size = UDim2.fromOffset(580, 460),
     Transparent = true,
-    Theme = "Dark", -- Diubah ke huruf kapital
+    Theme = "Dark", 
     SideBarWidth = 160,
     HasOutline = false
 })
@@ -400,9 +400,10 @@ end
 -- ====================================================
 -- TAB 1: PLAYER (Universal ID, Editor, Head & Target)
 -- ====================================================
-local AccDropdown
+-- Mendeklarasikan AccToggle dan AccDropdown agar bisa saling sinkron
+local AccDropdown, AccToggle 
 
-Tabs.Player:Paragraph({ Title = "✦ EDITOR AKSESORIS ✦", Content = "Atur posisi aksesoris yang sedang dipakai." })
+Tabs.Player:Paragraph({ Title = "——————————", Content = "Atur posisi aksesoris yang sedang dipakai." })
 
 AccDropdown = Tabs.Player:Dropdown({
     Title = "Pilih Aksesoris",
@@ -411,12 +412,17 @@ AccDropdown = Tabs.Player:Dropdown({
     Callback = function(Value)
         selectedAccessory = Value
         WindUI:Notify({ Title = "Selected", Content = "Mengedit: " .. Value, Duration = 2 })
+        
+        -- Sinkronkan Toggle dengan status aksesoris yang baru dipilih
+        if AccToggle then
+            AccToggle:SetValue(currentConfig[selectedAccessory].enabled)
+        end
     end
 })
 
-Tabs.Player:Toggle({
+AccToggle = Tabs.Player:Toggle({
     Title = "Aktifkan/Nonaktifkan Aksesoris",
-    Value = true,
+    Value = currentConfig[selectedAccessory].enabled, -- Default membaca state dari config saat UI dibuat
     Callback = function(State)
         if not selectedAccessory then return end
         currentConfig[selectedAccessory].enabled = State
@@ -514,7 +520,7 @@ Tabs.Player:Button({
     end
 })
 
-Tabs.Player:Paragraph({ Title = "✦ KEPALA & TARGET ✦", Content = "Ganti model kepala atau terapkan ke pemain lain." })
+Tabs.Player:Paragraph({ Title = "——————————", Content = "Ganti model kepala atau terapkan ke pemain lain." })
 
 Tabs.Player:Dropdown({
     Title = "Tipe Kepala",
@@ -610,7 +616,7 @@ Tabs.Player:Input({
 -- ====================================================
 -- TAB 2: SETTINGS (Tema & Save/Load)
 -- ====================================================
-Tabs.Settings:Paragraph({ Title = "✦ KONFIGURASI ✦", Content = "Simpan atau muat pengaturan." })
+Tabs.Settings:Paragraph({ Title = "——————————", Content = "Simpan atau muat pengaturan." })
 
 Tabs.Settings:Button({
     Title = "Simpan Konfigurasi",
@@ -635,6 +641,12 @@ Tabs.Settings:Button({
                 if ds then 
                     for k, v in pairs(dec) do currentConfig[k] = v end 
                     for n, _ in pairs(accessoryIds) do initConfig(n) end
+                    
+                    -- Sinkronkan Toggle jika kamu baru saja memuat konfigurasi
+                    if AccToggle and selectedAccessory then
+                        AccToggle:SetValue(currentConfig[selectedAccessory].enabled)
+                    end
+                    
                     WindUI:Notify({ Title = "Dimuat", Content = "Konfigurasi berhasil dimuat!", Duration = 2 })
                 end
             end
@@ -643,11 +655,11 @@ Tabs.Settings:Button({
     end
 })
 
-Tabs.Settings:Paragraph({ Title = "✦ TEMA UI ✦", Content = "Pilih tema warna WindUI." })
+Tabs.Settings:Paragraph({ Title = "——————————", Content = "Pilih tema warna WindUI." })
 
 Tabs.Settings:Dropdown({
     Title = "Ganti Tema UI",
-    Values = {"Dark", "Light", "Rose", "Aqua", "Amethyst", "Ruby"}, -- Diubah ke huruf kapital
+    Values = {"Dark", "Light", "Rose", "Aqua", "Amethyst", "Ruby"}, 
     Value = "Dark",
     Callback = function(Value)
         pcall(function()
