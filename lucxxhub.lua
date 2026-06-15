@@ -451,7 +451,7 @@ Tabs.Player:Input({
     end
 })
 
-Tabs.Player:Paragraph({ Title = " ", Content = "Atur posisi aksesoris yang sedang dipakai." })
+Tabs.Player:Paragraph({ Title = "✦ EDITOR AKSESORIS ✦", Content = "Atur posisi aksesoris yang sedang dipakai." })
 
 AccDropdown = Tabs.Player:Dropdown({
     Title = "Pilih Aksesoris",
