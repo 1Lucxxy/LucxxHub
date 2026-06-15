@@ -65,7 +65,7 @@ local function deepCopy(t)
     return res
 end
 
--- FIX: Menambahkan parameter ID agar AssetId ikut tersimpan di Config
+-- Menyimpan AssetId ke Config
 local function initConfig(name, id)
     if not currentConfig[name] then
         currentConfig[name] = { pos = {0,0,0}, rot = {0,0,0}, scale = 1, enabled = true, assetId = id }
@@ -323,7 +323,7 @@ local function refreshCharacter(char, configTable)
 end
 
 -- ====================================================
--- SISTEM LOCK & DETEKSI CUTSCENE / CLONE
+-- SISTEM LOCK & DETEKSI CUTSCENE / CLONE (UPDATED)
 -- ====================================================
 local function getTargetPlayer(nameStr)
     nameStr = nameStr:lower()
@@ -344,9 +344,10 @@ for _, p in ipairs(Players:GetPlayers()) do monitorPlayer(p) end
 table.insert(scriptConnections, Players.PlayerAdded:Connect(monitorPlayer))
 table.insert(scriptConnections, Players.PlayerRemoving:Connect(function(p) targetPlayersRegistry[p.UserId] = nil end))
 
+-- Deteksi Workspace
 table.insert(scriptConnections, workspace.DescendantAdded:Connect(function(obj)
     if obj:IsA("Model") and obj:FindFirstChild("Humanoid") then
-        task.wait(0.2)
+        task.wait(0.5) -- Delay Cutscene Clone
         local isLocalClone = false
         
         if obj.Name == localPlayer.Name and obj ~= localPlayer.Character then
@@ -372,7 +373,27 @@ table.insert(scriptConnections, workspace.DescendantAdded:Connect(function(obj)
     end
 end))
 
--- FIX: Menyembunyikan Aksesoris Custom & Custom Head saat mode First Person
+-- Deteksi Cutscene by Kamera
+local camera = workspace.CurrentCamera
+local function onCameraSubjectChanged()
+    if camera and camera.CameraSubject then
+        local subject = camera.CameraSubject
+        if subject:IsA("Humanoid") then
+            local model = subject.Parent
+            if model and model:IsA("Model") and model ~= localPlayer.Character then
+                task.wait(0.3)
+                refreshCharacter(model, currentConfig)
+            end
+        end
+    end
+end
+
+if camera then
+    table.insert(scriptConnections, camera:GetPropertyChangedSignal("CameraSubject"):Connect(onCameraSubjectChanged))
+    task.spawn(onCameraSubjectChanged)
+end
+
+-- Deteksi First Person Transparansi
 table.insert(scriptConnections, RunService.Stepped:Connect(function()
     local function enforceTransparency(char, config)
         if not char then return end
@@ -689,7 +710,7 @@ local function populateList()
     end
 end
 
--- FIX: Menyesuaikan btnLoad agar bisa load Custom ID yang sebelumnya tersimpan
+-- Load Config Custom
 btnLoad.MouseButton1Click:Connect(function()
     if readfile and isfile and isfile(FILE_NAME) then
         local suc, c = pcall(function() return readfile(FILE_NAME) end)
@@ -698,13 +719,12 @@ btnLoad.MouseButton1Click:Connect(function()
             if ds then 
                 for k, v in pairs(dec) do 
                     currentConfig[k] = v 
-                    -- Jika ada custom ID di config, tambahkan kembali ke accessoryIds
                     if type(v) == "table" and v.assetId then
                         accessoryIds[k] = v.assetId
                     end
                 end 
                 for n, id in pairs(accessoryIds) do initConfig(n, id) end
-                populateList() -- Perbarui UI agar custom ID muncul di list
+                populateList()
             end
         end
     end
@@ -712,7 +732,7 @@ btnLoad.MouseButton1Click:Connect(function()
     if localPlayer.Character then refreshCharacter(localPlayer.Character, currentConfig) end
 end)
 
--- FIX: btnAddId menggunakan initConfig dengan parameter ID
+-- Menambah ID
 btnAddId.MouseButton1Click:Connect(function()
     local id = tonumber(addIdBox.Text)
     if id then
@@ -720,7 +740,7 @@ btnAddId.MouseButton1Click:Connect(function()
         local success, info = pcall(function() return MarketplaceService:GetProductInfo(id) end)
         local newName = success and info.Name or ("Custom_" .. id)
         accessoryIds[newName] = id
-        initConfig(newName, id) -- Menyimpan assetId ke dalam config
+        initConfig(newName, id)
         populateList()
         addIdBox.Text = ""
         addIdBox.PlaceholderText = "Added: " .. newName
