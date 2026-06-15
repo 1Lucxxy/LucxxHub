@@ -359,22 +359,17 @@ end))
 -- ====================================================
 -- IMPLEMENTASI WINDUI 
 -- ====================================================
-local success, WindUI = pcall(function()
-    return loadstring(game:HttpGet("https://raw.githubusercontent.com/Footagesus/WindUI/main/dist/main.lua"))()
-end)
-
-if not success or not WindUI then
-    warn("Gagal memuat library WindUI. Pastikan koneksi aman dan executor mendukung loadstring.")
-    return -- Menghentikan script agar tidak error berlanjut
-end
+local WindUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Footagesus/WindUI/main/dist/main.lua"))()
 
 local Window = WindUI:CreateWindow({
     Title = "LucxxHub",
+    -- CARA GANTI LOGO CUSTOM:
+    -- Ganti "lucide-gamepad-2" menjadi "rbxassetid://ANGKA_ID_GAMBAR"
     Icon = "lucide-gamepad-2",
     Author = "Fayyxie",
     Size = UDim2.fromOffset(580, 460),
     Transparent = true,
-    Theme = "Dark", -- Diubah ke huruf kapital
+    Theme = "dark", -- Menggunakan lowercase untuk mencegah error tema
     SideBarWidth = 160,
     HasOutline = false
 })
@@ -400,60 +395,9 @@ end
 -- ====================================================
 -- TAB 1: PLAYER (Universal ID, Editor, Head & Target)
 -- ====================================================
-local AccDropdown
+local AccDropdown -- Deklarasi awal agar bisa di-refresh
 
-Tabs.Player:Paragraph({ Title = "✦ UNIVERSAL ASSET LOADER ✦", Content = "Masukkan ID Baju, Celana, Wajah, atau Aksesoris." })
-
-Tabs.Player:Input({
-    Title = "Custom Catalog ID",
-    Placeholder = "Ketik ID Asset di sini...",
-    Text = "Ketik ID Asset di sini...",
-    Callback = function(Text) 
-        local newCatalogId = tonumber(Text)
-        if not newCatalogId then return end
-
-        local success, info = pcall(function() return MarketplaceService:GetProductInfo(newCatalogId) end)
-        local newName = success and info.Name or ("Custom_" .. newCatalogId)
-        
-        local objSuccess, objects = pcall(function() return game:GetObjects("rbxassetid://" .. newCatalogId) end)
-        if objSuccess and objects and objects[1] then
-            local obj = objects[1]
-            local char = localPlayer.Character
-            
-            if obj:IsA("Shirt") or obj:IsA("Pants") or obj:IsA("ShirtGraphic") then
-                if char then
-                    for _, v in ipairs(char:GetChildren()) do
-                        if v.ClassName == obj.ClassName then v:Destroy() end
-                    end
-                    obj.Parent = char
-                end
-                WindUI:Notify({ Title = "Applied", Content = "Pakaian diterapkan: " .. newName, Duration = 3 })
-            
-            elseif obj:IsA("Decal") then
-                if char and char:FindFirstChild("Head") then
-                    for _, v in ipairs(char.Head:GetChildren()) do
-                        if v:IsA("Decal") then v:Destroy() end
-                    end
-                    obj.Parent = char.Head
-                end
-                WindUI:Notify({ Title = "Applied", Content = "Wajah diterapkan: " .. newName, Duration = 3 })
-                
-            else
-                accessoryIds[newName] = newCatalogId
-                initConfig(newName)
-                if AccDropdown then AccDropdown:Refresh(getAccessoryNames()) end
-                
-                WindUI:Notify({ Title = "Accessory Added", Content = newName .. " ditambahkan ke sistem Edit!", Duration = 3 })
-                
-                if char then wearAccessory(char, newName, newCatalogId, currentConfig) end
-            end
-        else
-            WindUI:Notify({ Title = "Error", Content = "ID Tidak Valid atau item Copylocked!", Duration = 2 })
-        end
-    end
-})
-
-Tabs.Player:Paragraph({ Title = "✦ EDITOR AKSESORIS ✦", Content = "Atur posisi aksesoris yang sedang dipakai." })
+Tabs.Player:Paragraph({ Title = " ", Content = "Atur posisi aksesoris yang sedang dipakai." })
 
 AccDropdown = Tabs.Player:Dropdown({
     Title = "Pilih Aksesoris",
@@ -607,6 +551,60 @@ Tabs.Player:Button({
     end
 })
 
+Tabs.Player:Paragraph({ Title = " ", Content = "Masukkan ID Baju, Celana, Wajah, atau Aksesoris." })
+
+Tabs.Player:Input({
+    Title = "Custom Catalog ID",
+    Placeholder = "Ketik ID Asset di sini...",
+    Text = "Ketik ID Asset di sini...",
+    Callback = function(Text) 
+        local newCatalogId = tonumber(Text)
+        if not newCatalogId then return end
+
+        local success, info = pcall(function() return MarketplaceService:GetProductInfo(newCatalogId) end)
+        local newName = success and info.Name or ("Custom_" .. newCatalogId)
+        
+        local objSuccess, objects = pcall(function() return game:GetObjects("rbxassetid://" .. newCatalogId) end)
+        if objSuccess and objects and objects[1] then
+            local obj = objects[1]
+            local char = localPlayer.Character
+            
+            -- Jika itu adalah pakaian (Baju/Celana/T-Shirt)
+            if obj:IsA("Shirt") or obj:IsA("Pants") or obj:IsA("ShirtGraphic") then
+                if char then
+                    for _, v in ipairs(char:GetChildren()) do
+                        if v.ClassName == obj.ClassName then v:Destroy() end
+                    end
+                    obj.Parent = char
+                end
+                WindUI:Notify({ Title = "Applied", Content = "Pakaian diterapkan: " .. newName, Duration = 3 })
+            
+            -- Jika itu adalah Wajah (Decal)
+            elseif obj:IsA("Decal") then
+                if char and char:FindFirstChild("Head") then
+                    for _, v in ipairs(char.Head:GetChildren()) do
+                        if v:IsA("Decal") then v:Destroy() end
+                    end
+                    obj.Parent = char.Head
+                end
+                WindUI:Notify({ Title = "Applied", Content = "Wajah diterapkan: " .. newName, Duration = 3 })
+                
+            -- Jika itu adalah Aksesoris atau Model (Topi, Rambut, Sayap, dsb)
+            else
+                accessoryIds[newName] = newCatalogId
+                initConfig(newName)
+                if AccDropdown then AccDropdown:Refresh(getAccessoryNames()) end
+                
+                WindUI:Notify({ Title = "Accessory Added", Content = newName .. " ditambahkan ke sistem Edit!", Duration = 3 })
+                
+                if char then wearAccessory(char, newName, newCatalogId, currentConfig) end
+            end
+        else
+            WindUI:Notify({ Title = "Error", Content = "ID Tidak Valid atau item Copylocked!", Duration = 2 })
+        end
+    end
+})
+
 -- ====================================================
 -- TAB 2: SETTINGS (Tema & Save/Load)
 -- ====================================================
@@ -647,24 +645,20 @@ Tabs.Settings:Paragraph({ Title = "✦ TEMA UI ✦", Content = "Pilih tema warna
 
 Tabs.Settings:Dropdown({
     Title = "Ganti Tema UI",
-    Values = {"Dark", "Light", "Rose", "Aqua", "Amethyst", "Ruby"}, -- Diubah ke huruf kapital
-    Value = "Dark",
+    Values = {"dark", "light", "rose", "aqua", "amethyst", "ruby"},
+    Value = "dark",
     Callback = function(Value)
         pcall(function()
-            if WindUI.SetTheme then
-                WindUI:SetTheme(Value)
-            elseif Window.SetTheme then 
-                Window:SetTheme(Value) 
-            end 
+            WindUI:SetTheme(Value)
+            -- Cadangan jika API WindUI menggunakan nama beda
+            if Window.SetTheme then Window:SetTheme(Value) end 
         end)
         WindUI:Notify({ Title = "Tema Diperbarui", Content = "Tema diubah ke " .. Value, Duration = 2 })
     end
 })
 
--- Inisialisasi awal menggunakan task.spawn agar GUI ter-render duluan tanpa menunggu proses game:GetObjects
-task.spawn(function()
-    if localPlayer.Character then refreshCharacter(localPlayer.Character, currentConfig) end
-end)
+-- Inisialisasi awal
+if localPlayer.Character then refreshCharacter(localPlayer.Character, currentConfig) end
 table.insert(scriptConnections, localPlayer.CharacterAdded:Connect(function(char) task.wait(1); refreshCharacter(char, currentConfig) end))
 
 -- ====================================================
