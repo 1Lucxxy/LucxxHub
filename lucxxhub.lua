@@ -556,7 +556,7 @@ Tabs.Player:Button({
     end
 })
 
-Tabs.Player:Paragraph({ Title = "✦ UNIVERSAL ASSET LOADER ✦", Content = "Masukkan ID Baju, Celana, Wajah, atau Aksesoris." })
+Tabs.Player:Paragraph({ Title = " ", Content = "Masukkan ID Baju, Celana, Wajah, atau Aksesoris." })
 
 Tabs.Player:Input({
     Title = "Custom Catalog ID",
