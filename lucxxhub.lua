@@ -6,6 +6,7 @@ if getgenv()._LucxxHubCleanup then
 end
 
 local scriptConnections = {}
+local isUpdatingUI = false -- Mencegah loop callback pada UI Toggle
 
 -- ====================================================
 -- GLOBAL CONFIG & UTILITIES
@@ -16,7 +17,15 @@ local MarketplaceService = game:GetService("MarketplaceService")
 local RunService = game:GetService("RunService")
 
 local localPlayer = Players.LocalPlayer
-local FILE_NAME = "AccessoryCustomConfigV4_2_WindUI.json"
+
+-- KONFIGURASI FOLDER & FILE
+local FOLDER_NAME = "LucxxHub_Configs"
+local AUTOLOAD_FILE = FOLDER_NAME .. "/autoload.txt"
+
+-- Membuat folder jika belum ada
+if makefolder and not isfolder(FOLDER_NAME) then
+    pcall(function() makefolder(FOLDER_NAME) end)
+end
 
 local accessoryIds = {
     ["Black Valk"] = 124730194,
@@ -60,7 +69,41 @@ local function initConfig(name)
         currentConfig[name] = { pos = {0,0,0}, rot = {0,0,0}, scale = 1, enabled = true }
     end
 end
+
+-- ====================================================
+-- SISTEM AUTO-LOAD CONFIG SAAT SCRIPT DIJALANKAN
+-- ====================================================
+if isfolder and isfolder(FOLDER_NAME) and isfile and isfile(AUTOLOAD_FILE) then
+    pcall(function()
+        local autoConfigName = readfile(AUTOLOAD_FILE)
+        local path = FOLDER_NAME .. "/" .. autoConfigName .. ".json"
+        if isfile(path) then
+            local content = readfile(path)
+            local dec = HttpService:JSONDecode(content)
+            for k, v in pairs(dec) do currentConfig[k] = v end
+        end
+    end)
+end
+
+-- Pastikan semua aksesoris terinisialisasi
 for name, _ in pairs(accessoryIds) do initConfig(name) end
+
+-- Fungsi untuk membaca isi folder config
+local function getSavedConfigs()
+    local list = {}
+    if listfiles and isfolder(FOLDER_NAME) then
+        pcall(function()
+            for _, file in ipairs(listfiles(FOLDER_NAME)) do
+                if file:match("%.json$") then
+                    local name = file:match("([^/\\]+)%.json$")
+                    if name then table.insert(list, name) end
+                end
+            end
+        end)
+    end
+    if #list == 0 then table.insert(list, "Belum Ada Config") end
+    return list
+end
 
 -- ====================================================
 -- FUNGSI KEPALA & AKSESORIS
@@ -365,7 +408,7 @@ end)
 
 if not success or not WindUI then
     warn("Gagal memuat library WindUI. Pastikan koneksi aman dan executor mendukung loadstring.")
-    return -- Menghentikan script agar tidak error berlanjut
+    return 
 end
 
 local Window = WindUI:CreateWindow({
@@ -400,7 +443,6 @@ end
 -- ====================================================
 -- TAB 1: PLAYER (Universal ID, Editor, Head & Target)
 -- ====================================================
--- Mendeklarasikan AccToggle dan AccDropdown agar bisa saling sinkron
 local AccDropdown, AccToggle 
 
 Tabs.Player:Paragraph({ Title = "——————————", Content = "Atur posisi aksesoris yang sedang dipakai." })
@@ -413,17 +455,22 @@ AccDropdown = Tabs.Player:Dropdown({
         selectedAccessory = Value
         WindUI:Notify({ Title = "Selected", Content = "Mengedit: " .. Value, Duration = 2 })
         
-        -- Sinkronkan Toggle dengan status aksesoris yang baru dipilih
+        -- MENGGUNAKAN FLAG isUpdatingUI UNTUK MENCEGAH LOOP CALLBACK
         if AccToggle then
+            isUpdatingUI = true 
             AccToggle:SetValue(currentConfig[selectedAccessory].enabled)
+            isUpdatingUI = false
         end
     end
 })
 
 AccToggle = Tabs.Player:Toggle({
     Title = "Aktifkan/Nonaktifkan Aksesoris",
-    Value = currentConfig[selectedAccessory].enabled, -- Default membaca state dari config saat UI dibuat
+    Value = currentConfig[selectedAccessory].enabled,
     Callback = function(State)
+        -- JIKA UI SEDANG DIPERBARUI OLEH DROPDOWN, JANGAN JALANKAN LOGIKA INI
+        if isUpdatingUI then return end 
+        
         if not selectedAccessory then return end
         currentConfig[selectedAccessory].enabled = State
         
@@ -567,7 +614,7 @@ Tabs.Player:Paragraph({ Title = "——————————", Content = "Mas
 Tabs.Player:Input({
     Title = "Custom Catalog ID",
     Placeholder = "Ketik ID Asset di sini...",
-    Text = "Ketik ID Asset di sini...",
+    Text = "",
     Callback = function(Text) 
         local newCatalogId = tonumber(Text)
         if not newCatalogId then return end
@@ -614,40 +661,80 @@ Tabs.Player:Input({
 })
 
 -- ====================================================
--- TAB 2: SETTINGS (Tema & Save/Load)
+-- TAB 2: SETTINGS (Config Manager & Tema)
 -- ====================================================
-Tabs.Settings:Paragraph({ Title = "——————————", Content = "Simpan atau muat pengaturan." })
+Tabs.Settings:Paragraph({ Title = "✦ CREATE CONFIG ✦", Content = "Buat dan simpan config baru." })
+
+local newConfigName = ""
+Tabs.Settings:Input({
+    Title = "Nama Config Baru",
+    Placeholder = "Ketik nama tanpa .json...",
+    Text = "",
+    Callback = function(Text) newConfigName = Text end
+})
+
+local ConfigListDropdown -- Dideklarasikan awal agar bisa di-refresh
 
 Tabs.Settings:Button({
-    Title = "Simpan Konfigurasi",
+    Title = "Simpan Config",
     Callback = function()
+        if newConfigName == "" then 
+            WindUI:Notify({ Title = "Error", Content = "Nama config tidak boleh kosong!", Duration = 2 })
+            return 
+        end
         if writefile then
             local success, encoded = pcall(function() return HttpService:JSONEncode(currentConfig) end)
             if success then 
-                writefile(FILE_NAME, encoded) 
-                WindUI:Notify({ Title = "Tersimpan", Content = "Konfigurasi berhasil disimpan!", Duration = 2 })
+                local path = FOLDER_NAME .. "/" .. newConfigName .. ".json"
+                writefile(path, encoded) 
+                WindUI:Notify({ Title = "Tersimpan", Content = "Config " .. newConfigName .. " berhasil disimpan!", Duration = 2 })
+                
+                -- Refresh Dropdown Config
+                if ConfigListDropdown then
+                    ConfigListDropdown:Refresh(getSavedConfigs())
+                end
             end
         end
     end
 })
 
+Tabs.Settings:Paragraph({ Title = "✦ LOAD & AUTOLOAD CONFIG ✦", Content = "Pilih config yang ingin dimuat." })
+
+local selectedSavedConfig = ""
+ConfigListDropdown = Tabs.Settings:Dropdown({
+    Title = "Pilih Config",
+    Values = getSavedConfigs(),
+    Value = "",
+    Callback = function(Value)
+        selectedSavedConfig = Value
+    end
+})
+
 Tabs.Settings:Button({
-    Title = "Muat Konfigurasi",
+    Title = "Load Config Terpilih",
     Callback = function()
-        if readfile and isfile and isfile(FILE_NAME) then
-            local suc, c = pcall(function() return readfile(FILE_NAME) end)
+        if selectedSavedConfig == "" or selectedSavedConfig == "Belum Ada Config" then return end
+        local path = FOLDER_NAME .. "/" .. selectedSavedConfig .. ".json"
+        
+        if readfile and isfile and isfile(path) then
+            local suc, c = pcall(function() return readfile(path) end)
             if suc then
                 local ds, dec = pcall(function() return HttpService:JSONDecode(c) end)
-                if ds then 
+                if ds and type(dec) == "table" then 
+                    -- Menerapkan config dengan aman
                     for k, v in pairs(dec) do currentConfig[k] = v end 
                     for n, _ in pairs(accessoryIds) do initConfig(n) end
                     
-                    -- Sinkronkan Toggle jika kamu baru saja memuat konfigurasi
+                    -- Sinkronkan Toggle UI
                     if AccToggle and selectedAccessory then
+                        isUpdatingUI = true
                         AccToggle:SetValue(currentConfig[selectedAccessory].enabled)
+                        isUpdatingUI = false
                     end
                     
-                    WindUI:Notify({ Title = "Dimuat", Content = "Konfigurasi berhasil dimuat!", Duration = 2 })
+                    WindUI:Notify({ Title = "Dimuat", Content = "Config " .. selectedSavedConfig .. " dimuat!", Duration = 2 })
+                else
+                    WindUI:Notify({ Title = "Error", Content = "Data config rusak atau tidak valid!", Duration = 2 })
                 end
             end
         end
@@ -655,7 +742,21 @@ Tabs.Settings:Button({
     end
 })
 
-Tabs.Settings:Paragraph({ Title = "——————————", Content = "Pilih tema warna WindUI." })
+Tabs.Settings:Button({
+    Title = "Set Sebagai Auto-Load Config",
+    Callback = function()
+        if selectedSavedConfig ~= "" and selectedSavedConfig ~= "Belum Ada Config" then
+            if writefile then
+                writefile(AUTOLOAD_FILE, selectedSavedConfig)
+                WindUI:Notify({ Title = "Auto-Load Diaktifkan", Content = "Config " .. selectedSavedConfig .. " akan otomatis dimuat saat script dijalankan.", Duration = 3 })
+            end
+        else
+            WindUI:Notify({ Title = "Peringatan", Content = "Pilih config terlebih dahulu!", Duration = 2 })
+        end
+    end
+})
+
+Tabs.Settings:Paragraph({ Title = " ", Content = "Pilih tema warna WindUI." })
 
 Tabs.Settings:Dropdown({
     Title = "Ganti Tema UI",
@@ -673,7 +774,7 @@ Tabs.Settings:Dropdown({
     end
 })
 
--- Inisialisasi awal menggunakan task.spawn agar GUI ter-render duluan tanpa menunggu proses game:GetObjects
+-- Inisialisasi awal menggunakan task.spawn agar GUI ter-render duluan
 task.spawn(function()
     if localPlayer.Character then refreshCharacter(localPlayer.Character, currentConfig) end
 end)
