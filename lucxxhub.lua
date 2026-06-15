@@ -359,17 +359,22 @@ end))
 -- ====================================================
 -- IMPLEMENTASI WINDUI 
 -- ====================================================
-local WindUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Footagesus/WindUI/main/dist/main.lua"))()
+local success, WindUI = pcall(function()
+    return loadstring(game:HttpGet("https://raw.githubusercontent.com/Footagesus/WindUI/main/dist/main.lua"))()
+end)
+
+if not success or not WindUI then
+    warn("Gagal memuat library WindUI. Pastikan koneksi aman dan executor mendukung loadstring.")
+    return -- Menghentikan script agar tidak error berlanjut
+end
 
 local Window = WindUI:CreateWindow({
     Title = "LucxxHub",
-    -- CARA GANTI LOGO CUSTOM:
-    -- Ganti "lucide-gamepad-2" menjadi "rbxassetid://ANGKA_ID_GAMBAR"
     Icon = "lucide-gamepad-2",
     Author = "Fayyxie",
     Size = UDim2.fromOffset(580, 460),
     Transparent = true,
-    Theme = "dark", -- Menggunakan lowercase untuk mencegah error tema
+    Theme = "Dark", -- Diubah ke huruf kapital
     SideBarWidth = 160,
     HasOutline = false
 })
@@ -395,7 +400,7 @@ end
 -- ====================================================
 -- TAB 1: PLAYER (Universal ID, Editor, Head & Target)
 -- ====================================================
-local AccDropdown -- Deklarasi awal agar bisa di-refresh
+local AccDropdown
 
 Tabs.Player:Paragraph({ Title = "✦ UNIVERSAL ASSET LOADER ✦", Content = "Masukkan ID Baju, Celana, Wajah, atau Aksesoris." })
 
@@ -415,7 +420,6 @@ Tabs.Player:Input({
             local obj = objects[1]
             local char = localPlayer.Character
             
-            -- Jika itu adalah pakaian (Baju/Celana/T-Shirt)
             if obj:IsA("Shirt") or obj:IsA("Pants") or obj:IsA("ShirtGraphic") then
                 if char then
                     for _, v in ipairs(char:GetChildren()) do
@@ -425,7 +429,6 @@ Tabs.Player:Input({
                 end
                 WindUI:Notify({ Title = "Applied", Content = "Pakaian diterapkan: " .. newName, Duration = 3 })
             
-            -- Jika itu adalah Wajah (Decal)
             elseif obj:IsA("Decal") then
                 if char and char:FindFirstChild("Head") then
                     for _, v in ipairs(char.Head:GetChildren()) do
@@ -435,7 +438,6 @@ Tabs.Player:Input({
                 end
                 WindUI:Notify({ Title = "Applied", Content = "Wajah diterapkan: " .. newName, Duration = 3 })
                 
-            -- Jika itu adalah Aksesoris atau Model (Topi, Rambut, Sayap, dsb)
             else
                 accessoryIds[newName] = newCatalogId
                 initConfig(newName)
@@ -645,20 +647,24 @@ Tabs.Settings:Paragraph({ Title = "✦ TEMA UI ✦", Content = "Pilih tema warna
 
 Tabs.Settings:Dropdown({
     Title = "Ganti Tema UI",
-    Values = {"dark", "light", "rose", "aqua", "amethyst", "ruby"},
-    Value = "dark",
+    Values = {"Dark", "Light", "Rose", "Aqua", "Amethyst", "Ruby"}, -- Diubah ke huruf kapital
+    Value = "Dark",
     Callback = function(Value)
         pcall(function()
-            WindUI:SetTheme(Value)
-            -- Cadangan jika API WindUI menggunakan nama beda
-            if Window.SetTheme then Window:SetTheme(Value) end 
+            if WindUI.SetTheme then
+                WindUI:SetTheme(Value)
+            elseif Window.SetTheme then 
+                Window:SetTheme(Value) 
+            end 
         end)
         WindUI:Notify({ Title = "Tema Diperbarui", Content = "Tema diubah ke " .. Value, Duration = 2 })
     end
 })
 
--- Inisialisasi awal
-if localPlayer.Character then refreshCharacter(localPlayer.Character, currentConfig) end
+-- Inisialisasi awal menggunakan task.spawn agar GUI ter-render duluan tanpa menunggu proses game:GetObjects
+task.spawn(function()
+    if localPlayer.Character then refreshCharacter(localPlayer.Character, currentConfig) end
+end)
 table.insert(scriptConnections, localPlayer.CharacterAdded:Connect(function(char) task.wait(1); refreshCharacter(char, currentConfig) end))
 
 -- ====================================================
