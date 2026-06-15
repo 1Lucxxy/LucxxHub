@@ -394,7 +394,6 @@ end
 -- ====================================================
 -- TAB 1: PLAYER (Gabungan Aksesoris, Head, dan Target)
 -- ====================================================
-Tabs.Player:Section({ Title = "Accessory Editor" })
 
 local AccDropdown = Tabs.Player:Dropdown({
     Title = "Select Accessory",
@@ -438,8 +437,6 @@ Tabs.Player:Toggle({
         end
     end
 })
-
-Tabs.Player:Section({ Title = "Transform Settings" })
 
 Tabs.Player:Input({
     Title = "Position (X, Y, Z)",
@@ -505,8 +502,6 @@ Tabs.Player:Button({
     end
 })
 
-Tabs.Player:Section({ Title = "Head Customization" })
-
 Tabs.Player:Dropdown({
     Title = "Head Type",
     Values = {"Default", "Death Walker", "UGC Headless"},
@@ -524,8 +519,6 @@ Tabs.Player:Dropdown({
         end
     end
 })
-
-Tabs.Player:Section({ Title = "Target System" })
 
 local targetPlayerTemp = ""
 Tabs.Player:Input({
@@ -551,7 +544,6 @@ Tabs.Player:Button({
 -- ====================================================
 -- TAB 2: SETTINGS
 -- ====================================================
-Tabs.Settings:Section({ Title = "Custom Accessories" })
 
 local newCatalogId = nil
 Tabs.Settings:Input({
@@ -578,8 +570,6 @@ Tabs.Settings:Button({
         end
     end
 })
-
-Tabs.Settings:Section({ Title = "Save / Load Configuration" })
 
 Tabs.Settings:Button({
     Title = "Save Config",
@@ -611,8 +601,6 @@ Tabs.Settings:Button({
         if localPlayer.Character then refreshCharacter(localPlayer.Character, currentConfig) end
     end
 })
-
-Tabs.Settings:Section({ Title = "UI Personalization" })
 
 Tabs.Settings:Dropdown({
     Title = "Change UI Theme",
