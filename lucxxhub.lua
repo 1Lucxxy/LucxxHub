@@ -357,18 +357,19 @@ table.insert(scriptConnections, RunService.Stepped:Connect(function()
 end))
 
 -- ====================================================
--- IMPLEMENTASI WINDUI DENGAN LINK YANG SUDAH DIPERBAIKI
+-- IMPLEMENTASI WINDUI 
 -- ====================================================
--- Menggunakan link raw ke dist main WindUI dari sumber resmi GitHub
 local WindUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Footagesus/WindUI/main/dist/main.lua"))()
 
 local Window = WindUI:CreateWindow({
     Title = "LucxxHub",
+    -- CARA GANTI LOGO CUSTOM:
+    -- Ganti "lucide-gamepad-2" menjadi "rbxassetid://ANGKA_ID_GAMBAR"
     Icon = "lucide-gamepad-2",
     Author = "Fayyxie",
     Size = UDim2.fromOffset(580, 460),
     Transparent = true,
-    Theme = "Dark",
+    Theme = "dark", -- Menggunakan lowercase untuk mencegah error tema
     SideBarWidth = 160,
     HasOutline = false
 })
@@ -392,21 +393,78 @@ local function getAccessoryNames()
 end
 
 -- ====================================================
--- TAB 1: PLAYER (Gabungan Aksesoris, Head, dan Target)
+-- TAB 1: PLAYER (Universal ID, Editor, Head & Target)
 -- ====================================================
+local AccDropdown -- Deklarasi awal agar bisa di-refresh
 
-local AccDropdown = Tabs.Player:Dropdown({
-    Title = "Select Accessory",
+Tabs.Player:Paragraph({ Title = "✦ UNIVERSAL ASSET LOADER ✦", Content = "Masukkan ID Baju, Celana, Wajah, atau Aksesoris." })
+
+Tabs.Player:Input({
+    Title = "Custom Catalog ID",
+    Placeholder = "Ketik ID Asset di sini...",
+    Text = "Ketik ID Asset di sini...",
+    Callback = function(Text) 
+        local newCatalogId = tonumber(Text)
+        if not newCatalogId then return end
+
+        local success, info = pcall(function() return MarketplaceService:GetProductInfo(newCatalogId) end)
+        local newName = success and info.Name or ("Custom_" .. newCatalogId)
+        
+        local objSuccess, objects = pcall(function() return game:GetObjects("rbxassetid://" .. newCatalogId) end)
+        if objSuccess and objects and objects[1] then
+            local obj = objects[1]
+            local char = localPlayer.Character
+            
+            -- Jika itu adalah pakaian (Baju/Celana/T-Shirt)
+            if obj:IsA("Shirt") or obj:IsA("Pants") or obj:IsA("ShirtGraphic") then
+                if char then
+                    for _, v in ipairs(char:GetChildren()) do
+                        if v.ClassName == obj.ClassName then v:Destroy() end
+                    end
+                    obj.Parent = char
+                end
+                WindUI:Notify({ Title = "Applied", Content = "Pakaian diterapkan: " .. newName, Duration = 3 })
+            
+            -- Jika itu adalah Wajah (Decal)
+            elseif obj:IsA("Decal") then
+                if char and char:FindFirstChild("Head") then
+                    for _, v in ipairs(char.Head:GetChildren()) do
+                        if v:IsA("Decal") then v:Destroy() end
+                    end
+                    obj.Parent = char.Head
+                end
+                WindUI:Notify({ Title = "Applied", Content = "Wajah diterapkan: " .. newName, Duration = 3 })
+                
+            -- Jika itu adalah Aksesoris atau Model (Topi, Rambut, Sayap, dsb)
+            else
+                accessoryIds[newName] = newCatalogId
+                initConfig(newName)
+                if AccDropdown then AccDropdown:Refresh(getAccessoryNames()) end
+                
+                WindUI:Notify({ Title = "Accessory Added", Content = newName .. " ditambahkan ke sistem Edit!", Duration = 3 })
+                
+                if char then wearAccessory(char, newName, newCatalogId, currentConfig) end
+            end
+        else
+            WindUI:Notify({ Title = "Error", Content = "ID Tidak Valid atau item Copylocked!", Duration = 2 })
+        end
+    end
+})
+
+Tabs.Player:Paragraph({ Title = "✦ EDITOR AKSESORIS ✦", Content = "Atur posisi aksesoris yang sedang dipakai." })
+
+AccDropdown = Tabs.Player:Dropdown({
+    Title = "Pilih Aksesoris",
     Values = getAccessoryNames(),
     Value = selectedAccessory,
     Callback = function(Value)
         selectedAccessory = Value
-        WindUI:Notify({ Title = "Selected", Content = "Editing: " .. Value, Duration = 2 })
+        WindUI:Notify({ Title = "Selected", Content = "Mengedit: " .. Value, Duration = 2 })
     end
 })
 
 Tabs.Player:Toggle({
-    Title = "Enable/Disable Accessory",
+    Title = "Aktifkan/Nonaktifkan Aksesoris",
     Value = true,
     Callback = function(State)
         if not selectedAccessory then return end
@@ -439,8 +497,9 @@ Tabs.Player:Toggle({
 })
 
 Tabs.Player:Input({
-    Title = "Position (X, Y, Z)",
-    PlaceholderText = "Format: 0, 0, 0",
+    Title = "Posisi (X, Y, Z)",
+    Placeholder = "Contoh: 0, 1.5, 0",
+    Text = "",
     Callback = function(Text)
         local x, y, z = parseVector(Text)
         tempInputs.pos = {x, y, z}
@@ -448,8 +507,9 @@ Tabs.Player:Input({
 })
 
 Tabs.Player:Input({
-    Title = "Rotation (X, Y, Z)",
-    PlaceholderText = "Format: 0, 0, 0",
+    Title = "Rotasi (X, Y, Z)",
+    Placeholder = "Contoh: 0, 90, 0",
+    Text = "",
     Callback = function(Text)
         local x, y, z = parseVector(Text)
         tempInputs.rot = {x, y, z}
@@ -457,13 +517,14 @@ Tabs.Player:Input({
 })
 
 Tabs.Player:Input({
-    Title = "Scale",
-    PlaceholderText = "1",
+    Title = "Skala (Ukuran)",
+    Placeholder = "Contoh: 1.5",
+    Text = "",
     Callback = function(Text) tempInputs.scale = tonumber(Text) or 1 end
 })
 
 Tabs.Player:Button({
-    Title = "Apply Changes",
+    Title = "Terapkan Perubahan Posisi",
     Callback = function()
         if not selectedAccessory then return end
         currentConfig[selectedAccessory].pos = deepCopy(tempInputs.pos)
@@ -481,12 +542,12 @@ Tabs.Player:Button({
                 applyConfigToSpecific(p.Character, selectedAccessory, config)
             end
         end
-        WindUI:Notify({ Title = "Success", Content = "Applied to " .. selectedAccessory, Duration = 2 })
+        WindUI:Notify({ Title = "Berhasil", Content = "Posisi " .. selectedAccessory .. " diubah!", Duration = 2 })
     end
 })
 
 Tabs.Player:Button({
-    Title = "Reset Values",
+    Title = "Reset Ke Posisi Awal",
     Callback = function()
         if not selectedAccessory then return end
         currentConfig[selectedAccessory] = { pos = {0,0,0}, rot = {0,0,0}, scale = 1, enabled = true }
@@ -498,12 +559,14 @@ Tabs.Player:Button({
                 applyConfigToSpecific(p.Character, selectedAccessory, config)
             end
         end
-        WindUI:Notify({ Title = "Reset", Content = selectedAccessory .. " has been reset.", Duration = 2 })
+        WindUI:Notify({ Title = "Reset", Content = selectedAccessory .. " dikembalikan ke normal.", Duration = 2 })
     end
 })
 
+Tabs.Player:Paragraph({ Title = "✦ KEPALA & TARGET ✦", Content = "Ganti model kepala atau terapkan ke pemain lain." })
+
 Tabs.Player:Dropdown({
-    Title = "Head Type",
+    Title = "Tipe Kepala",
     Values = {"Default", "Death Walker", "UGC Headless"},
     Value = "Default",
     Callback = function(Value)
@@ -522,70 +585,46 @@ Tabs.Player:Dropdown({
 
 local targetPlayerTemp = ""
 Tabs.Player:Input({
-    Title = "Player Name",
-    PlaceholderText = "Username or DisplayName...",
+    Title = "Nama Target Pemain",
+    Placeholder = "Ketik Username/DisplayName...",
+    Text = "",
     Callback = function(Text) targetPlayerTemp = Text end
 })
 
 Tabs.Player:Button({
-    Title = "Apply To Player",
+    Title = "Terapkan Ke Target",
     Callback = function()
         local p = getTargetPlayer(targetPlayerTemp)
         if p then
             targetPlayersRegistry[p.UserId] = deepCopy(currentConfig)
             if p.Character then refreshCharacter(p.Character, targetPlayersRegistry[p.UserId]) end
-            WindUI:Notify({ Title = "Locked", Content = "Successfully locked onto " .. p.Name, Duration = 3 })
+            WindUI:Notify({ Title = "Terkunci", Content = "Berhasil menargetkan " .. p.Name, Duration = 3 })
         else
-            WindUI:Notify({ Title = "Error", Content = "Player not found!", Duration = 3 })
+            WindUI:Notify({ Title = "Error", Content = "Pemain tidak ditemukan!", Duration = 3 })
         end
     end
 })
 
 -- ====================================================
--- TAB 2: SETTINGS
+-- TAB 2: SETTINGS (Tema & Save/Load)
 -- ====================================================
-
-local newCatalogId = nil
-Tabs.Settings:Input({
-    Title = "Custom Catalog ID",
-    PlaceholderText = "Enter ID...",
-    Callback = function(Text) newCatalogId = tonumber(Text) end
-})
+Tabs.Settings:Paragraph({ Title = "✦ KONFIGURASI ✦", Content = "Simpan atau muat pengaturan." })
 
 Tabs.Settings:Button({
-    Title = "Add Custom Accessory",
-    Callback = function()
-        if newCatalogId then
-            local success, info = pcall(function() return MarketplaceService:GetProductInfo(newCatalogId) end)
-            local newName = success and info.Name or ("Custom_" .. newCatalogId)
-            accessoryIds[newName] = newCatalogId
-            initConfig(newName)
-            
-            AccDropdown:Refresh(getAccessoryNames())
-            WindUI:Notify({ Title = "Added", Content = "Accessory " .. newName .. " added!", Duration = 3 })
-            
-            if localPlayer.Character then wearAccessory(localPlayer.Character, newName, newCatalogId, currentConfig) end
-        else
-            WindUI:Notify({ Title = "Error", Content = "Invalid ID!", Duration = 2 })
-        end
-    end
-})
-
-Tabs.Settings:Button({
-    Title = "Save Config",
+    Title = "Simpan Konfigurasi",
     Callback = function()
         if writefile then
             local success, encoded = pcall(function() return HttpService:JSONEncode(currentConfig) end)
             if success then 
                 writefile(FILE_NAME, encoded) 
-                WindUI:Notify({ Title = "Saved", Content = "Configuration Saved!", Duration = 2 })
+                WindUI:Notify({ Title = "Tersimpan", Content = "Konfigurasi berhasil disimpan!", Duration = 2 })
             end
         end
     end
 })
 
 Tabs.Settings:Button({
-    Title = "Load Config",
+    Title = "Muat Konfigurasi",
     Callback = function()
         if readfile and isfile and isfile(FILE_NAME) then
             local suc, c = pcall(function() return readfile(FILE_NAME) end)
@@ -594,7 +633,7 @@ Tabs.Settings:Button({
                 if ds then 
                     for k, v in pairs(dec) do currentConfig[k] = v end 
                     for n, _ in pairs(accessoryIds) do initConfig(n) end
-                    WindUI:Notify({ Title = "Loaded", Content = "Configuration Loaded!", Duration = 2 })
+                    WindUI:Notify({ Title = "Dimuat", Content = "Konfigurasi berhasil dimuat!", Duration = 2 })
                 end
             end
         end
@@ -602,15 +641,19 @@ Tabs.Settings:Button({
     end
 })
 
+Tabs.Settings:Paragraph({ Title = "✦ TEMA UI ✦", Content = "Pilih tema warna WindUI." })
+
 Tabs.Settings:Dropdown({
-    Title = "Change UI Theme",
-    Values = {"Dark", "Light", "Rose", "Aqua", "Amethyst", "Ruby"},
-    Value = "Dark",
+    Title = "Ganti Tema UI",
+    Values = {"dark", "light", "rose", "aqua", "amethyst", "ruby"},
+    Value = "dark",
     Callback = function(Value)
         pcall(function()
             WindUI:SetTheme(Value)
+            -- Cadangan jika API WindUI menggunakan nama beda
+            if Window.SetTheme then Window:SetTheme(Value) end 
         end)
-        WindUI:Notify({ Title = "Theme Updated", Content = "UI Theme changed to " .. Value, Duration = 2 })
+        WindUI:Notify({ Title = "Tema Diperbarui", Content = "Tema diubah ke " .. Value, Duration = 2 })
     end
 })
 
