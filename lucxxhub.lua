@@ -344,44 +344,92 @@ for _, p in ipairs(Players:GetPlayers()) do monitorPlayer(p) end
 table.insert(scriptConnections, Players.PlayerAdded:Connect(monitorPlayer))
 table.insert(scriptConnections, Players.PlayerRemoving:Connect(function(p) targetPlayersRegistry[p.UserId] = nil end))
 
--- Deteksi Workspace
-table.insert(scriptConnections, workspace.DescendantAdded:Connect(function(obj)
-    if obj:IsA("Model") and obj:FindFirstChild("Humanoid") then
-        task.wait(0.5) -- Delay Cutscene Clone
-        local isLocalClone = false
-        
-        if obj.Name == localPlayer.Name and obj ~= localPlayer.Character then
-            isLocalClone = true
-        else
-            local myShirt = localPlayer.Character and localPlayer.Character:FindFirstChildOfClass("Shirt")
-            local cloneShirt = obj:FindFirstChildOfClass("Shirt")
-            if myShirt and cloneShirt and myShirt.ShirtTemplate == cloneShirt.ShirtTemplate then
-                isLocalClone = true
+-- Fungsi Analisis Karakter (Mendeteksi Clone Jauh Lebih Kuat)
+local function isCloneOfLocal(obj)
+    if not obj or not localPlayer.Character or obj == localPlayer.Character then return false end
+
+    -- 1. Deteksi via Nama
+    if obj.Name == localPlayer.Name or obj.Name == localPlayer.DisplayName then return true end
+
+    local myChar = localPlayer.Character
+    
+    -- 2. Deteksi via Baju & Celana (Lebih Akurat)
+    local myShirt = myChar:FindFirstChildOfClass("Shirt")
+    local cloneShirt = obj:FindFirstChildOfClass("Shirt")
+    if myShirt and cloneShirt and myShirt.ShirtTemplate == cloneShirt.ShirtTemplate and myShirt.ShirtTemplate ~= "" then return true end
+
+    local myPants = myChar:FindFirstChildOfClass("Pants")
+    local clonePants = obj:FindFirstChildOfClass("Pants")
+    if myPants and clonePants and myPants.PantsTemplate == clonePants.PantsTemplate and myPants.PantsTemplate ~= "" then return true end
+
+    -- 3. Deteksi via Aksesoris Bawaan (Rambut/Topi Default)
+    local myAccs = {}
+    for _, acc in ipairs(myChar:GetChildren()) do
+        if acc:IsA("Accessory") and acc.Name ~= "CustomHeadModel" then
+            local handle = acc:FindFirstChild("Handle")
+            if handle then
+                local mesh = handle:FindFirstChildOfClass("SpecialMesh")
+                local meshId = mesh and mesh.MeshId or (handle:IsA("MeshPart") and handle.MeshId)
+                if meshId and meshId ~= "" then myAccs[meshId] = true end
             end
         end
+    end
 
-        if isLocalClone then
-            refreshCharacter(obj, currentConfig)
-        else
-            local tPlayer = getTargetPlayer(obj.Name)
-            if tPlayer and tPlayer.Name == obj.Name and obj ~= tPlayer.Character then
-                if targetPlayersRegistry[tPlayer.UserId] then
-                    refreshCharacter(obj, targetPlayersRegistry[tPlayer.UserId])
+    for _, acc in ipairs(obj:GetChildren()) do
+        if acc:IsA("Accessory") then
+            local handle = acc:FindFirstChild("Handle")
+            if handle then
+                local mesh = handle:FindFirstChildOfClass("SpecialMesh")
+                local meshId = mesh and mesh.MeshId or (handle:IsA("MeshPart") and handle.MeshId)
+                -- Jika ada minimal 1 aksesoris ori yang cocok, itu adalah clone kita
+                if meshId and myAccs[meshId] then 
+                    return true 
                 end
             end
         end
     end
+
+    return false
+end
+
+-- Deteksi Model Masuk Ke Workspace
+table.insert(scriptConnections, workspace.DescendantAdded:Connect(function(obj)
+    if obj:IsA("Model") then
+        task.spawn(function()
+            local hum = obj:WaitForChild("Humanoid", 2) -- Maksimal tunggu 2 detik agar tidak stuck
+            if hum then
+                task.wait(0.5) -- Beri sedikit waktu untuk game memasang baju dll ke dummy
+                if isCloneOfLocal(obj) then
+                    refreshCharacter(obj, currentConfig)
+                else
+                    local tPlayer = getTargetPlayer(obj.Name)
+                    if tPlayer and tPlayer.Name == obj.Name and obj ~= tPlayer.Character then
+                        if targetPlayersRegistry[tPlayer.UserId] then
+                            refreshCharacter(obj, targetPlayersRegistry[tPlayer.UserId])
+                        end
+                    end
+                end
+            end
+        end)
+    end
 end))
 
--- Deteksi Cutscene by Kamera
+-- Deteksi Cutscene By Kamera (Lebih Sensitif)
 local camera = workspace.CurrentCamera
 local function onCameraSubjectChanged()
     if camera and camera.CameraSubject then
         local subject = camera.CameraSubject
+        local model
+        
         if subject:IsA("Humanoid") then
-            local model = subject.Parent
-            if model and model:IsA("Model") and model ~= localPlayer.Character then
-                task.wait(0.3)
+            model = subject.Parent
+        elseif subject:IsA("BasePart") then
+            model = subject.Parent
+        end
+        
+        if model and model:IsA("Model") and model:FindFirstChild("Humanoid") and model ~= localPlayer.Character then
+            task.wait(0.5)
+            if isCloneOfLocal(model) then
                 refreshCharacter(model, currentConfig)
             end
         end
