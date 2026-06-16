@@ -54,7 +54,7 @@ local KORBLOX_TEXTURE_ID = "rbxassetid://101851254"
 -- Struktur Data
 local spawnedAccessories = {}
 local baseCFrames = {}
-local currentConfig = { _HeadType = "Default" }
+local currentConfig = { _HeadType = "Default", _Favorites = {} }
 local selectedAccessory = nil
 local targetPlayersRegistry = {} 
 
@@ -494,8 +494,10 @@ listFrame.Size, listFrame.Position, listFrame.BackgroundColor3 = UDim2.new(0, 13
 listFrame.BackgroundTransparency = 0.2
 listFrame.BorderSizePixel, listFrame.ScrollBarThickness, listFrame.CanvasSize = UDim2.new(0, 0, 0, 400), 4, UDim2.new(0, 0, 0, 400)
 listFrame.Parent = content
+
 local listLayout = Instance.new("UIListLayout")
 listLayout.Padding = UDim.new(0, 2)
+listLayout.SortOrder = Enum.SortOrder.LayoutOrder -- Menggunakan LayoutOrder agar posisi bisa diurutkan
 listLayout.Parent = listFrame
 
 local panel = Instance.new("Frame")
@@ -695,18 +697,47 @@ btnSave.MouseButton1Click:Connect(function()
 end)
 
 -- ====================================================
--- FUNGSI POPULATE LIST
+-- FUNGSI POPULATE LIST WITH FAVORITE SYSTEM
 -- ====================================================
 local function populateList()
-    for _, child in ipairs(listFrame:GetChildren()) do if child:IsA("TextButton") then child:Destroy() end end
+    if not currentConfig._Favorites then currentConfig._Favorites = {} end
+    
+    for _, child in ipairs(listFrame:GetChildren()) do 
+        if child:IsA("TextButton") then child:Destroy() end 
+    end
+    
     for name, _ in pairs(accessoryIds) do
+        local isFavorite = currentConfig._Favorites[name] or false
+        
         local btn = Instance.new("TextButton")
         btn.Size, btn.BackgroundColor3 = UDim2.new(1, 0, 0, 24), Color3.fromRGB(50, 50, 50)
         btn.BackgroundTransparency = 0.2
-        btn.Text, btn.TextColor3 = name, Color3.fromRGB(255, 255, 255)
+        btn.Text, btn.TextColor3 = "  " .. name, Color3.fromRGB(255, 255, 255)
         btn.Font, btn.TextSize, btn.BorderSizePixel = Enum.Font.SourceSans, 12, 0
+        btn.TextXAlignment = Enum.TextXAlignment.Left
+        
+        -- Mengatur urutan: Favorite mendapatkan LayoutOrder 1 (di atas), non-favorite mendapat 2
+        btn.LayoutOrder = isFavorite and 1 or 2
         btn.Parent = listFrame
+        
         btn.MouseButton1Click:Connect(function() selectedAccessory = name; updateUIText() end)
+        
+        -- Membuat tombol Favorite (Bintang)
+        local favBtn = Instance.new("TextButton")
+        favBtn.Size = UDim2.new(0, 24, 0, 24)
+        favBtn.Position = UDim2.new(1, -24, 0, 0)
+        favBtn.BackgroundTransparency = 1
+        favBtn.Text = isFavorite and "⭐" or "☆"
+        favBtn.TextColor3 = isFavorite and Color3.fromRGB(255, 200, 0) or Color3.fromRGB(150, 150, 150)
+        favBtn.Font = Enum.Font.SourceSansBold
+        favBtn.TextSize = 14
+        favBtn.BorderSizePixel = 0
+        favBtn.Parent = btn
+        
+        favBtn.MouseButton1Click:Connect(function()
+            currentConfig._Favorites[name] = not currentConfig._Favorites[name]
+            populateList() -- Re-populate untuk langsung memperbarui urutan posisi ke paling atas
+        end)
     end
 end
 
@@ -723,6 +754,7 @@ btnLoad.MouseButton1Click:Connect(function()
                         accessoryIds[k] = v.assetId
                     end
                 end 
+                if not currentConfig._Favorites then currentConfig._Favorites = {} end
                 for n, id in pairs(accessoryIds) do initConfig(n, id) end
                 populateList()
             end
