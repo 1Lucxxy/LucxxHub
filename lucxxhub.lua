@@ -5,7 +5,7 @@ if getgenv()._LucxxHubCleanup then
     pcall(getgenv()._LucxxHubCleanup)
 end
 
-local scriptConnections = {}
+local scriptConnections = {} -- Tabel koneksi event
 
 -- ====================================================
 -- GLOBAL CONFIG & UTILITIES
@@ -18,6 +18,7 @@ local RunService = game:GetService("RunService")
 local localPlayer = Players.LocalPlayer
 local FILE_NAME = "AccessoryCustomConfigV4_2.json"
 
+-- Daftar Aksesoris Default
 local accessoryIds = {
     ["Black Valk"] = 124730194,
     ["Violet Valk"] = 1402432199,
@@ -28,6 +29,7 @@ local accessoryIds = {
     ["Fiery Horns"] = 215718515
 }
 
+-- ID Khusus Model Kepala
 local HEAD_IDS = {
     ["Death Walker"] = 99223542650102,
     ["UGC Headless"] = 15093053680
@@ -36,6 +38,7 @@ local HEAD_IDS = {
 local KORBLOX_MESH_ID = "rbxassetid://101851696"
 local KORBLOX_TEXTURE_ID = "rbxassetid://101851254"
 
+-- Struktur Data
 local spawnedAccessories = {}
 local baseCFrames = {}
 local currentConfig = { _HeadType = "Default" }
@@ -49,6 +52,7 @@ local function deepCopy(t)
     return res
 end
 
+-- Menyimpan AssetId ke Config
 local function initConfig(name, id)
     if not currentConfig[name] then
         currentConfig[name] = { pos = {0,0,0}, rot = {0,0,0}, scale = 1, enabled = true, assetId = id }
@@ -394,16 +398,16 @@ table.insert(scriptConnections, RunService.Stepped:Connect(function()
 end))
 
 -- ====================================================
--- INISIALISASI WINDUI
+-- INJEKSI & INISIALISASI WINDUI RESMI (STABIL)
 -- ====================================================
-local WindUI = loadstring(game:HttpGet("https://tree-hub.vercel.app/api/UI/WindUI"))()
+local WindUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/iK4st/WindUI/main/Source.lua"))()
 
 local Window = WindUI:CreateWindow({
     Title = "Accessory Configurator PRO V4.2",
     Icon = "rbxassetid://10709796265",
     Author = "LucxxHub",
     Folder = "LucxxHubConfig",
-    Size = UDim2.fromOffset(580, 480),
+    Size = UDim2.fromOffset(580, 460),
     Transparent = true,
     Theme = "Dark",
 })
@@ -418,14 +422,6 @@ local function getAccessoryNames()
     return names
 end
 
-local function parseCSV(str, default)
-    local parts = string.split(str, ",")
-    if #parts >= 3 then
-        return {tonumber(parts[1]) or default[1], tonumber(parts[2]) or default[2], tonumber(parts[3]) or default[3]}
-    end
-    return default
-end
-
 local function notifyWrap(title, content)
     pcall(function() WindUI:Notify({Title = title, Content = content, Duration = 3}) end)
 end
@@ -433,9 +429,10 @@ end
 -- ================== TAB 1: EDITOR ==================
 MainTab:Section({ Title = "Accessory Selection & Custom ID" })
 
-local DropdownState = MainTab:Dropdown({
+local DropdownAccessory = MainTab:Dropdown({
     Title = "Selected Accessory",
-    Values = getAccessoryNames(),
+    Options = getAccessoryNames(),
+    Values = getAccessoryNames(), -- Fallback universal key untuk bercabang versi WindUI
     Default = "Black Valk",
     Callback = function(value)
         selectedAccessory = value
@@ -444,6 +441,7 @@ local DropdownState = MainTab:Dropdown({
 
 MainTab:Toggle({
     Title = "Accessory Status (ON/OFF)",
+    Value = true,
     Default = true,
     Callback = function(state)
         if not selectedAccessory then return end
@@ -493,8 +491,6 @@ MainTab:Button({
             accessoryIds[newName] = id
             initConfig(newName, id)
             
-            -- WindUI Dropdown update workaround if SetValues doesn't exist natively.
-            -- Using re-population logic or just notify the user.
             notifyWrap("Success", "Berhasil menambahkan: " .. newName)
             if localPlayer.Character then wearAccessory(localPlayer.Character, newName, id, currentConfig) end
         else
@@ -503,36 +499,31 @@ MainTab:Button({
     end
 })
 
+-- SEKAT KEDUA
 MainTab:Section({ Title = "Transformations (Offset & Scale)" })
 
-local inPos, inRot, inScale = "0, 0, 0", "0, 0, 0", "1"
+local tx, ty, tz = "0", "0", "0"
+local rx, ry, rz = "0", "0", "0"
+local tscale = "1"
 
-MainTab:Input({
-    Title = "Position (X, Y, Z)",
-    Placeholder = "Contoh: 0, 1.5, 0",
-    Callback = function(v) inPos = v end
-})
+MainTab:Input({ Title = "Position X", Placeholder = "0", Callback = function(v) tx = v end })
+MainTab:Input({ Title = "Position Y", Placeholder = "0", Callback = function(v) ty = v end })
+MainTab:Input({ Title = "Position Z", Placeholder = "0", Callback = function(v) tz = v end })
 
-MainTab:Input({
-    Title = "Rotation (X, Y, Z) in Degrees",
-    Placeholder = "Contoh: 0, 90, 0",
-    Callback = function(v) inRot = v end
-})
+MainTab:Input({ Title = "Rotation X (Degrees)", Placeholder = "0", Callback = function(v) rx = v end })
+MainTab:Input({ Title = "Rotation Y (Degrees)", Placeholder = "0", Callback = function(v) ry = v end })
+MainTab:Input({ Title = "Rotation Z (Degrees)", Placeholder = "0", Callback = function(v) rz = v end })
 
-MainTab:Input({
-    Title = "Overall Scale",
-    Placeholder = "Contoh: 1",
-    Callback = function(v) inScale = v end
-})
+MainTab:Input({ Title = "Overall Scale", Placeholder = "1", Callback = function(v) tscale = v end })
 
 MainTab:Button({
     Title = "Apply Vector Transformations",
     Callback = function()
         if not selectedAccessory then return end
         
-        currentConfig[selectedAccessory].pos = parseCSV(inPos, currentConfig[selectedAccessory].pos)
-        currentConfig[selectedAccessory].rot = parseCSV(inRot, currentConfig[selectedAccessory].rot)
-        currentConfig[selectedAccessory].scale = tonumber(inScale) or currentConfig[selectedAccessory].scale
+        currentConfig[selectedAccessory].pos = {tonumber(tx) or 0, tonumber(ty) or 0, tonumber(tz) or 0}
+        currentConfig[selectedAccessory].rot = {tonumber(rx) or 0, tonumber(ry) or 0, tonumber(rz) or 0}
+        currentConfig[selectedAccessory].scale = tonumber(tscale) or 1
         
         if localPlayer.Character then applyConfigToSpecific(localPlayer.Character, selectedAccessory, currentConfig) end
 
@@ -549,10 +540,12 @@ MainTab:Button({
     end
 })
 
+-- SEKAT KETIGA
 MainTab:Section({ Title = "Character Modifiers & Target" })
 
 MainTab:Dropdown({
     Title = "Head State Modifier",
+    Options = {"Default", "Death Walker", "UGC Headless"},
     Values = {"Default", "Death Walker", "UGC Headless"},
     Default = "Default",
     Callback = function(val)
@@ -630,7 +623,7 @@ ConfigTab:Button({
     end
 })
 
--- Runtime Exec
+-- Runtime Startup
 if localPlayer.Character then refreshCharacter(localPlayer.Character, currentConfig) end
 table.insert(scriptConnections, localPlayer.CharacterAdded:Connect(function(char) task.wait(1); refreshCharacter(char, currentConfig) end))
 task.spawn(loadConfigLogic)
