@@ -5,7 +5,7 @@ if getgenv()._LucxxHubCleanup then
     pcall(getgenv()._LucxxHubCleanup)
 end
 
-local scriptConnections = {} -- Tabel untuk menyimpan semua koneksi event
+local scriptConnections = {}
 
 -- ====================================================
 -- GLOBAL CONFIG & UTILITIES
@@ -18,7 +18,6 @@ local RunService = game:GetService("RunService")
 local localPlayer = Players.LocalPlayer
 local FILE_NAME = "AccessoryCustomConfigV4_2.json"
 
--- Daftar Aksesoris Default
 local accessoryIds = {
     ["Black Valk"] = 124730194,
     ["Violet Valk"] = 1402432199,
@@ -29,7 +28,6 @@ local accessoryIds = {
     ["Fiery Horns"] = 215718515
 }
 
--- ID Khusus Model Kepala
 local HEAD_IDS = {
     ["Death Walker"] = 99223542650102,
     ["UGC Headless"] = 15093053680
@@ -38,7 +36,6 @@ local HEAD_IDS = {
 local KORBLOX_MESH_ID = "rbxassetid://101851696"
 local KORBLOX_TEXTURE_ID = "rbxassetid://101851254"
 
--- Struktur Data
 local spawnedAccessories = {}
 local baseCFrames = {}
 local currentConfig = { _HeadType = "Default" }
@@ -52,7 +49,6 @@ local function deepCopy(t)
     return res
 end
 
--- Menyimpan AssetId ke Config
 local function initConfig(name, id)
     if not currentConfig[name] then
         currentConfig[name] = { pos = {0,0,0}, rot = {0,0,0}, scale = 1, enabled = true, assetId = id }
@@ -80,12 +76,7 @@ local function wearHeadModel(char, headType)
             end
         end
 
-        local handle
-        if result:IsA("BasePart") then
-            handle = result
-        else
-            handle = result:FindFirstChild("Handle") or result:FindFirstChildOfClass("Part") or result:FindFirstChildOfClass("MeshPart")
-        end
+        local handle = result:IsA("BasePart") and result or (result:FindFirstChild("Handle") or result:FindFirstChildOfClass("Part") or result:FindFirstChildOfClass("MeshPart"))
 
         if handle then
             handle.Transparency = 0
@@ -192,12 +183,7 @@ local function wearAccessory(char, name, assetId, configTable)
             end
         end
 
-        local handle
-        if result:IsA("BasePart") then
-            handle = result
-        else
-            handle = result:FindFirstChild("Handle") or result:FindFirstChildOfClass("Part") or result:FindFirstChildOfClass("MeshPart")
-        end
+        local handle = result:IsA("BasePart") and result or (result:FindFirstChild("Handle") or result:FindFirstChildOfClass("Part") or result:FindFirstChildOfClass("MeshPart"))
 
         if handle then
             handle.Transparency = 0
@@ -256,36 +242,25 @@ local function applyKorblox(char)
         local rFoot = char:FindFirstChild("RightFoot")
         
         if rUpper and rLower and rFoot then
-            rUpper.Transparency = 1
-            rLower.Transparency = 1
-            rFoot.Transparency = 1
-            
+            rUpper.Transparency = 1; rLower.Transparency = 1; rFoot.Transparency = 1
             local oldFake = char:FindFirstChild("FakeKorbloxLeg")
             if oldFake then oldFake:Destroy() end
             
             local fakeLeg = Instance.new("Part")
             fakeLeg.Name = "FakeKorbloxLeg"
             fakeLeg.Size = Vector3.new(1, 2, 1)
-            fakeLeg.Anchored = false
-            fakeLeg.CanCollide = false
-            fakeLeg.Transparency = 0
-            fakeLeg.Archivable = true
+            fakeLeg.Anchored = false; fakeLeg.CanCollide = false; fakeLeg.Transparency = 0; fakeLeg.Archivable = true
             
             local mesh = Instance.new("SpecialMesh")
             mesh.MeshType, mesh.MeshId, mesh.TextureId = Enum.MeshType.FileMesh, KORBLOX_MESH_ID, KORBLOX_TEXTURE_ID
             mesh.Scale = Vector3.new(1, 1, 1)
-            mesh.Archivable = true
-            mesh.Parent = fakeLeg
+            mesh.Archivable = true; mesh.Parent = fakeLeg
             
             fakeLeg.Parent = char
-            
             local weld = Instance.new("Weld")
             weld.Name = "KorbloxWeld"
-            weld.Part0 = rUpper
-            weld.Part1 = fakeLeg
-            weld.C0 = CFrame.new(0, -0.4, 0)
-            weld.Archivable = true
-            weld.Parent = fakeLeg
+            weld.Part0 = rUpper; weld.Part1 = fakeLeg; weld.C0 = CFrame.new(0, -0.4, 0)
+            weld.Archivable = true; weld.Parent = fakeLeg
         end
     end
 end
@@ -331,36 +306,27 @@ for _, p in ipairs(Players:GetPlayers()) do monitorPlayer(p) end
 table.insert(scriptConnections, Players.PlayerAdded:Connect(monitorPlayer))
 table.insert(scriptConnections, Players.PlayerRemoving:Connect(function(p) targetPlayersRegistry[p.UserId] = nil end))
 
--- Deteksi Workspace
 table.insert(scriptConnections, workspace.DescendantAdded:Connect(function(obj)
     if obj:IsA("Model") and obj:FindFirstChild("Humanoid") then
         task.wait(0.5)
         local isLocalClone = false
-        
-        if obj.Name == localPlayer.Name and obj ~= localPlayer.Character then
-            isLocalClone = true
+        if obj.Name == localPlayer.Name and obj ~= localPlayer.Character then isLocalClone = true
         else
             local myShirt = localPlayer.Character and localPlayer.Character:FindFirstChildOfClass("Shirt")
             local cloneShirt = obj:FindFirstChildOfClass("Shirt")
-            if myShirt and cloneShirt and myShirt.ShirtTemplate == cloneShirt.ShirtTemplate then
-                isLocalClone = true
-            end
+            if myShirt and cloneShirt and myShirt.ShirtTemplate == cloneShirt.ShirtTemplate then isLocalClone = true end
         end
 
-        if isLocalClone then
-            refreshCharacter(obj, currentConfig)
+        if isLocalClone then refreshCharacter(obj, currentConfig)
         else
             local tPlayer = getTargetPlayer(obj.Name)
             if tPlayer and tPlayer.Name == obj.Name and obj ~= tPlayer.Character then
-                if targetPlayersRegistry[tPlayer.UserId] then
-                    refreshCharacter(obj, targetPlayersRegistry[tPlayer.UserId])
-                end
+                if targetPlayersRegistry[tPlayer.UserId] then refreshCharacter(obj, targetPlayersRegistry[tPlayer.UserId]) end
             end
         end
     end
 end))
 
--- Deteksi Cutscene by Kamera
 local camera = workspace.CurrentCamera
 local function onCameraSubjectChanged()
     if camera and camera.CameraSubject then
@@ -380,20 +346,16 @@ if camera then
     task.spawn(onCameraSubjectChanged)
 end
 
--- Deteksi First Person Transparansi
 table.insert(scriptConnections, RunService.Stepped:Connect(function()
     local function enforceTransparency(char, config)
         if not char then return end
-        
         local head = char:FindFirstChild("Head")
         local ltm = head and head.LocalTransparencyModifier or 0
         
         if spawnedAccessories[char] then
             for _, acc in pairs(spawnedAccessories[char]) do
                 for _, v in ipairs(acc:GetDescendants()) do
-                    if v:IsA("BasePart") then
-                        v.LocalTransparencyModifier = ltm
-                    end
+                    if v:IsA("BasePart") then v.LocalTransparencyModifier = ltm end
                 end
             end
         end
@@ -401,9 +363,7 @@ table.insert(scriptConnections, RunService.Stepped:Connect(function()
         local customHead = char:FindFirstChild("CustomHeadModel")
         if customHead then
             for _, v in ipairs(customHead:GetDescendants()) do
-                if v:IsA("BasePart") then
-                    v.LocalTransparencyModifier = ltm
-                end
+                if v:IsA("BasePart") then v.LocalTransparencyModifier = ltm end
             end
         end
         
@@ -434,172 +394,145 @@ table.insert(scriptConnections, RunService.Stepped:Connect(function()
 end))
 
 -- ====================================================
--- INISIALISASI LINORIA LIBRARY GUI
+-- INISIALISASI WINDUI
 -- ====================================================
-local repo = 'https://raw.githubusercontent.com/violin-suzutsuki/LinoriaLib/main/'
-local Library = loadstring(game:HttpGet(repo .. 'Library.lua'))()
-local ThemeManager = loadstring(game:HttpGet(repo .. 'addons/ThemeManager.lua'))()
+local WindUI = loadstring(game:HttpGet("https://tree-hub.vercel.app/api/UI/WindUI"))()
 
-local Window = Library:CreateWindow({
-    Title = 'Accessory Configurator PRO V4.2',
-    Center = true,
-    AutoShow = true,
-    TabPadding = 8,
-    MenuFadeTime = 0.2
+local Window = WindUI:CreateWindow({
+    Title = "Accessory Configurator PRO V4.2",
+    Icon = "rbxassetid://10709796265",
+    Author = "LucxxHub",
+    Folder = "LucxxHubConfig",
+    Size = UDim2.fromOffset(580, 480),
+    Transparent = true,
+    Theme = "Dark",
 })
 
--- Membuat Tab Menu
-local Tabs = {
-    Main = Window:AddTab('Editor'),
-    Config = Window:AddTab('Configuration')
-}
+local MainTab = Window:Tab({ Title = "Editor", Icon = "rbxassetid://10709796265" })
+local ConfigTab = Window:Tab({ Title = "Configuration", Icon = "rbxassetid://10709783424" })
 
--- Sekat Visual (Groupbox) di Dalam Satu Tab Utama (Main)
-local AccessoryGroup = Tabs.Main:AddLeftGroupbox('Accessory Selection & Custom ID')
-local TransformGroup = Tabs.Main:AddRightGroupbox('Transformations (Offset & Scale)')
-local ModifierGroup = Tabs.Main:AddLeftGroupbox('Character Modifiers & Target')
-
--- Utility untuk mendapatkan daftar nama aksesoris terkini
 local function getAccessoryNames()
     local names = {}
-    for name, _ in pairs(accessoryIds) do
-        table.insert(names, name)
-    end
+    for name, _ in pairs(accessoryIds) do table.insert(names, name) end
     table.sort(names)
     return names
 end
 
--- ====================================================
--- KONTROL UI SYNC & BINDING
--- ====================================================
-local updatingUI = false
-local function updateUIText()
-    if not selectedAccessory or updatingUI then return end
-    updatingUI = true
-    
-    local cfg = currentConfig[selectedAccessory]
-    if cfg then
-        if Library.Options.PosX then Library.Options.PosX:SetValue(tostring(cfg.pos[1])) end
-        if Library.Options.PosY then Library.Options.PosY:SetValue(tostring(cfg.pos[2])) end
-        if Library.Options.PosZ then Library.Options.PosZ:SetValue(tostring(cfg.pos[3])) end
-        
-        if Library.Options.RotX then Library.Options.RotX:SetValue(tostring(cfg.rot[1])) end
-        if Library.Options.RotY then Library.Options.RotY:SetValue(tostring(cfg.rot[2])) end
-        if Library.Options.RotZ then Library.Options.RotZ:SetValue(tostring(cfg.rot[3])) end
-        
-        if Library.Options.ScaleInput then Library.Options.ScaleInput:SetValue(tostring(cfg.scale)) end
-        if Library.Toggles.AccessoryStatus then Library.Toggles.AccessoryStatus:SetValue(cfg.enabled) end
+local function parseCSV(str, default)
+    local parts = string.split(str, ",")
+    if #parts >= 3 then
+        return {tonumber(parts[1]) or default[1], tonumber(parts[2]) or default[2], tonumber(parts[3]) or default[3]}
     end
-    updatingUI = false
+    return default
 end
 
--- 1. GROUPBOX: ACCESSORY SELECTION
-local AccessoryDropdown = AccessoryGroup:AddDropdown('SelectedAccessory', {
+local function notifyWrap(title, content)
+    pcall(function() WindUI:Notify({Title = title, Content = content, Duration = 3}) end)
+end
+
+-- ================== TAB 1: EDITOR ==================
+MainTab:Section({ Title = "Accessory Selection & Custom ID" })
+
+local DropdownState = MainTab:Dropdown({
+    Title = "Selected Accessory",
     Values = getAccessoryNames(),
-    Default = 1,
-    Multi = false,
-    Text = 'Select Accessory',
-    Tooltip = 'Pilih aksesoris yang ingin kamu edit transformasinya',
+    Default = "Black Valk",
+    Callback = function(value)
+        selectedAccessory = value
+    end
 })
 
-AccessoryDropdown:OnChanged(function()
-    selectedAccessory = AccessoryDropdown.Value
-    updateUIText()
-end)
-
-AccessoryGroup:AddToggle('AccessoryStatus', {
-    Text = 'Accessory Status (ON/OFF)',
+MainTab:Toggle({
+    Title = "Accessory Status (ON/OFF)",
     Default = true,
-    Tooltip = 'Aktifkan atau matikan aksesoris terpilih',
-})
-
-Library.Toggles.AccessoryStatus:OnChanged(function()
-    if updatingUI or not selectedAccessory then return end
-    currentConfig[selectedAccessory].enabled = Library.Toggles.AccessoryStatus.Value
-    
-    if localPlayer.Character then
-        if currentConfig[selectedAccessory].enabled then
-            wearAccessory(localPlayer.Character, selectedAccessory, accessoryIds[selectedAccessory], currentConfig)
-        else
-            if spawnedAccessories[localPlayer.Character] and spawnedAccessories[localPlayer.Character][selectedAccessory] then
-                spawnedAccessories[localPlayer.Character][selectedAccessory]:Destroy()
-                spawnedAccessories[localPlayer.Character][selectedAccessory] = nil
+    Callback = function(state)
+        if not selectedAccessory then return end
+        currentConfig[selectedAccessory].enabled = state
+        
+        if localPlayer.Character then
+            if currentConfig[selectedAccessory].enabled then
+                wearAccessory(localPlayer.Character, selectedAccessory, accessoryIds[selectedAccessory], currentConfig)
+            else
+                if spawnedAccessories[localPlayer.Character] and spawnedAccessories[localPlayer.Character][selectedAccessory] then
+                    spawnedAccessories[localPlayer.Character][selectedAccessory]:Destroy()
+                    spawnedAccessories[localPlayer.Character][selectedAccessory] = nil
+                end
             end
         end
-    end
 
-    for userId, config in pairs(targetPlayersRegistry) do
-        local p = Players:GetPlayerByUserId(userId)
-        if p and p.Character then
-            config[selectedAccessory].enabled = currentConfig[selectedAccessory].enabled
-            if config[selectedAccessory].enabled then
-                wearAccessory(p.Character, selectedAccessory, accessoryIds[selectedAccessory], config)
-            else
-                if spawnedAccessories[p.Character] and spawnedAccessories[p.Character][selectedAccessory] then
-                    spawnedAccessories[p.Character][selectedAccessory]:Destroy()
-                    spawnedAccessories[p.Character][selectedAccessory] = nil
+        for userId, config in pairs(targetPlayersRegistry) do
+            local p = Players:GetPlayerByUserId(userId)
+            if p and p.Character then
+                config[selectedAccessory].enabled = state
+                if state then wearAccessory(p.Character, selectedAccessory, accessoryIds[selectedAccessory], config)
+                else
+                    if spawnedAccessories[p.Character] and spawnedAccessories[p.Character][selectedAccessory] then
+                        spawnedAccessories[p.Character][selectedAccessory]:Destroy()
+                        spawnedAccessories[p.Character][selectedAccessory] = nil
+                    end
                 end
             end
         end
     end
-end)
-
-AccessoryGroup:AddInput('CustomIDInput', {
-    Default = '',
-    Numeric = true,
-    Finished = true,
-    Text = 'Add Accessory by Catalog ID',
-    Placeholder = 'Masukkan Asset ID...',
 })
 
-AccessoryGroup:AddButton({
-    Text = 'Load & Add Catalog ID',
-    Func = function()
-        local id = tonumber(Library.Options.CustomIDInput.Value)
+local customIdRaw = ""
+MainTab:Input({
+    Title = "Add Accessory by Catalog ID",
+    Placeholder = "Masukkan Asset ID...",
+    Callback = function(text) customIdRaw = text end
+})
+
+MainTab:Button({
+    Title = "Load & Add Catalog ID",
+    Callback = function()
+        local id = tonumber(customIdRaw)
         if id then
-            Library:Notify("Fetching item metadata...", 2)
             local success, info = pcall(function() return MarketplaceService:GetProductInfo(id) end)
             local newName = success and info.Name or ("Custom_" .. id)
             accessoryIds[newName] = id
             initConfig(newName, id)
             
-            AccessoryDropdown:SetValues(getAccessoryNames())
-            AccessoryDropdown:SetValue(newName)
-            
+            -- WindUI Dropdown update workaround if SetValues doesn't exist natively.
+            -- Using re-population logic or just notify the user.
+            notifyWrap("Success", "Berhasil menambahkan: " .. newName)
             if localPlayer.Character then wearAccessory(localPlayer.Character, newName, id, currentConfig) end
-            Library:Notify("Successfully added: " .. newName, 3)
         else
-            Library:Notify("ID Catalog tidak valid!", 3)
+            notifyWrap("Error", "ID tidak valid!")
         end
     end
 })
 
--- 2. GROUPBOX: TRANSFORMATIONS
-TransformGroup:AddInput('PosX', { Default = '0', Numeric = false, Finished = false, Text = 'Position Offset X' })
-TransformGroup:AddInput('PosY', { Default = '0', Numeric = false, Finished = false, Text = 'Position Offset Y' })
-TransformGroup:AddInput('PosZ', { Default = '0', Numeric = false, Finished = false, Text = 'Position Offset Z' })
+MainTab:Section({ Title = "Transformations (Offset & Scale)" })
 
-TransformGroup:AddInput('RotX', { Default = '0', Numeric = false, Finished = false, Text = 'Rotation X (Deg)' })
-TransformGroup:AddInput('RotY', { Default = '0', Numeric = false, Finished = false, Text = 'Rotation Y (Deg)' })
-TransformGroup:AddInput('RotZ', { Default = '0', Numeric = false, Finished = false, Text = 'Rotation Z (Deg)' })
+local inPos, inRot, inScale = "0, 0, 0", "0, 0, 0", "1"
 
-TransformGroup:AddInput('ScaleInput', { Default = '1', Numeric = false, Finished = false, Text = 'Overall Scale' })
+MainTab:Input({
+    Title = "Position (X, Y, Z)",
+    Placeholder = "Contoh: 0, 1.5, 0",
+    Callback = function(v) inPos = v end
+})
 
-TransformGroup:AddButton({
-    Text = 'Apply Vector Transformations',
-    Func = function()
+MainTab:Input({
+    Title = "Rotation (X, Y, Z) in Degrees",
+    Placeholder = "Contoh: 0, 90, 0",
+    Callback = function(v) inRot = v end
+})
+
+MainTab:Input({
+    Title = "Overall Scale",
+    Placeholder = "Contoh: 1",
+    Callback = function(v) inScale = v end
+})
+
+MainTab:Button({
+    Title = "Apply Vector Transformations",
+    Callback = function()
         if not selectedAccessory then return end
-        currentConfig[selectedAccessory].pos = {
-            tonumber(Library.Options.PosX.Value) or 0,
-            tonumber(Library.Options.PosY.Value) or 0,
-            tonumber(Library.Options.PosZ.Value) or 0
-        }
-        currentConfig[selectedAccessory].rot = {
-            tonumber(Library.Options.RotX.Value) or 0,
-            tonumber(Library.Options.RotY.Value) or 0,
-            tonumber(Library.Options.RotZ.Value) or 0
-        }
-        currentConfig[selectedAccessory].scale = tonumber(Library.Options.ScaleInput.Value) or 1
+        
+        currentConfig[selectedAccessory].pos = parseCSV(inPos, currentConfig[selectedAccessory].pos)
+        currentConfig[selectedAccessory].rot = parseCSV(inRot, currentConfig[selectedAccessory].rot)
+        currentConfig[selectedAccessory].scale = tonumber(inScale) or currentConfig[selectedAccessory].scale
         
         if localPlayer.Character then applyConfigToSpecific(localPlayer.Character, selectedAccessory, currentConfig) end
 
@@ -612,61 +545,52 @@ TransformGroup:AddButton({
                 applyConfigToSpecific(p.Character, selectedAccessory, config)
             end
         end
-        Library:Notify("Transformations successfully updated!", 2)
+        notifyWrap("Applied", "Transformasi berhasil diterapkan ke: " .. selectedAccessory)
     end
 })
 
--- 3. GROUPBOX: MODIFIERS & TARGET PLAYER
-local function changeHead(typeStr)
-    currentConfig._HeadType = typeStr
-    if localPlayer.Character then refreshCharacter(localPlayer.Character, currentConfig) end
-    
-    for userId, config in pairs(targetPlayersRegistry) do
-        local p = Players:GetPlayerByUserId(userId)
-        if p and p.Character then
-            config._HeadType = typeStr
-            refreshCharacter(p.Character, config)
+MainTab:Section({ Title = "Character Modifiers & Target" })
+
+MainTab:Dropdown({
+    Title = "Head State Modifier",
+    Values = {"Default", "Death Walker", "UGC Headless"},
+    Default = "Default",
+    Callback = function(val)
+        currentConfig._HeadType = val
+        if localPlayer.Character then refreshCharacter(localPlayer.Character, currentConfig) end
+        for userId, config in pairs(targetPlayersRegistry) do
+            local p = Players:GetPlayerByUserId(userId)
+            if p and p.Character then
+                config._HeadType = val
+                refreshCharacter(p.Character, config)
+            end
         end
     end
-end
-
-ModifierGroup:AddDropdown('HeadTypeSelection', {
-    Values = { 'Default', 'Death Walker', 'UGC Headless' },
-    Default = 1,
-    Multi = false,
-    Text = 'Head State Modifier',
 })
 
-Library.Options.HeadTypeSelection:OnChanged(function()
-    changeHead(Library.Options.HeadTypeSelection.Value)
-end)
-
-ModifierGroup:AddInput('TargetPlayerInput', {
-    Default = '',
-    Numeric = false,
-    Finished = true,
-    Text = 'Target Player Username',
-    Placeholder = 'Nama atau Display Name...',
+local tPlayerInput = ""
+MainTab:Input({
+    Title = "Target Player Username",
+    Placeholder = "Nama atau Display Name...",
+    Callback = function(v) tPlayerInput = v end
 })
 
-ModifierGroup:AddButton({
-    Text = 'Lock Settings to Target Player',
-    Func = function()
-        local p = getTargetPlayer(Library.Options.TargetPlayerInput.Value)
+MainTab:Button({
+    Title = "Lock Settings to Target Player",
+    Callback = function()
+        local p = getTargetPlayer(tPlayerInput)
         if p then
             targetPlayersRegistry[p.UserId] = deepCopy(currentConfig)
             if p.Character then refreshCharacter(p.Character, targetPlayersRegistry[p.UserId]) end
-            Library:Notify("Successfully locked config to: " .. p.Name, 3)
+            notifyWrap("Target Locked", "Config dikunci ke: " .. p.Name)
         else
-            Library:Notify("Error: Player tidak ditemukan!", 3)
+            notifyWrap("Error", "Player tidak ditemukan!")
         end
     end
 })
 
--- ====================================================
--- TAB CONFIGURATION (SAVE / LOAD SYSTEM JSON)
--- ====================================================
-local FileConfigGroup = Tabs.Config:AddLeftGroupbox('JSON File Configuration')
+-- ================== TAB 2: CONFIGURATION ==================
+ConfigTab:Section({ Title = "JSON File Configuration" })
 
 local function loadConfigLogic()
     if readfile and isfile and isfile(FILE_NAME) then
@@ -676,56 +600,43 @@ local function loadConfigLogic()
             if ds then 
                 for k, v in pairs(dec) do 
                     currentConfig[k] = v 
-                    if type(v) == "table" and v.assetId then
-                        accessoryIds[k] = v.assetId
-                    end
+                    if type(v) == "table" and v.assetId then accessoryIds[k] = v.assetId end
                 end 
                 for n, id in pairs(accessoryIds) do initConfig(n, id) end
-                AccessoryDropdown:SetValues(getAccessoryNames())
             end
         end
     end
-    updateUIText()
     if localPlayer.Character then refreshCharacter(localPlayer.Character, currentConfig) end
 end
 
-FileConfigGroup:AddButton({
-    Text = 'Save Active Config to File',
-    Func = function()
+ConfigTab:Button({
+    Title = "Save Active Config to File",
+    Callback = function()
         if writefile then
             local success, encoded = pcall(function() return HttpService:JSONEncode(currentConfig) end)
             if success then 
                 writefile(FILE_NAME, encoded)
-                Library:Notify("Configuration successfully saved to storage!", 3)
-            else
-                Library:Notify("Failed to serialize settings data.", 3)
+                notifyWrap("Success", "Konfigurasi tersimpan di workspace!")
             end
-        else
-            Library:Notify("Executor tidak mendukung writefile!", 3)
         end
     end
 })
 
-FileConfigGroup:AddButton({
-    Text = 'Load Config from File',
-    Func = function()
+ConfigTab:Button({
+    Title = "Load Config from File",
+    Callback = function()
         loadConfigLogic()
-        Library:Notify("Configuration loaded and compiled successfully!", 3)
+        notifyWrap("Loaded", "Konfigurasi dimuat dari file!")
     end
 })
 
--- Integrasi Pengaturan Tema Linoria pada Tab Config (Sisi Kanan)
-ThemeManager:SetLibrary(Library)
-ThemeManager:SetFolder('LucxxHubConfig')
-ThemeManager:ApplyToTab(Tabs.Config)
-
--- Runtime Startup Execution
+-- Runtime Exec
 if localPlayer.Character then refreshCharacter(localPlayer.Character, currentConfig) end
 table.insert(scriptConnections, localPlayer.CharacterAdded:Connect(function(char) task.wait(1); refreshCharacter(char, currentConfig) end))
-task.spawn(function() loadConfigLogic() end)
+task.spawn(loadConfigLogic)
 
 -- ====================================================
--- MENDAFTARKAN FUNGSI CLEANUP UNTUK EKSEKUSI BERIKUTNYA
+-- MENDAFTARKAN FUNGSI CLEANUP
 -- ====================================================
 getgenv()._LucxxHubCleanup = function()
     for _, conn in ipairs(scriptConnections) do
@@ -733,8 +644,7 @@ getgenv()._LucxxHubCleanup = function()
     end
     table.clear(scriptConnections)
 
-    -- Menghancurkan Base Core UI Linoria
-    pcall(function() Library:Destroy() end)
+    pcall(function() Window:Destroy() end)
 
     for char, accs in pairs(spawnedAccessories) do
         for _, acc in pairs(accs) do
@@ -745,7 +655,6 @@ getgenv()._LucxxHubCleanup = function()
     for _, p in ipairs(Players:GetPlayers()) do
         if p.Character then
             local char = p.Character
-            
             local customHead = char:FindFirstChild("CustomHeadModel")
             if customHead then customHead:Destroy() end
             
