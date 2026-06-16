@@ -1,5 +1,3 @@
-task.wait(3) -- Menunggu game selesai loading
-
 -- ====================================================
 -- SISTEM CLEANUP (MENCEGAH OVERLAP SAAT RE-EXECUTE)
 -- ====================================================
@@ -20,8 +18,18 @@ local RunService = game:GetService("RunService")
 local localPlayer = Players.LocalPlayer
 local FILE_NAME = "AccessoryCustomConfigV4_2.json"
 
--- Memaksa GUI masuk ke PlayerGui karena update Delta
-local GUI_PARENT = localPlayer:WaitForChild("PlayerGui")
+-- Menentukan tempat GUI yang aman (Support executor PC & Mobile)
+local GUI_PARENT
+if gethui then
+    GUI_PARENT = gethui()
+else
+    local success, cg = pcall(function() return game:GetService("CoreGui") end)
+    if success and cg then
+        GUI_PARENT = cg
+    else
+        GUI_PARENT = localPlayer:WaitForChild("PlayerGui")
+    end
+end
 
 -- Daftar Aksesoris Default
 local accessoryIds = {
@@ -315,7 +323,7 @@ local function refreshCharacter(char, configTable)
 end
 
 -- ====================================================
--- SISTEM LOCK & DETEKSI CUTSCENE / CLONE
+-- SISTEM LOCK & DETEKSI CUTSCENE / CLONE (UPDATED)
 -- ====================================================
 local function getTargetPlayer(nameStr)
     nameStr = nameStr:lower()
