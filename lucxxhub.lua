@@ -14,9 +14,11 @@ local Players = game:GetService("Players")
 local HttpService = game:GetService("HttpService")
 local MarketplaceService = game:GetService("MarketplaceService")
 local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TextChatService = game:GetService("TextChatService")
 
 local localPlayer = Players.LocalPlayer
-local FILE_NAME = "AccessoryCustomConfigV4_2.json"
+local FILE_NAME = "AccessoryCustomConfigV4_4.json"
 
 -- Menentukan tempat GUI yang aman (Support executor PC & Mobile)
 local GUI_PARENT
@@ -54,7 +56,7 @@ local KORBLOX_TEXTURE_ID = "rbxassetid://101851254"
 -- Struktur Data
 local spawnedAccessories = {}
 local baseCFrames = {}
-local currentConfig = { _HeadType = "Default", _Favorites = {} }
+local currentConfig = { _HeadType = "Default", _Korblox = true, _Favorites = {} }
 local selectedAccessory = nil
 local targetPlayersRegistry = {} 
 
@@ -93,13 +95,7 @@ local function wearHeadModel(char, headType)
             end
         end
 
-        local handle
-        if result:IsA("BasePart") then
-            handle = result
-        else
-            handle = result:FindFirstChild("Handle") or result:FindFirstChildOfClass("Part") or result:FindFirstChildOfClass("MeshPart")
-        end
-
+        local handle = result:IsA("BasePart") and result or result:FindFirstChild("Handle") or result:FindFirstChildOfClass("Part") or result:FindFirstChildOfClass("MeshPart")
         if handle then
             handle.Transparency = 0
             local targetPart = char:WaitForChild("Head", 3)
@@ -205,13 +201,7 @@ local function wearAccessory(char, name, assetId, configTable)
             end
         end
 
-        local handle
-        if result:IsA("BasePart") then
-            handle = result
-        else
-            handle = result:FindFirstChild("Handle") or result:FindFirstChildOfClass("Part") or result:FindFirstChildOfClass("MeshPart")
-        end
-
+        local handle = result:IsA("BasePart") and result or result:FindFirstChild("Handle") or result:FindFirstChildOfClass("Part") or result:FindFirstChildOfClass("MeshPart")
         if handle then
             handle.Transparency = 0
             local attachment = handle:FindFirstChildOfClass("Attachment")
@@ -251,54 +241,67 @@ local function wearAccessory(char, name, assetId, configTable)
     end
 end
 
-local function applyKorblox(char)
+local function applyKorblox(char, configTable)
+    local enabled = configTable._Korblox
+    if enabled == nil then enabled = true end
+
     local rightLeg = char:FindFirstChild("Right Leg")
     if rightLeg then
-        for _, v in ipairs(rightLeg:GetChildren()) do
-            if v:IsA("SpecialMesh") or v:IsA("CharacterMesh") then v:Destroy() end
+        local existingMesh = rightLeg:FindFirstChild("LucxxKorbloxMesh")
+        if enabled then
+            if not existingMesh then
+                for _, v in ipairs(rightLeg:GetChildren()) do
+                    if v:IsA("SpecialMesh") or v:IsA("CharacterMesh") then v:Destroy() end
+                end
+                local mesh = Instance.new("SpecialMesh")
+                mesh.Name = "LucxxKorbloxMesh"
+                mesh.MeshType, mesh.MeshId, mesh.TextureId = Enum.MeshType.FileMesh, KORBLOX_MESH_ID, KORBLOX_TEXTURE_ID
+                mesh.Scale = Vector3.new(1, 1, 1)
+                mesh.Archivable = true
+                mesh.Parent = rightLeg
+            end
+        else
+            if existingMesh then existingMesh:Destroy() end
         end
-        local mesh = Instance.new("SpecialMesh")
-        mesh.Name = "LucxxKorbloxMesh"
-        mesh.MeshType, mesh.MeshId, mesh.TextureId = Enum.MeshType.FileMesh, KORBLOX_MESH_ID, KORBLOX_TEXTURE_ID
-        mesh.Scale = Vector3.new(1, 1, 1)
-        mesh.Archivable = true
-        mesh.Parent = rightLeg
     else
         local rUpper = char:FindFirstChild("RightUpperLeg")
         local rLower = char:FindFirstChild("RightLowerLeg")
         local rFoot = char:FindFirstChild("RightFoot")
+        local fakeLeg = char:FindFirstChild("FakeKorbloxLeg")
         
-        if rUpper and rLower and rFoot then
-            rUpper.Transparency = 1
-            rLower.Transparency = 1
-            rFoot.Transparency = 1
-            
-            local oldFake = char:FindFirstChild("FakeKorbloxLeg")
-            if oldFake then oldFake:Destroy() end
-            
-            local fakeLeg = Instance.new("Part")
-            fakeLeg.Name = "FakeKorbloxLeg"
-            fakeLeg.Size = Vector3.new(1, 2, 1)
-            fakeLeg.Anchored = false
-            fakeLeg.CanCollide = false
-            fakeLeg.Transparency = 0
-            fakeLeg.Archivable = true
-            
-            local mesh = Instance.new("SpecialMesh")
-            mesh.MeshType, mesh.MeshId, mesh.TextureId = Enum.MeshType.FileMesh, KORBLOX_MESH_ID, KORBLOX_TEXTURE_ID
-            mesh.Scale = Vector3.new(1, 1, 1)
-            mesh.Archivable = true
-            mesh.Parent = fakeLeg
-            
-            fakeLeg.Parent = char
-            
-            local weld = Instance.new("Weld")
-            weld.Name = "KorbloxWeld"
-            weld.Part0 = rUpper
-            weld.Part1 = fakeLeg
-            weld.C0 = CFrame.new(0, -0.4, 0)
-            weld.Archivable = true
-            weld.Parent = fakeLeg
+        if enabled then
+            if rUpper and rLower and rFoot then
+                rUpper.Transparency = 1; rLower.Transparency = 1; rFoot.Transparency = 1
+                if not fakeLeg then
+                    fakeLeg = Instance.new("Part")
+                    fakeLeg.Name = "FakeKorbloxLeg"
+                    fakeLeg.Size = Vector3.new(1, 2, 1)
+                    fakeLeg.Anchored = false
+                    fakeLeg.CanCollide = false
+                    fakeLeg.Transparency = 0
+                    fakeLeg.Archivable = true
+                    
+                    local mesh = Instance.new("SpecialMesh")
+                    mesh.MeshType, mesh.MeshId, mesh.TextureId = Enum.MeshType.FileMesh, KORBLOX_MESH_ID, KORBLOX_TEXTURE_ID
+                    mesh.Scale = Vector3.new(1, 1, 1)
+                    mesh.Archivable = true
+                    mesh.Parent = fakeLeg
+                    fakeLeg.Parent = char
+                    
+                    local weld = Instance.new("Weld")
+                    weld.Name = "KorbloxWeld"
+                    weld.Part0 = rUpper
+                    weld.Part1 = fakeLeg
+                    weld.C0 = CFrame.new(0, -0.4, 0)
+                    weld.Archivable = true
+                    weld.Parent = fakeLeg
+                end
+            end
+        else
+            if fakeLeg then fakeLeg:Destroy() end
+            if rUpper then rUpper.Transparency = 0 end
+            if rLower then rLower.Transparency = 0 end
+            if rFoot then rFoot.Transparency = 0 end
         end
     end
 end
@@ -318,12 +321,12 @@ local function refreshCharacter(char, configTable)
         if cfg[name] and cfg[name].enabled then wearAccessory(char, name, id, cfg) end
     end
     
-    applyKorblox(char)
+    applyKorblox(char, cfg)
     applyHeadState(char, cfg)
 end
 
 -- ====================================================
--- SISTEM LOCK & DETEKSI CUTSCENE / CLONE (UPDATED)
+-- SISTEM LOCK & DETEKSI CUTSCENE / CLONE
 -- ====================================================
 local function getTargetPlayer(nameStr)
     nameStr = nameStr:lower()
@@ -344,16 +347,11 @@ for _, p in ipairs(Players:GetPlayers()) do monitorPlayer(p) end
 table.insert(scriptConnections, Players.PlayerAdded:Connect(monitorPlayer))
 table.insert(scriptConnections, Players.PlayerRemoving:Connect(function(p) targetPlayersRegistry[p.UserId] = nil end))
 
--- Fungsi Analisis Karakter (Mendeteksi Clone Jauh Lebih Kuat)
 local function isCloneOfLocal(obj)
     if not obj or not localPlayer.Character or obj == localPlayer.Character then return false end
-
-    -- 1. Deteksi via Nama
     if obj.Name == localPlayer.Name or obj.Name == localPlayer.DisplayName then return true end
 
     local myChar = localPlayer.Character
-    
-    -- 2. Deteksi via Baju & Celana (Lebih Akurat)
     local myShirt = myChar:FindFirstChildOfClass("Shirt")
     local cloneShirt = obj:FindFirstChildOfClass("Shirt")
     if myShirt and cloneShirt and myShirt.ShirtTemplate == cloneShirt.ShirtTemplate and myShirt.ShirtTemplate ~= "" then return true end
@@ -362,7 +360,6 @@ local function isCloneOfLocal(obj)
     local clonePants = obj:FindFirstChildOfClass("Pants")
     if myPants and clonePants and myPants.PantsTemplate == clonePants.PantsTemplate and myPants.PantsTemplate ~= "" then return true end
 
-    -- 3. Deteksi via Aksesoris Bawaan (Rambut/Topi Default)
     local myAccs = {}
     for _, acc in ipairs(myChar:GetChildren()) do
         if acc:IsA("Accessory") and acc.Name ~= "CustomHeadModel" then
@@ -381,24 +378,19 @@ local function isCloneOfLocal(obj)
             if handle then
                 local mesh = handle:FindFirstChildOfClass("SpecialMesh")
                 local meshId = mesh and mesh.MeshId or (handle:IsA("MeshPart") and handle.MeshId)
-                -- Jika ada minimal 1 aksesoris ori yang cocok, itu adalah clone kita
-                if meshId and myAccs[meshId] then 
-                    return true 
-                end
+                if meshId and myAccs[meshId] then return true end
             end
         end
     end
-
     return false
 end
 
--- Deteksi Model Masuk Ke Workspace
 table.insert(scriptConnections, workspace.DescendantAdded:Connect(function(obj)
     if obj:IsA("Model") then
         task.spawn(function()
-            local hum = obj:WaitForChild("Humanoid", 2) -- Maksimal tunggu 2 detik agar tidak stuck
+            local hum = obj:WaitForChild("Humanoid", 2)
             if hum then
-                task.wait(0.5) -- Beri sedikit waktu untuk game memasang baju dll ke dummy
+                task.wait(0.5)
                 if isCloneOfLocal(obj) then
                     refreshCharacter(obj, currentConfig)
                 else
@@ -414,24 +406,17 @@ table.insert(scriptConnections, workspace.DescendantAdded:Connect(function(obj)
     end
 end))
 
--- Deteksi Cutscene By Kamera (Lebih Sensitif)
 local camera = workspace.CurrentCamera
 local function onCameraSubjectChanged()
     if camera and camera.CameraSubject then
         local subject = camera.CameraSubject
         local model
-        
-        if subject:IsA("Humanoid") then
-            model = subject.Parent
-        elseif subject:IsA("BasePart") then
-            model = subject.Parent
-        end
+        if subject:IsA("Humanoid") then model = subject.Parent
+        elseif subject:IsA("BasePart") then model = subject.Parent end
         
         if model and model:IsA("Model") and model:FindFirstChild("Humanoid") and model ~= localPlayer.Character then
             task.wait(0.5)
-            if isCloneOfLocal(model) then
-                refreshCharacter(model, currentConfig)
-            end
+            if isCloneOfLocal(model) then refreshCharacter(model, currentConfig) end
         end
     end
 end
@@ -441,20 +426,16 @@ if camera then
     task.spawn(onCameraSubjectChanged)
 end
 
--- Deteksi First Person Transparansi
 table.insert(scriptConnections, RunService.Stepped:Connect(function()
     local function enforceTransparency(char, config)
         if not char then return end
-        
         local head = char:FindFirstChild("Head")
         local ltm = head and head.LocalTransparencyModifier or 0
         
         if spawnedAccessories[char] then
             for _, acc in pairs(spawnedAccessories[char]) do
                 for _, v in ipairs(acc:GetDescendants()) do
-                    if v:IsA("BasePart") then
-                        v.LocalTransparencyModifier = ltm
-                    end
+                    if v:IsA("BasePart") then v.LocalTransparencyModifier = ltm end
                 end
             end
         end
@@ -462,20 +443,20 @@ table.insert(scriptConnections, RunService.Stepped:Connect(function()
         local customHead = char:FindFirstChild("CustomHeadModel")
         if customHead then
             for _, v in ipairs(customHead:GetDescendants()) do
-                if v:IsA("BasePart") then
-                    v.LocalTransparencyModifier = ltm
-                end
+                if v:IsA("BasePart") then v.LocalTransparencyModifier = ltm end
             end
         end
         
-        local fakeLeg = char:FindFirstChild("FakeKorbloxLeg")
-        local rUpper = char:FindFirstChild("RightUpperLeg")
-        if fakeLeg and rUpper and rUpper.Transparency ~= 1 then
-            rUpper.Transparency = 1
-            local rLower = char:FindFirstChild("RightLowerLeg")
-            if rLower then rLower.Transparency = 1 end
-            local rFoot = char:FindFirstChild("RightFoot")
-            if rFoot then rFoot.Transparency = 1 end
+        if config and config._Korblox then
+            local fakeLeg = char:FindFirstChild("FakeKorbloxLeg")
+            local rUpper = char:FindFirstChild("RightUpperLeg")
+            if fakeLeg and rUpper and rUpper.Transparency ~= 1 then
+                rUpper.Transparency = 1
+                local rLower = char:FindFirstChild("RightLowerLeg")
+                if rLower then rLower.Transparency = 1 end
+                local rFoot = char:FindFirstChild("RightFoot")
+                if rFoot then rFoot.Transparency = 1 end
+            end
         end
         
         if config and config._HeadType ~= "Default" then
@@ -495,7 +476,26 @@ table.insert(scriptConnections, RunService.Stepped:Connect(function()
 end))
 
 -- ====================================================
--- PEMBUATAN GUI EDITOR
+-- FUNGSI UNTUK MENGIRIM PESAN CHAT (EMOTES)
+-- ====================================================
+local function playEmote(emoteCmd)
+    if TextChatService.ChatVersion == Enum.ChatVersion.TextChatService then
+        -- Chat Sistem Baru
+        local channel = TextChatService.TextChannels:FindFirstChild("RBXGeneral")
+        if channel then
+            channel:SendAsync("/e " .. emoteCmd)
+        end
+    else
+        -- Chat Sistem Lama (Legacy)
+        local defaultChat = ReplicatedStorage:FindFirstChild("DefaultChatSystemChatEvents")
+        if defaultChat and defaultChat:FindFirstChild("SayMessageRequest") then
+            defaultChat.SayMessageRequest:FireServer("/e " .. emoteCmd, "All")
+        end
+    end
+end
+
+-- ====================================================
+-- PEMBUATAN GUI EDITOR (DENGAN 3 TAB)
 -- ====================================================
 if GUI_PARENT:FindFirstChild("AccessoryEditorUI") then GUI_PARENT.AccessoryEditorUI:Destroy() end
 
@@ -512,7 +512,7 @@ minSquare.BorderSizePixel, minSquare.Visible, minSquare.Draggable, minSquare.Act
 minSquare.Parent = sg
 
 local main = Instance.new("Frame")
-main.Size, main.Position = UDim2.new(0, 420, 0, 300), UDim2.new(0.5, -210, 0.5, -150)
+main.Size, main.Position = UDim2.new(0, 440, 0, 320), UDim2.new(0.5, -220, 0.5, -160)
 main.BackgroundColor3, main.BorderSizePixel = Color3.fromRGB(25, 25, 25), 0
 main.BackgroundTransparency = 0.2
 main.Active, main.Draggable = true, true
@@ -521,7 +521,7 @@ main.Parent = sg
 local title = Instance.new("TextLabel")
 title.Size, title.BackgroundColor3 = UDim2.new(1, 0, 0, 25), Color3.fromRGB(40, 40, 40)
 title.BackgroundTransparency = 0.2
-title.Text, title.TextColor3 = "  Accessory Configurator PRO V4.2", Color3.fromRGB(255, 255, 255)
+title.Text, title.TextColor3 = "  Accessory Configurator PRO V4.4", Color3.fromRGB(255, 255, 255)
 title.Font, title.TextSize, title.TextXAlignment = Enum.Font.SourceSansBold, 14, Enum.TextXAlignment.Left
 title.Parent = main
 
@@ -533,24 +533,92 @@ btnMin.Parent = title
 btnMin.MouseButton1Click:Connect(function() main.Visible = false; minSquare.Visible = true end)
 minSquare.MouseButton1Click:Connect(function() main.Visible = true; minSquare.Visible = false end)
 
+local function createBtn(text, pos, color, parent)
+    local b = Instance.new("TextButton")
+    b.Size, b.Position, b.BackgroundColor3 = UDim2.new(0, 115, 0, 22), pos, color
+    b.Text, b.TextColor3, b.Font, b.TextSize = text, Color3.fromRGB(255, 255, 255), Enum.Font.SourceSansBold, 12
+    b.Parent = parent
+    return b
+end
+
+-- TABS CONTAINER (DIBAGI 3)
+local tabContainer = Instance.new("Frame")
+tabContainer.Size, tabContainer.Position = UDim2.new(1, 0, 0, 25), UDim2.new(0, 0, 0, 25)
+tabContainer.BackgroundColor3, tabContainer.BorderSizePixel = Color3.fromRGB(35, 35, 35), 0
+tabContainer.Parent = main
+
+local btnTabPlayer = Instance.new("TextButton")
+btnTabPlayer.Size, btnTabPlayer.Position = UDim2.new(0.33, 0, 1, 0), UDim2.new(0, 0, 0, 0)
+btnTabPlayer.BackgroundColor3, btnTabPlayer.BorderSizePixel = Color3.fromRGB(50, 50, 50), 0
+btnTabPlayer.Text, btnTabPlayer.TextColor3 = "Player & Access.", Color3.fromRGB(255, 255, 255)
+btnTabPlayer.Font, btnTabPlayer.TextSize = Enum.Font.SourceSansBold, 13
+btnTabPlayer.Parent = tabContainer
+
+local btnTabConfig = Instance.new("TextButton")
+btnTabConfig.Size, btnTabConfig.Position = UDim2.new(0.33, 0, 1, 0), UDim2.new(0.33, 0, 0, 0)
+btnTabConfig.BackgroundColor3, btnTabConfig.BorderSizePixel = Color3.fromRGB(30, 30, 30), 0
+btnTabConfig.Text, btnTabConfig.TextColor3 = "Config System", Color3.fromRGB(200, 200, 200)
+btnTabConfig.Font, btnTabConfig.TextSize = Enum.Font.SourceSansBold, 13
+btnTabConfig.Parent = tabContainer
+
+local btnTabEmote = Instance.new("TextButton")
+btnTabEmote.Size, btnTabEmote.Position = UDim2.new(0.34, 0, 1, 0), UDim2.new(0.66, 0, 0, 0)
+btnTabEmote.BackgroundColor3, btnTabEmote.BorderSizePixel = Color3.fromRGB(30, 30, 30), 0
+btnTabEmote.Text, btnTabEmote.TextColor3 = "R6 Emotes", Color3.fromRGB(200, 200, 200)
+btnTabEmote.Font, btnTabEmote.TextSize = Enum.Font.SourceSansBold, 13
+btnTabEmote.Parent = tabContainer
+
+-- CONTENT AREA
 local content = Instance.new("Frame")
-content.Size, content.Position, content.BackgroundTransparency = UDim2.new(1, 0, 1, -25), UDim2.new(0, 0, 0, 25), 1
+content.Size, content.Position, content.BackgroundTransparency = UDim2.new(1, 0, 1, -50), UDim2.new(0, 0, 0, 50), 1
 content.Parent = main
 
+local playerTab = Instance.new("Frame")
+playerTab.Size, playerTab.BackgroundTransparency = UDim2.new(1, 0, 1, 0), 1
+playerTab.Visible = true; playerTab.Parent = content
+
+local configTab = Instance.new("Frame")
+configTab.Size, configTab.BackgroundTransparency = UDim2.new(1, 0, 1, 0), 1
+configTab.Visible = false; configTab.Parent = content
+
+local emoteTab = Instance.new("Frame")
+emoteTab.Size, emoteTab.BackgroundTransparency = UDim2.new(1, 0, 1, 0), 1
+emoteTab.Visible = false; emoteTab.Parent = content
+
+-- TAB SWITCH LOGIC
+local function switchTab(activeBtn, activeFrame)
+    for _, btn in ipairs({btnTabPlayer, btnTabConfig, btnTabEmote}) do
+        if btn == activeBtn then
+            btn.BackgroundColor3, btn.TextColor3 = Color3.fromRGB(50, 50, 50), Color3.fromRGB(255, 255, 255)
+        else
+            btn.BackgroundColor3, btn.TextColor3 = Color3.fromRGB(30, 30, 30), Color3.fromRGB(200, 200, 200)
+        end
+    end
+    for _, frm in ipairs({playerTab, configTab, emoteTab}) do
+        frm.Visible = (frm == activeFrame)
+    end
+end
+btnTabPlayer.MouseButton1Click:Connect(function() switchTab(btnTabPlayer, playerTab) end)
+btnTabConfig.MouseButton1Click:Connect(function() switchTab(btnTabConfig, configTab) end)
+btnTabEmote.MouseButton1Click:Connect(function() switchTab(btnTabEmote, emoteTab) end)
+
+-- ====================================================
+-- TAB 1: PLAYER & ACCESSORIES
+-- ====================================================
 local listFrame = Instance.new("ScrollingFrame")
 listFrame.Size, listFrame.Position, listFrame.BackgroundColor3 = UDim2.new(0, 130, 1, -10), UDim2.new(0, 5, 0, 5), Color3.fromRGB(20, 20, 20)
 listFrame.BackgroundTransparency = 0.2
 listFrame.BorderSizePixel, listFrame.ScrollBarThickness, listFrame.CanvasSize = UDim2.new(0, 0, 0, 400), 4, UDim2.new(0, 0, 0, 400)
-listFrame.Parent = content
+listFrame.Parent = playerTab
 
 local listLayout = Instance.new("UIListLayout")
 listLayout.Padding = UDim.new(0, 2)
-listLayout.SortOrder = Enum.SortOrder.LayoutOrder -- Menggunakan LayoutOrder agar posisi bisa diurutkan
+listLayout.SortOrder = Enum.SortOrder.LayoutOrder
 listLayout.Parent = listFrame
 
 local panel = Instance.new("Frame")
 panel.Size, panel.Position, panel.BackgroundTransparency = UDim2.new(1, -145, 1, -10), UDim2.new(0, 140, 0, 5), 1
-panel.Parent = content
+panel.Parent = playerTab
 
 local activeLabel = Instance.new("TextLabel")
 activeLabel.Size, activeLabel.Text, activeLabel.TextColor3 = UDim2.new(1, 0, 0, 15), "Editing: None", Color3.fromRGB(255, 200, 0)
@@ -591,53 +659,104 @@ inputs.scale.Size, inputs.scale.Position, inputs.scale.BackgroundColor3 = UDim2.
 inputs.scale.TextColor3, inputs.scale.Font, inputs.scale.TextSize, inputs.scale.Text = Color3.fromRGB(255, 255, 255), Enum.Font.Code, 11, "1"
 inputs.scale.Parent = panel
 
-local function createBtn(text, pos, color, parent)
-    local b = Instance.new("TextButton")
-    b.Size, b.Position, b.BackgroundColor3 = UDim2.new(0, 115, 0, 22), pos, color
-    b.Text, b.TextColor3, b.Font, b.TextSize = text, Color3.fromRGB(255, 255, 255), Enum.Font.SourceSansBold, 12
-    b.Parent = parent
-    return b
-end
-
 local btnApply = createBtn("Apply Change", UDim2.new(0, 0, 0, 105), Color3.fromRGB(0, 120, 215), panel)
-local btnReset = createBtn("Reset All", UDim2.new(0, 125, 0, 105), Color3.fromRGB(200, 100, 0), panel)
-local btnSave = createBtn("Save Config", UDim2.new(0, 0, 0, 132), Color3.fromRGB(46, 125, 50), panel)
-local btnLoad = createBtn("Load Config", UDim2.new(0, 125, 0, 132), Color3.fromRGB(198, 105, 0), panel)
+btnApply.Size = UDim2.new(0, 150, 0, 22)
 
-local addIdBox = Instance.new("TextBox")
-addIdBox.Size, addIdBox.Position, addIdBox.BackgroundColor3 = UDim2.new(0, 150, 0, 22), UDim2.new(0, 0, 0, 160), Color3.fromRGB(35, 35, 35)
-addIdBox.TextColor3, addIdBox.PlaceholderText, addIdBox.Font, addIdBox.TextSize = Color3.fromRGB(255, 255, 255), "Catalog ID...", Enum.Font.SourceSans, 12
-addIdBox.Parent = panel
-
-local btnAddId = createBtn("Add", UDim2.new(0, 160, 0, 160), Color3.fromRGB(120, 0, 215), panel)
-btnAddId.Size = UDim2.new(0, 80, 0, 22)
-
-local targetBox = Instance.new("TextBox")
-targetBox.Size, targetBox.Position, targetBox.BackgroundColor3 = UDim2.new(0, 150, 0, 22), UDim2.new(0, 0, 0, 190), Color3.fromRGB(35, 35, 35)
-targetBox.TextColor3, targetBox.PlaceholderText, targetBox.Font, targetBox.TextSize = Color3.fromRGB(255, 255, 255), "Target Player Name...", Enum.Font.SourceSans, 12
-targetBox.Parent = panel
-
-local btnTarget = createBtn("Lock to Player", UDim2.new(0, 160, 0, 190), Color3.fromRGB(180, 20, 50), panel)
-btnTarget.Size = UDim2.new(0, 80, 0, 22)
+local sep = Instance.new("Frame")
+sep.Size, sep.Position, sep.BackgroundColor3 = UDim2.new(1, 0, 0, 2), UDim2.new(0, 0, 0, 135), Color3.fromRGB(50, 50, 50)
+sep.BorderSizePixel = 0; sep.Parent = panel
 
 local lblHead = Instance.new("TextLabel")
-lblHead.Size, lblHead.Position = UDim2.new(0, 60, 0, 20), UDim2.new(0, 0, 0, 220)
+lblHead.Size, lblHead.Position = UDim2.new(0, 60, 0, 20), UDim2.new(0, 0, 0, 145)
 lblHead.Text, lblHead.TextColor3 = "Head:", Color3.fromRGB(200, 200, 200)
-lblHead.Font, lblHead.TextSize, lblHead.BackgroundTransparency = Enum.Font.SourceSansBold, 12, 1
-lblHead.TextXAlignment = Enum.TextXAlignment.Left
-lblHead.Parent = panel
+lblHead.Font, lblHead.TextSize, lblHead.BackgroundTransparency = Enum.Font.SourceSansBold, 13, 1
+lblHead.TextXAlignment = Enum.TextXAlignment.Left; lblHead.Parent = panel
 
-local btnHeadDefault = createBtn("Default", UDim2.new(0, 45, 0, 220), Color3.fromRGB(60, 60, 60), panel)
+local btnHeadDefault = createBtn("Default", UDim2.new(0, 45, 0, 145), Color3.fromRGB(60, 60, 60), panel)
 btnHeadDefault.Size = UDim2.new(0, 55, 0, 22)
-local btnHeadDeath = createBtn("Death W.", UDim2.new(0, 105, 0, 220), Color3.fromRGB(150, 20, 20), panel)
+local btnHeadDeath = createBtn("Death W.", UDim2.new(0, 105, 0, 145), Color3.fromRGB(150, 20, 20), panel)
 btnHeadDeath.Size = UDim2.new(0, 65, 0, 22)
-local btnHeadHeadless = createBtn("Headless", UDim2.new(0, 175, 0, 220), Color3.fromRGB(100, 20, 150), panel)
+local btnHeadHeadless = createBtn("Headless", UDim2.new(0, 175, 0, 145), Color3.fromRGB(100, 20, 150), panel)
 btnHeadHeadless.Size = UDim2.new(0, 65, 0, 22)
 
+local lblKorblox = Instance.new("TextLabel")
+lblKorblox.Size, lblKorblox.Position = UDim2.new(0, 60, 0, 20), UDim2.new(0, 0, 0, 175)
+lblKorblox.Text, lblKorblox.TextColor3 = "Korblox:", Color3.fromRGB(200, 200, 200)
+lblKorblox.Font, lblKorblox.TextSize, lblKorblox.BackgroundTransparency = Enum.Font.SourceSansBold, 13, 1
+lblKorblox.TextXAlignment = Enum.TextXAlignment.Left; lblKorblox.Parent = panel
+
+local btnKorbloxOn = createBtn("ON", UDim2.new(0, 45, 0, 175), Color3.fromRGB(46, 125, 50), panel)
+btnKorbloxOn.Size = UDim2.new(0, 55, 0, 22)
+local btnKorbloxOff = createBtn("OFF", UDim2.new(0, 105, 0, 175), Color3.fromRGB(200, 50, 50), panel)
+btnKorbloxOff.Size = UDim2.new(0, 55, 0, 22)
+
+-- ====================================================
+-- TAB 2: CONFIG SYSTEM
+-- ====================================================
+local btnSave = createBtn("Save Config", UDim2.new(0, 20, 0, 20), Color3.fromRGB(46, 125, 50), configTab)
+btnSave.Size = UDim2.new(0, 180, 0, 30)
+
+local btnLoad = createBtn("Load Config", UDim2.new(0, 220, 0, 20), Color3.fromRGB(198, 105, 0), configTab)
+btnLoad.Size = UDim2.new(0, 180, 0, 30)
+
+local addIdBox = Instance.new("TextBox")
+addIdBox.Size, addIdBox.Position, addIdBox.BackgroundColor3 = UDim2.new(0, 180, 0, 30), UDim2.new(0, 20, 0, 70), Color3.fromRGB(35, 35, 35)
+addIdBox.TextColor3, addIdBox.PlaceholderText, addIdBox.Font, addIdBox.TextSize = Color3.fromRGB(255, 255, 255), "Catalog ID...", Enum.Font.SourceSans, 14
+addIdBox.Parent = configTab
+
+local btnAddId = createBtn("Add To Library", UDim2.new(0, 220, 0, 70), Color3.fromRGB(120, 0, 215), configTab)
+btnAddId.Size = UDim2.new(0, 180, 0, 30)
+
+local targetBox = Instance.new("TextBox")
+targetBox.Size, targetBox.Position, targetBox.BackgroundColor3 = UDim2.new(0, 180, 0, 30), UDim2.new(0, 20, 0, 120), Color3.fromRGB(35, 35, 35)
+targetBox.TextColor3, targetBox.PlaceholderText, targetBox.Font, targetBox.TextSize = Color3.fromRGB(255, 255, 255), "Target Player Name...", Enum.Font.SourceSans, 14
+targetBox.Parent = configTab
+
+local btnTarget = createBtn("Lock Config To Target", UDim2.new(0, 220, 0, 120), Color3.fromRGB(180, 20, 50), configTab)
+btnTarget.Size = UDim2.new(0, 180, 0, 30)
+
+-- ====================================================
+-- TAB 3: EMOTES (R6 & R15 Default)
+-- ====================================================
+local emoteScroll = Instance.new("ScrollingFrame")
+emoteScroll.Size, emoteScroll.Position = UDim2.new(1, -20, 1, -20), UDim2.new(0, 10, 0, 10)
+emoteScroll.BackgroundColor3, emoteScroll.BackgroundTransparency = Color3.fromRGB(20, 20, 20), 0.5
+emoteScroll.BorderSizePixel, emoteScroll.ScrollBarThickness = 0, 6
+emoteScroll.CanvasSize = UDim2.new(0, 0, 0, 200)
+emoteScroll.Parent = emoteTab
+
+local gridLayout = Instance.new("UIGridLayout")
+gridLayout.CellSize = UDim2.new(0, 120, 0, 35)
+gridLayout.CellPadding = UDim2.new(0, 15, 0, 15)
+gridLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+gridLayout.SortOrder = Enum.SortOrder.LayoutOrder
+gridLayout.Parent = emoteScroll
+
+-- List Default Emote yang didukung R6
+local defaultEmotes = {
+    {name = "Dance 1", cmd = "dance"},
+    {name = "Dance 2", cmd = "dance2"},
+    {name = "Dance 3", cmd = "dance3"},
+    {name = "Wave", cmd = "wave"},
+    {name = "Point", cmd = "point"},
+    {name = "Cheer", cmd = "cheer"},
+    {name = "Laugh", cmd = "laugh"}
+}
+
+for i, emote in ipairs(defaultEmotes) do
+    local b = createBtn(emote.name, UDim2.new(0, 0, 0, 0), Color3.fromRGB(40, 80, 150), emoteScroll)
+    b.LayoutOrder = i
+    b.MouseButton1Click:Connect(function()
+        playEmote(emote.cmd)
+    end)
+end
+
+-- ====================================================
+-- FUNGSI BUTTON ACTIONS & UPDATE UI
+-- ====================================================
 local function changeHead(typeStr)
     currentConfig._HeadType = typeStr
     if localPlayer.Character then refreshCharacter(localPlayer.Character, currentConfig) end
-    
     for userId, config in pairs(targetPlayersRegistry) do
         local p = Players:GetPlayerByUserId(userId)
         if p and p.Character then
@@ -650,12 +769,25 @@ btnHeadDefault.MouseButton1Click:Connect(function() changeHead("Default") end)
 btnHeadDeath.MouseButton1Click:Connect(function() changeHead("Death Walker") end)
 btnHeadHeadless.MouseButton1Click:Connect(function() changeHead("UGC Headless") end)
 
+local function changeKorblox(state)
+    currentConfig._Korblox = state
+    if localPlayer.Character then refreshCharacter(localPlayer.Character, currentConfig) end
+    for userId, config in pairs(targetPlayersRegistry) do
+        local p = Players:GetPlayerByUserId(userId)
+        if p and p.Character then
+            config._Korblox = state
+            refreshCharacter(p.Character, config)
+        end
+    end
+end
+btnKorbloxOn.MouseButton1Click:Connect(function() changeKorblox(true) end)
+btnKorbloxOff.MouseButton1Click:Connect(function() changeKorblox(false) end)
+
 btnTarget.MouseButton1Click:Connect(function()
     local p = getTargetPlayer(targetBox.Text)
     if p then
         targetPlayersRegistry[p.UserId] = deepCopy(currentConfig)
         if p.Character then refreshCharacter(p.Character, targetPlayersRegistry[p.UserId]) end
-        
         targetBox.Text = "Locked: " .. p.Name
         task.delay(2, function() if targetBox.Text:find("Locked:") then targetBox.Text = "" end end)
     else
@@ -744,9 +876,6 @@ btnSave.MouseButton1Click:Connect(function()
     end
 end)
 
--- ====================================================
--- FUNGSI POPULATE LIST WITH FAVORITE SYSTEM
--- ====================================================
 local function populateList()
     if not currentConfig._Favorites then currentConfig._Favorites = {} end
     
@@ -763,33 +892,25 @@ local function populateList()
         btn.Text, btn.TextColor3 = "  " .. name, Color3.fromRGB(255, 255, 255)
         btn.Font, btn.TextSize, btn.BorderSizePixel = Enum.Font.SourceSans, 12, 0
         btn.TextXAlignment = Enum.TextXAlignment.Left
-        
-        -- Mengatur urutan: Favorite mendapatkan LayoutOrder 1 (di atas), non-favorite mendapat 2
         btn.LayoutOrder = isFavorite and 1 or 2
         btn.Parent = listFrame
         
         btn.MouseButton1Click:Connect(function() selectedAccessory = name; updateUIText() end)
         
-        -- Membuat tombol Favorite (Bintang)
         local favBtn = Instance.new("TextButton")
-        favBtn.Size = UDim2.new(0, 24, 0, 24)
-        favBtn.Position = UDim2.new(1, -24, 0, 0)
-        favBtn.BackgroundTransparency = 1
+        favBtn.Size, favBtn.Position, favBtn.BackgroundTransparency = UDim2.new(0, 24, 0, 24), UDim2.new(1, -24, 0, 0), 1
         favBtn.Text = isFavorite and "⭐" or "☆"
         favBtn.TextColor3 = isFavorite and Color3.fromRGB(255, 200, 0) or Color3.fromRGB(150, 150, 150)
-        favBtn.Font = Enum.Font.SourceSansBold
-        favBtn.TextSize = 14
-        favBtn.BorderSizePixel = 0
+        favBtn.Font, favBtn.TextSize, favBtn.BorderSizePixel = Enum.Font.SourceSansBold, 14, 0
         favBtn.Parent = btn
         
         favBtn.MouseButton1Click:Connect(function()
             currentConfig._Favorites[name] = not currentConfig._Favorites[name]
-            populateList() -- Re-populate untuk langsung memperbarui urutan posisi ke paling atas
+            populateList() 
         end)
     end
 end
 
--- Load Config Custom
 btnLoad.MouseButton1Click:Connect(function()
     if readfile and isfile and isfile(FILE_NAME) then
         local suc, c = pcall(function() return readfile(FILE_NAME) end)
@@ -798,11 +919,10 @@ btnLoad.MouseButton1Click:Connect(function()
             if ds then 
                 for k, v in pairs(dec) do 
                     currentConfig[k] = v 
-                    if type(v) == "table" and v.assetId then
-                        accessoryIds[k] = v.assetId
-                    end
+                    if type(v) == "table" and v.assetId then accessoryIds[k] = v.assetId end
                 end 
                 if not currentConfig._Favorites then currentConfig._Favorites = {} end
+                if currentConfig._Korblox == nil then currentConfig._Korblox = true end
                 for n, id in pairs(accessoryIds) do initConfig(n, id) end
                 populateList()
             end
@@ -812,7 +932,6 @@ btnLoad.MouseButton1Click:Connect(function()
     if localPlayer.Character then refreshCharacter(localPlayer.Character, currentConfig) end
 end)
 
--- Menambah ID
 btnAddId.MouseButton1Click:Connect(function()
     local id = tonumber(addIdBox.Text)
     if id then
@@ -834,7 +953,7 @@ table.insert(scriptConnections, localPlayer.CharacterAdded:Connect(function(char
 task.spawn(function() btnLoad.MouseButton1Click:Fire() end)
 
 -- ====================================================
--- MENDAFTARKAN FUNGSI CLEANUP UNTUK EKSEKUSI BERIKUTNYA
+-- MENDAFTARKAN FUNGSI CLEANUP
 -- ====================================================
 getgenv()._LucxxHubCleanup = function()
     for _, conn in ipairs(scriptConnections) do
