@@ -1,1 +1,963 @@
-return(function(...)local A={"\085\055\049\068\055\080\071\104\089\082\090\117\099\105\119\088\068\098\118\103\098\118\072\104";"\105\081\065\087\068\068\112\068\066\097\056\061","\113\097\067\097\080\067\061\061","\085\115\115\070\118\075\051\074\102\100\121\087\054\086\074\077\090\104\113\077\119\067\120\112\073\067\109\119\082\067\061\061","\106\076\047\065";"\047\110\078\057\077\065\073\089\103\067\061\061";"\069\082\106\053\067\114\104\073\079\081\119\061","\122\077\074\098\103\083\078\097\106\073\075\061","\047\086\120\105\115\076\061\061";"\050\106\099\055\085\071\122\077\055\077\111\055","\078\113\054\049\067\079\114\066","\117\052\065\089\068\117\088\086","\049\086\102\117\111\043\111\106\119\065\066\112\101\073\055\106\120\097\049\070\111\075\066\056\083\105\066\122","\084\117\053\098\085\067\061\061","\098\106\072\043\098\107\079\104\070\120\105\047";"\119\107\072\088\097\115\052\100\077\119\081\061","\082\116\084\049\121\099\067\061";"\083\047\082\102\078\117\071\061";"\079\098\099\122\056\099\072\061";"\066\049\051\078\070\104\109\089\121\111\119\077\055\076\061\061";"\090\116\071\055\109\072\108\089";"\065\085\108\066\052\066\088\054\110\055\083\103\105\106\112\087\119\109\120\101\076\101\061\061","\068\047\053\090\087\069\088\084\068\065\112\110\116\053\069\086\066\080\075\057\119\067\112\061","\057\057\108\050\077\076\061\061","\114\077\078\103\052\086\078\079\078\084\061\061","\112\048\054\104","\098\098\088\090\057\076\061\061";"\052\122\110\113\100\073\110\056\083\073\049\108\081\112\108\085\079\067\061\061","\122\122\114\109\089\076\061\061";"\052\112\097\100\052\100\084\061","\099\052\098\076\122\050\089\068","\067\087\080\085\118\111\101\107\052\116\111\072\075\101\061\061","\115\069\110\121\066\048\104\110\066\073\048\053";"\079\101\043\072\118\101\061\061","\055\076\061\061","\087\117\081\050\083\105\055\112\104\052\069\051\110\083\104\065\087\067\061\061","\121\065\055\117\074\053\079\075\101\100\052\122";"\052\104\100\082","\116\084\081\061";"\097\104\083\047\108\051\071\097\067\055\065\116\050\105\112\112\043\083\085\054\056\076\061\061";"\078\068\074\111\072\089\109\102\104\101\061\061","\114\067\053\067";"\100\113\103\107\108\108\088\072\111\054\088\052\099\102\106\072\107\101\061\061";"\079\082\108\049";"\047\070\121\110";"\054\068\069\084\080\111\048\097\074\043\110\051\077\065\073\101","\081\043\043\078\112\077\097\105\055\110\076\087\078\049\084\085","\047\098\057\107\107\075\086\065\114\052\084\097\105\083\054\098\115\104\109\083\077\075\071\104\099\082\112\122\053\101\061\061";"\069\069\109\074\043\078\049\072","\069\078\057\078\119\100\057\079\078\108\054\048\043\084\061\061","\108\073\110\106\104\043\111\047\119\075\066\048\100\080\109\075","\083\073\053\117\083\073\110\112";"\083\120\083\075","\120\051\043\061";"\048\076\057\086\055\084\061\061","\115\070\071\103\121\072\069\072\121\067\061\061","\107\114\088\054\108\085\090\083\084\073\055\111\108\052\108\119\055\068\114\087\116\081\115\117\119\079\079\068\051\084\061\061","\110\057\050\122\118\084\061\061";"\101\070\070\119\110\090\048\061","\074\051\121\079\053\122\107\069\078\085\111\116\108\089\050\072\106\066\075\061";"\106\066\097\074\102\050\118\083","\121\047\047\122\119\076\061\061","\083\043\112\070\103\077\069\109\088\076\061\061","\089\104\088\065\056\068\057\083\098\110\118\053\057\104\099\061";"\087\112\099\048\052\073\087\097\084\101\061\061";"\098\078\048\070\108\073\069\067\118\102\078\122\077\116\068\090\051\067\061\061","\106\076\103\054\081\109\050\116\073\101\061\061","\082\084\080\100\071\057\100\074\090\118\066\083\086\090\100\112\103\109\117\117\074\053\057\122\112\067\061\061";"\056\079\087\082\085\076\061\061";"\089\107\049\066\066\110\109\085\069\087\089\066\056\101\061\061";"\052\102\066\070\079\075\049\102\083\073\053\075\111\101\061\061","\050\090\084\082\043\104\086\119\097\069\071\054\116\084\099\081\067\070\078\116";"\079\107\090\065","\083\114\077\043\102\052\048\043";"\077\122\056\085\112\071\043\068\055\087\052\072\119\084\061\061";"\074\066\103\102\105\110\089\081\070\076\083\074\082\047\050\120\107\110\068\069\053\084\061\061","\116\074\106\112\120\085\053\111\090\084\061\061","\043\097\108\108\077\054\054\068","\107\055\117\079\053\090\071\099\049\088\071\061";"\078\051\122\122","\105\043\103\047\107\076\061\061","\120\082\084\088\089\076\061\061","\073\068\075\088\089\100\120\073\097\057\068\047","\113\088\097\069\052\065\108\118","\121\101\049\113\050\120\110\054\066\066\087\116\113\054\078\065\084\120\102\117\119\050\067\061","\103\084\111\100\076\052\082\099","\099\120\047\113\110\098\057\048";"\086\071\051\080\068\067\061\061";"\056\078\117\083\115\121\079\111\111\100\098\055\105\081\114\121\120\113\052\056","\052\077\118\088\068\121\116\104\075\067\061\061","\055\117\087\051\076\076\115\068";"\057\071\084\055\053\076\061\061","\071\119\072\061";"\082\052\102\050\047\082\120\043\106\098\114\086\043\101\061\061";"\054\122\111\069\122\067\061\061","\085\109\112\043\110\052\115\048\097\067\061\061","\077\054\108\047","\065\080\079\082\102\101\115\066\072\068\068\047\112\118\079\105\109\106\080\112\105\076\061\061","\119\071\077\072\119\109\081\104\112\087\073\120";"\101\112\107\074\121\067\061\061";"\105\101\114\048\111\119\100\079";"\098\090\084\087\107\117\047\112\073\100\101\108\071\107\099\081\103\116\048\107\086\098\078\061";"\053\076\050\067\121\099\072\065";"\088\051\084\115\067\076\061\061","\043\068\088\048\100\052\086\052";"\065\085\043\081\055\076\061\061","\120\048\109\118\067\103\115\077\115\067\043\117";"\080\087\088\082","\054\101\069\049\107\082\056\050\113\101\061\061","\111\049\076\051";"\057\111\084\103\107\076\061\061";"\119\050\108\116","\078\090\070\099","\080\087\106\057";"\089\043\113\082\090\080\048\061";"\051\098\048\052\116\067\061\061";"\081\108\067\076\122\081\078\061";"\102\112\100\050\103\056\090\112\073\067\069\074\047\104\053\104\101\068\054\116\090\072\081\105\104\104\056\076\113\084\061\061";"\079\084\075\086\080\122\081\082\055\102\101\061","\079\085\106\068\116\067\061\061","\121\106\119\118";"\101\112\110\048\107\080\099\122\119\108\088\087\115\054\110\098","\118\069\120\050\078\065\067\053\118\053\086\104\102\067\061\061";"\106\051\115\069\110\121\118\053\069\120\112\061";"\084\082\055\073\078\079\083\074\098\105\048\061","\117\070\109\117\109\072\073\055\077\081\112\106\065\084\061\061";"\070\120\090\051";"\052\109\083\108","\069\090\116\068\073\079\110\074\089\084\061\061","\103\072\066\077\055\068\070\065\112\116\075\113\071\076\061\061";"\104\050\119\050\119\086\084\057\049\110\067\071\104\112\109\122\115\067\061\061";"\111\043\088\108\099\073\106\073\099\065\067\071\079\112\102\081","\109\073\054\076\066\090\106\098\113\119\069\066\106\120\106\071\050\105\084\061";"\049\097\102\122\083\073\053\117\120\086\108\054\104\067\061\061";"\077\053\118\078\047\067\061\061";"\105\073\069\043\051\067\107\090\078\048\072\076";"\109\082\114\056\090\078\109\110\074\120\110\075\056\067\061\061";"\081\117\053\083\111\076\061\061","\068\111\117\051";"\049\067\112\105\078\081\079\102\068\088\088\054\074\056\076\088\051\115\054\083","\119\097\066\055\120\097\084\061";"\102\052\074\052\117\100\108\097\122\080\104\082\055\056\114\086\071\043\049\074","\065\089\047\112";"\105\118\053\089\111\105\049\055\104\097\110\116\120\097\081\061","\047\049\052\075\104\047\117\088\071\084\061\061";"\070\047\117\075\049\085\052\099\047\056\078\070\076\100\119\119";"\107\112\082\102\101\098\048\061";"\086\079\101\075\074\070\077\056\053\108\072\110\085\047\049\074\067\088\054\107";"\122\097\120\090\110\076\061\061","\048\117\101\074\050\047\079\075\052\113\082\115";"\047\089\074\113\077\114\087\049\079\076\061\061";"\071\075\053\117\098\121\089\107\052\119\048\119\081\068\081\051\047\067\061\061","\053\084\122\050\066\076\061\061","\052\107\043\055\086\079\090\079\082\084\061\061";"\043\079\068\090\109\069\071\061";"\084\049\078\090\069\082\107\057\088\080\076\070","\066\074\057\053\075\076\061\061","\087\111\116\083\104\099\115\118\115\076\061\061";"\080\114\082\121\090\101\111\053\052\076\061\061","\055\102\100\086\081\073\067\110\068\121\056\070";"\119\086\110\117\111\097\053\089";"\114\101\112\067\056\066\047\078\048\083\074\097\075\097\112\066\104\072\083\061","\047\057\121\118\053\049\099\066";"\118\079\070\084","\073\050\054\085\050\113\114\103\055\120\067\061";"\115\080\118\085\083\112\102\116\115\110\103\109\119\097\106\048","\119\102\083\054\070\067\061\061";"\099\082\115\056";"\072\109\101\084\048\118\116\109\070\047\078\109\080\076\061\061";"\077\072\056\061","\055\072\105\103\073\119\121\075\098\048\073\097","\087\054\097\088\067\074\086\107","\050\076\119\085\047\098\090\090\110\101\061\061";"\088\088\084\049\043\076\061\061","\053\081\066\067","\050\084\115\110\083\090\073\072\053\087\052\055\119\090\089\111\050\115\106\087\108\082\078\121\076\105\104\098\089\076\061\061","\074\048\073\080";"\085\089\089\043\070\087\076\121","\048\100\055\050\110\078\084\057\076\047\080\111\120\102\056\107\110\069\101\118","\086\070\077\101\099\090\084\117\084\067\061\061","\051\068\065\122\116\081\067\051\122\117\070\065\111\068\111\065\050\087\084\117\099\067\061\061","\074\053\120\121\054\084\061\061","\079\077\050\053";"\083\077\065\079\089\083\111\076\086\076\047\118\055\053\098\099","\116\118\121\076\098\084\113\072\086\108\078\122\056\072\110\083\112\114\088\099\100\110\083\061";"\119\069\073\106";"\043\087\083\081\065\089\098\108\075\079\119\078\074\069\122\116\049\065\083\061","\070\111\089\066\065\070\071\061","\104\106\101\068\116\050\073\075\106\085\074\084\057\116\105\072\105\076\061\061","\120\074\085\118\120\080\101\061";"\083\073\055\055\119\076\061\061";"\081\081\082\104\068\085\079\048\051\097\085\049\047\043\097\081";"\048\065\118\109\101\075\112\116\100\110\089\055\122\068\075\047","\088\116\109\087\067\112\104\057\084\050\099\070\074\051\118\070\111\101\061\061";"\122\112\087\116\090\081\109\120\053\120\084\122\070\084\061\061","\112\066\112\119\054\047\073\080","\082\053\116\105\112\082\082\066";"\090\105\108\112\088\101\061\061","\118\081\117\119\097\065\101\085\084\113\070\086\088\049\119\061","\121\086\111\108\077\076\078\061","\081\053\090\118\101\067\061\061","\101\054\111\081\104\073\106\066\100\073\104\097\100\112\106\097\111\076\061\061","\085\070\082\054\108\119\106\048\112\101\061\061";"\047\085\120\057","\113\074\065\090\054\076\061\061","\111\050\066\118\083\076\061\061","\053\066\075\089\083\084\061\061";"\104\097\053\122\104\113\088\106\120\086\119\061","\102\110\090\068\090\075\078\087\112\076\104\075\088\076\061\061","\076\110\047\053\083\076\072\102\086\101\061\061";"\105\104\080\055\051\086\109\052\109\083\078\061";"\116\068\089\082\086\080\104\078\084\119\103\114","\108\081\049\106\120\101\061\061";"\119\097\066\052\100\118\102\113\108\122\104\072\066\110\066\085\049\051\075\061","\071\115\090\089\112\066\081\070\050\068\105\073\109\103\069\085\051\114\072\056\103\114\081\061";"\049\107\051\068\112\107\065\068\082\055\102\047";"\100\086\104\043\079\108\106\074\111\110\104\050\083\108\101\073\111\076\061\061";"\115\043\106\113\115\108\088\079\099\081\102\107\052\054\049\085\081\067\061\061","\050\102\072\065\072\112\084\108\047\067\061\061";"\081\051\081\112\107\080\101\068\115\081\053\097\104\065\104\074\120\080\056\061","\107\076\061\061";"\107\043\049\069\101\122\072\084\108\108\049\105\104\110\111\069","\087\117\073\086\102\118\113\089\111\101\061\061","\052\054\111\122\119\073\088\055\100\105\110\087\111\043\109\113\104\051\101\061","\088\082\053\099";"\114\087\121\043\101\097\078\086\122\109\075\104\117\065\114\048\101\114\102\108\099\101\061\061","\076\056\097\090\065\121\073\050\055\076\061\061","\081\066\082\086\086\076\061\061";"\078\071\079\108","\119\067\115\116\074\122\067\054\071\051\112\061","\111\047\087\067\106\056\119\116\113\076\061\061","\084\090\047\108\051\084\099\061";"\104\098\122\057\071\100\113\111\112\052\066\057\085\076\052\051\081\051\103\055\090\067\061\061";"\048\117\077\073\047\076\061\061","\070\100\089\085\084\076\061\061","\073\065\090\097\084\120\099\061","\117\107\109\075\111\101\061\061","\105\043\118\065\075\084\061\061";"\051\103\097\049\109\052\049\069\074\054\055\088\086\101\104\108\119\076\061\061","\074\119\118\050\119\076\106\108\118\098\056\061";"\083\056\067\067";"\047\108\117\103\068\109\120\084","\087\054\106\103\085\102\069\121\070\112\090\073\071\084\061\061","\047\080\048\107\102\066\066\119\114\075\086\105";"\122\116\088\047\057\084\061\061","\053\070\070\067\043\043\084\070\117\103\110\053";"\069\078\078\078","\084\121\088\088\049\067\061\061","\104\103\079\055\114\085\056\114","\049\054\082\057";"\067\110\085\100\068\082\056\099\098\102\056\061";"\056\116\079\069\076\088\090\099\110\103\077\122\102\090\051\118";"\100\105\106\054\100\081\118\054\080\081\112\071\052\118\081\071\052\067\061\061","\069\090\083\074\102\097\109\071\055\104\049\069\066\076\061\061","\105\118\053\065\083\084\061\061","\088\075\084\119\079\089\084\107\098\077\112\078\122\078\073\097\110\113\121\043\069\051\110\097\073\103\079\070\084\050\098\097\108\084\061\061","\049\086\102\057\111\108\066\102\119\065\111\102\119\076\061\061";"\056\098\105\084\098\076\061\061","\086\116\079\076\043\121\112\061";"\067\076\068\099\043\107\071\071\111\067\089\104\081\097\111\122","\104\097\110\116\120\097\081\061";"\111\073\108\112\111\073\108\117\104\076\061\061","\122\097\071\085\122\056\072\121\065\098\048\105\074\087\119\083\080\051\113\076","\108\087\070\050\101\076\061\061","\087\118\102\105\098\107\081\073\043\079\085\080\079\112\100\098\051\104\119\105\051\119\110\100\118\071\080\069\105\084\061\061","\068\057\121\077\084\119\071\056\047\085\085\052\098\110\057\082\121\101\073\099\082\112\053\052","\114\079\057\097\043\081\110\104\055\116\082\054\051\111\120\078\087\101\078\111\105\111\071\061","\047\102\105\106\088\117\083\061","\109\052\121\068\066\067\049\090\118\043\072\061";"\069\043\122\104\104\089\071\108";"\103\121\075\050\049\055\108\072\111\065\099\061","\085\049\098\079\105\098\051\082\117\065\115\070\109\089\081\061";"\052\099\104\115\090\110\120\105\055\103\072\061";"\086\108\077\081\104\086\049\065\122\071\079\072\066\102\067\106\053\076\061\061","\115\122\074\054\100\110\122\104\068\112\112\068\047\080\089\079\068\074\118\085","\054\107\099\054\084\053\054\098\097\120\050\083\121\053\080\078","\104\078\081\122\080\049\047\120\100\065\057\121\119\106\086\119\100\074\079\043\122\050\056\061","\115\086\053\057\111\112\106\087\104\065\108\051\108\075\055\073\120\051\081\061","\056\081\055\055","\084\101\109\120\057\101\090\071\050\083\090\084\048\076\048\061","\119\097\110\106\119\065\099\061";"\085\050\088\084","\113\054\087\100\056\076\061\061","\049\052\103\104\075\088\048\054\099\076\061\061";"\048\050\072\100\107\075\049\112\067\101\061\061","\048\065\082\072\065\098\057\074\088\109\053\110\047\051\048\061","\118\100\101\086\081\116\049\078","\087\065\076\090\070\113\056\061";"\075\051\084\089\066\085\053\087\104\068\113\101\081\108\100\074\089\083\073\077\057\100\076\061";"\073\074\083\113";"\120\070\107\115";"\104\097\110\122\100\084\061\061","\089\047\105\052\120\067\061\061";"\077\087\080\101\112\116\112\100","\106\104\047\103\078\097\104\116\111\056\067\061","\077\052\068\112\049\090\076\061";"\053\051\074\085\085\076\061\061","\110\103\070\077\067\087\075\081\043\078\082\069\115\101\061\061";"\107\116\076\102\111\090\048\106\107\076\061\061","\110\068\077\105\047\075\086\071\100\051\057\078\075\073\118\104","\077\105\085\115","\115\107\086\052\050\101\061\061","\100\075\055\110\066\073\109\068\083\075\088\099\115\043\088\051";"\102\043\119\056\072\076\061\061";"\107\083\050\106";"\069\114\106\105";"\115\083\068\109\065\069\077\101\089\067\061\061";"\108\114\114\112","\054\117\090\056","\115\101\111\122\073\076\061\061","\119\069\109\101\086\074\090\084\098\066\071\061","\079\074\101\107";"\071\057\081\071\065\087\088\113\105\116\119\061";"\083\065\102\112\111\101\061\061";"\053\086\084\099\089\067\061\061";"\075\097\089\117\066\055\099\068";"\104\050\088\106\104\097\108\086\100\080\109\102","\077\079\048\107\086\077\065\072\112\084\099\061";"\109\097\104\117\078\067\114\048\086\101\061\061";"\110\118\054\053\088\115\070\106\080\047\113\068\080\110\072\098\068\079\119\047";"\056\089\068\111\100\071\080\100\049\101\061\061";"\109\098\101\114\054\084\061\061";"\077\076\061\061","\082\109\097\121\113\069\057\051\121\082\071\061";"\043\087\099\079\114\084\061\061";"\119\073\108\112\120\080\108\112\083\105\049\055\083\086\109\102";"\056\119\115\114";"\108\072\057\109\112\047\098\111\087\087\081\108\078\103\065\050\074\112\072\118\070\101\061\061","\110\119\118\103\047\076\061\061","\108\043\120\090\102\048\043\061";"\079\107\053\111\090\073\101\066\117\120\116\111\090\076\061\061","\071\083\112\114","\049\073\108\112\101\073\055\106\120\097\049\057\111\080\071\061","\077\107\116\102\121\074\067\067\098\117\050\106\116\113\056\082\050\050\079\075\050\082\075\043\115\100\073\102\053\076\061\061";"\066\072\071\071\050\114\105\067\101\073\111\049\111\101\061\061";"\066\072\087\122","\055\099\113\107\052\053\117\079\079\047\082\117\117\111\087\122\110\081\100\073\049\080\056\061";"\111\069\090\065\106\102\056\090\087\074\050\079\057\084\061\061";"\098\083\051\085\081\043\051\113\087\056\114\122\119\101\061\061","\073\112\089\114\054\084\109\088\083\101\061\061";"\098\113\119\109\107\066\106\113\120\088\070\075\065\119\081\061";"\087\120\057\113\115\076\061\061";"\049\073\108\112\079\073\088\069\111\080\066\112\119\084\061\061";"\068\083\083\055\121\076\061\061","\114\118\111\081\113\084\061\061","\117\076\097\104\047\067\061\061";"\090\084\061\061","\116\085\114\056\070\043\120\043","\050\083\121\079\074\101\061\061";"\051\102\088\087\087\103\111\105\087\069\099\076\056\090\076\081\084\071\121\071","\105\090\068\109\070\100\086\082\107\077\043\061","\106\107\083\101\098\055\088\119\106\080\068\097\050\076\061\061","\073\052\056\077\116\067\108\089\114\070\065\043\088\053\082\098\070\054\098\120\057\098\075\061";"\109\055\107\081\099\076\061\061","\086\106\113\104\104\105\102\076\072\080\115\113\098\082\077\080";"\108\051\110\047\081\079\049\106\107\051\075\057\108\050\055\051\120\105\101\061";"\049\073\108\112\081\113\088\047\111\113\108\054\104\043\102\117\111\086\078\061";"\077\113\055\053\075\084\061\061","\111\057\068\086\097\084\061\061";"\114\118\106\055\048\110\075\072\056\073\084\061";"\109\050\116\076\057\105\067\105\112\073\080\106","\111\075\111\108\099\113\066\066\099\086\078\073\100\108\066\122";"\078\054\081\076\069\118\113\104\067\099\121\120","\115\073\057\069\048\066\043\101\098\107\075\102\053\088\119\061";"\113\081\055\118\122\119\112\061";"\052\112\088\049\119\097\102\084\115\080\106\080\081\102\103\111\115\080\048\061";"\098\076\066\073\088\084\061\061";"\115\112\050\121\070\118\078\103\053\087\076\105\111\084\054\078\113\084\061\061";"\043\112\105\106\086\101\061\061";"\050\103\117\073\072\103\075\084","\074\110\076\051\043\067\061\061";"\054\116\080\114\112\105\098\079\065\100\086\057\069\048\099\061";"\081\054\110\052\052\113\066\110\052\050\104\087\099\086\109\109\119\110\081\061";"\087\104\101\088\087\098\049\098\068\076\071\080\079\114\076\122\097\074\075\061";"\113\065\056\073","\087\057\083\073\101\086\076\055\055\052\078\066\066\076\050\078\056\043\071\061","\066\113\109\057\048\069\117\047\049\110\119\061","\057\066\088\081\082\078\047\099\047\074\067\061","\090\075\076\110";"\105\043\047\073\082\108\088\076\088\071\066\117\048\115\083\061";"\115\055\103\097\054\055\048\083\078\073\072\107\043\068\072\077\076\099\111\104\101\115\075\061";"\097\085\114\088\073\065\085\072\098\065\075\061";"\084\085\075\043\050\116\077\104\113\103\083\061";"\048\117\083\061";"\113\084\110\056\105\121\099\061";"\117\055\120\055\067\122\112\061";"\100\047\108\097\065\071\076\047\076\053\075\061","\068\116\101\118\083\101\061\061";"\09\075\066\051\108\0
+-- ====================================================
+-- SISTEM CLEANUP (MENCEGAH OVERLAP SAAT RE-EXECUTE)
+-- ====================================================
+if getgenv()._LucxxHubCleanup then
+    pcall(getgenv()._LucxxHubCleanup)
+end
+
+local scriptConnections = {}
+
+-- ====================================================
+-- GLOBAL CONFIG & UTILITIES
+-- ====================================================
+local Players = game:GetService("Players")
+local HttpService = game:GetService("HttpService")
+local MarketplaceService = game:GetService("MarketplaceService")
+local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TextChatService = game:GetService("TextChatService")
+
+local localPlayer = Players.LocalPlayer
+local FILE_NAME = "AccessoryCustomConfigV4_5.json"
+
+local GUI_PARENT
+if gethui then
+    GUI_PARENT = gethui()
+else
+    local success, cg = pcall(function() return game:GetService("CoreGui") end)
+    if success and cg then GUI_PARENT = cg else GUI_PARENT = localPlayer:WaitForChild("PlayerGui") end
+end
+
+local accessoryIds = {
+    ["Black Valk"] = 124730194,
+    ["Violet Valk"] = 1402432199,
+    ["8-Bit Royal"] = 10159600649,
+    ["Frozen Horn"] = 74891470,
+    ["Poison Horn"] = 1744060292,
+    ["Bunny Fedora"] = 108147416,
+    ["Fiery Horns"] = 215718515
+}
+
+local HEAD_IDS = {
+    ["Death Walker"] = 99223542650102,
+    ["UGC Headless"] = 15093053680
+}
+
+local KORBLOX_MESH_ID = "rbxassetid://101851696"
+local KORBLOX_TEXTURE_ID = "rbxassetid://101851254"
+
+local spawnedAccessories = {}
+local baseCFrames = {}
+local currentConfig = { _HeadType = "Default", _Korblox = true, _Favorites = {} }
+local selectedAccessory = nil
+local targetPlayersRegistry = {} 
+
+local function deepCopy(t)
+    if type(t) ~= "table" then return t end
+    local res = {}
+    for k, v in pairs(t) do res[k] = deepCopy(v) end
+    return res
+end
+
+local function initConfig(name, id)
+    if not currentConfig[name] then
+        currentConfig[name] = { pos = {0,0,0}, rot = {0,0,0}, scale = 1, enabled = true, assetId = id }
+    elseif id and not currentConfig[name].assetId then
+        currentConfig[name].assetId = id
+    end
+end
+for name, id in pairs(accessoryIds) do initConfig(name, id) end
+
+-- ====================================================
+-- FUNGSI KEPALA (HEAD)
+-- ====================================================
+local function wearHeadModel(char, headType)
+    local assetId = HEAD_IDS[headType]
+    if not assetId then return end
+    
+    local success, result = pcall(function() return game:GetObjects("rbxassetid://" .. assetId)[1] end)
+    if success and result then
+        result.Archivable = true
+        for _, v in ipairs(result:GetDescendants()) do
+            v.Archivable = true
+            if v:IsA("BasePart") then
+                v.Anchored = false
+                v.CanCollide = false
+                v.Massless = true
+            end
+        end
+
+        local handle = result:IsA("BasePart") and result or result:FindFirstChild("Handle") or result:FindFirstChildOfClass("Part") or result:FindFirstChildOfClass("MeshPart")
+        if handle then
+            handle.Transparency = 0
+            local targetPart = char:WaitForChild("Head", 3)
+            if not targetPart then return end
+            
+            local attachment = handle:FindFirstChildOfClass("Attachment")
+            local baseC0, baseC1 = CFrame.new(), CFrame.new()
+            
+            if attachment then
+                local charAttachment = targetPart:FindFirstChild(attachment.Name, true)
+                if charAttachment then baseC0, baseC1 = charAttachment.CFrame, attachment.CFrame end
+            end
+            
+            if result:IsA("BasePart") then
+                local wrapModel = Instance.new("Model")
+                wrapModel.Name = "CustomHeadModel"
+                result.Parent = wrapModel
+                wrapModel.Parent = char
+            else
+                result.Name = "CustomHeadModel"
+                result.Parent = char
+            end
+            
+            local weld = Instance.new("Weld")
+            weld.Name = "HeadWeld"
+            weld.Part0, weld.Part1 = targetPart, handle
+            weld.C0, weld.C1 = baseC0, baseC1
+            weld.Parent = handle
+        end
+    end
+end
+
+local function applyHeadState(char, configTable)
+    if not char then return end
+    for _, v in ipairs(char:GetChildren()) do
+        if v.Name == "CustomHeadModel" then v:Destroy() end
+    end
+    
+    local head = char:FindFirstChild("Head")
+    if not head then return end
+    local headType = configTable._HeadType or "Default"
+    
+    if headType == "Default" then
+        head.Transparency = 0
+        local face = head:FindFirstChildOfClass("Decal")
+        if face then face.Transparency = 0 end
+        local mesh = head:FindFirstChildOfClass("SpecialMesh")
+        if mesh then 
+            mesh.Scale = (mesh.MeshType == Enum.MeshType.Head) and Vector3.new(1.25, 1.25, 1.25) or Vector3.new(1, 1, 1) 
+        end
+    else
+        head.Transparency = 1
+        local face = head:FindFirstChildOfClass("Decal")
+        if face then face.Transparency = 1 end
+        local mesh = head:FindFirstChildOfClass("SpecialMesh")
+        if mesh then mesh.Scale = Vector3.new(0, 0, 0) end
+        
+        wearHeadModel(char, headType)
+    end
+end
+
+-- ====================================================
+-- FUNGSI AKSESORIS UMUM
+-- ====================================================
+local function applyConfigToSpecific(char, name, configTable)
+    local acc = spawnedAccessories[char] and spawnedAccessories[char][name]
+    local cfg = configTable[name]
+    local base = baseCFrames[char] and baseCFrames[char][name]
+    
+    if not cfg or not acc or not base then return end
+    
+    local handle = acc:IsA("BasePart") and acc or acc:FindFirstChild("Handle") or acc:FindFirstChildOfClass("Part") or acc:FindFirstChildOfClass("MeshPart")
+    if not handle then return end
+    
+    local weld = handle:FindFirstChild("ManualWeld")
+    if weld then
+        local offsetPos = CFrame.new(unpack(cfg.pos))
+        local offsetRot = CFrame.Angles(math.rad(cfg.rot[1]), math.rad(cfg.rot[2]), math.rad(cfg.rot[3]))
+        weld.C0 = base.C0 * offsetPos * offsetRot
+        weld.C1 = base.C1
+    end
+    
+    local mesh = handle:FindFirstChildOfClass("SpecialMesh")
+    local s = cfg.scale
+    if mesh then mesh.Scale = Vector3.new(s, s, s) else handle.Size = Vector3.new(s, s, s) end
+end
+
+local function wearAccessory(char, name, assetId, configTable)
+    if not configTable[name].enabled then return end 
+    
+    if not spawnedAccessories[char] then spawnedAccessories[char] = {} end
+    if not baseCFrames[char] then baseCFrames[char] = {} end
+    if spawnedAccessories[char][name] then pcall(function() spawnedAccessories[char][name]:Destroy() end) end
+
+    local success, result = pcall(function() return game:GetObjects("rbxassetid://" .. assetId)[1] end)
+    if success and result then
+        result.Archivable = true
+        for _, v in ipairs(result:GetDescendants()) do
+            v.Archivable = true
+            if v:IsA("BasePart") then
+                v.Anchored = false
+                v.CanCollide = false
+                v.Massless = true
+            end
+        end
+
+        local handle = result:IsA("BasePart") and result or result:FindFirstChild("Handle") or result:FindFirstChildOfClass("Part") or result:FindFirstChildOfClass("MeshPart")
+        if handle then
+            handle.Transparency = 0
+            local attachment = handle:FindFirstChildOfClass("Attachment")
+            local targetPart = char:WaitForChild("Head", 3) or char:FindFirstChild("Torso") or char:FindFirstChild("UpperTorso")
+            local baseC0, baseC1 = CFrame.new(), CFrame.new()
+            
+            if attachment then
+                local charAttachment = char:FindFirstChild(attachment.Name, true)
+                if charAttachment then 
+                    targetPart = charAttachment.Parent 
+                    baseC0, baseC1 = charAttachment.CFrame, attachment.CFrame
+                end
+            end
+            
+            baseCFrames[char][name] = {C0 = baseC0, C1 = baseC1}
+            
+            if result:IsA("BasePart") then
+                local wrapModel = Instance.new("Model")
+                wrapModel.Name = name .. "_Model"
+                result.Parent = wrapModel
+                wrapModel.Parent = char
+                spawnedAccessories[char][name] = wrapModel
+            else
+                result.Parent = char
+                spawnedAccessories[char][name] = result
+            end
+            
+            local weld = Instance.new("Weld")
+            weld.Name = "ManualWeld"
+            weld.Part0, weld.Part1 = targetPart, handle
+            weld.C0, weld.C1 = baseC0, baseC1
+            weld.Archivable = true
+            weld.Parent = handle
+            
+            applyConfigToSpecific(char, name, configTable)
+        end
+    end
+end
+
+-- ====================================================
+-- FUNGSI KORBLOX (FIXED HEIGHT BUG)
+-- ====================================================
+local function applyKorblox(char, configTable)
+    local enabled = configTable._Korblox
+    if enabled == nil then enabled = true end
+
+    local rightLeg = char:FindFirstChild("Right Leg")
+    if rightLeg then
+        -- R6 LOGIC
+        local existingMesh = rightLeg:FindFirstChild("LucxxKorbloxMesh")
+        if enabled then
+            if not existingMesh then
+                for _, v in ipairs(rightLeg:GetChildren()) do
+                    if v:IsA("SpecialMesh") or v:IsA("CharacterMesh") then v:Destroy() end
+                end
+                local mesh = Instance.new("SpecialMesh")
+                mesh.Name = "LucxxKorbloxMesh"
+                mesh.MeshType, mesh.MeshId, mesh.TextureId = Enum.MeshType.FileMesh, KORBLOX_MESH_ID, KORBLOX_TEXTURE_ID
+                mesh.Scale = Vector3.new(1, 1, 1)
+                mesh.Archivable = true
+                mesh.Parent = rightLeg
+            end
+        else
+            if existingMesh then existingMesh:Destroy() end
+        end
+    else
+        -- R15 LOGIC
+        local rUpper = char:FindFirstChild("RightUpperLeg")
+        local rLower = char:FindFirstChild("RightLowerLeg")
+        local rFoot = char:FindFirstChild("RightFoot")
+        local fakeLeg = char:FindFirstChild("FakeKorbloxLeg")
+        
+        if enabled then
+            if rUpper and rLower and rFoot then
+                rUpper.Transparency = 1; rLower.Transparency = 1; rFoot.Transparency = 1
+                if not fakeLeg then
+                    fakeLeg = Instance.new("Part")
+                    fakeLeg.Name = "FakeKorbloxLeg"
+                    -- FIX: Size sekecil mungkin & Massless agar tidak nabrak tanah / mengubah HipHeight
+                    fakeLeg.Size = Vector3.new(0.1, 0.1, 0.1) 
+                    fakeLeg.Anchored = false
+                    fakeLeg.CanCollide = false
+                    fakeLeg.CanTouch = false
+                    fakeLeg.CanQuery = false
+                    fakeLeg.Massless = true
+                    fakeLeg.Transparency = 0
+                    fakeLeg.Archivable = true
+                    
+                    local mesh = Instance.new("SpecialMesh")
+                    mesh.MeshType, mesh.MeshId, mesh.TextureId = Enum.MeshType.FileMesh, KORBLOX_MESH_ID, KORBLOX_TEXTURE_ID
+                    mesh.Scale = Vector3.new(1, 1, 1)
+                    mesh.Archivable = true
+                    mesh.Parent = fakeLeg
+                    fakeLeg.Parent = char
+                    
+                    local weld = Instance.new("Weld")
+                    weld.Name = "KorbloxWeld"
+                    weld.Part0 = rUpper
+                    weld.Part1 = fakeLeg
+                    weld.C0 = CFrame.new(0, -0.4, 0)
+                    weld.Archivable = true
+                    weld.Parent = fakeLeg
+                end
+            end
+        else
+            if fakeLeg then fakeLeg:Destroy() end
+            if rUpper then rUpper.Transparency = 0 end
+            if rLower then rLower.Transparency = 0 end
+            if rFoot then rFoot.Transparency = 0 end
+        end
+    end
+end
+
+local function refreshCharacter(char, configTable)
+    if not char then return end
+    local cfg = configTable or currentConfig
+    
+    if spawnedAccessories[char] then
+        for k, v in pairs(spawnedAccessories[char]) do
+            if v and v.Parent then v:Destroy() end
+        end
+        spawnedAccessories[char] = {}
+    end
+    
+    for name, id in pairs(accessoryIds) do
+        if cfg[name] and cfg[name].enabled then wearAccessory(char, name, id, cfg) end
+    end
+    
+    applyKorblox(char, cfg)
+    applyHeadState(char, cfg)
+end
+
+-- ====================================================
+-- SISTEM LOCK & DETEKSI CLONE
+-- ====================================================
+local function getTargetPlayer(nameStr)
+    nameStr = nameStr:lower()
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p.Name:lower():sub(1, #nameStr) == nameStr or p.DisplayName:lower():sub(1, #nameStr) == nameStr then return p end
+    end
+    return nil
+end
+
+local function monitorPlayer(p)
+    table.insert(scriptConnections, p.CharacterAdded:Connect(function(char)
+        task.wait(1)
+        if targetPlayersRegistry[p.UserId] then refreshCharacter(char, targetPlayersRegistry[p.UserId]) end
+    end))
+end
+
+for _, p in ipairs(Players:GetPlayers()) do monitorPlayer(p) end
+table.insert(scriptConnections, Players.PlayerAdded:Connect(monitorPlayer))
+table.insert(scriptConnections, Players.PlayerRemoving:Connect(function(p) targetPlayersRegistry[p.UserId] = nil end))
+
+local function isCloneOfLocal(obj)
+    if not obj or not localPlayer.Character or obj == localPlayer.Character then return false end
+    if obj.Name == localPlayer.Name or obj.Name == localPlayer.DisplayName then return true end
+
+    local myChar = localPlayer.Character
+    local myShirt = myChar:FindFirstChildOfClass("Shirt")
+    local cloneShirt = obj:FindFirstChildOfClass("Shirt")
+    if myShirt and cloneShirt and myShirt.ShirtTemplate == cloneShirt.ShirtTemplate and myShirt.ShirtTemplate ~= "" then return true end
+
+    local myAccs = {}
+    for _, acc in ipairs(myChar:GetChildren()) do
+        if acc:IsA("Accessory") and acc.Name ~= "CustomHeadModel" then
+            local handle = acc:FindFirstChild("Handle")
+            if handle then
+                local mesh = handle:FindFirstChildOfClass("SpecialMesh")
+                local meshId = mesh and mesh.MeshId or (handle:IsA("MeshPart") and handle.MeshId)
+                if meshId and meshId ~= "" then myAccs[meshId] = true end
+            end
+        end
+    end
+
+    for _, acc in ipairs(obj:GetChildren()) do
+        if acc:IsA("Accessory") then
+            local handle = acc:FindFirstChild("Handle")
+            if handle then
+                local mesh = handle:FindFirstChildOfClass("SpecialMesh")
+                local meshId = mesh and mesh.MeshId or (handle:IsA("MeshPart") and handle.MeshId)
+                if meshId and myAccs[meshId] then return true end
+            end
+        end
+    end
+    return false
+end
+
+table.insert(scriptConnections, workspace.DescendantAdded:Connect(function(obj)
+    if obj:IsA("Model") then
+        task.spawn(function()
+            local hum = obj:WaitForChild("Humanoid", 2)
+            if hum then
+                task.wait(0.5)
+                if isCloneOfLocal(obj) then
+                    refreshCharacter(obj, currentConfig)
+                else
+                    local tPlayer = getTargetPlayer(obj.Name)
+                    if tPlayer and tPlayer.Name == obj.Name and obj ~= tPlayer.Character then
+                        if targetPlayersRegistry[tPlayer.UserId] then
+                            refreshCharacter(obj, targetPlayersRegistry[tPlayer.UserId])
+                        end
+                    end
+                end
+            end
+        end)
+    end
+end))
+
+local camera = workspace.CurrentCamera
+local function onCameraSubjectChanged()
+    if camera and camera.CameraSubject then
+        local subject = camera.CameraSubject
+        local model
+        if subject:IsA("Humanoid") then model = subject.Parent
+        elseif subject:IsA("BasePart") then model = subject.Parent end
+        
+        if model and model:IsA("Model") and model:FindFirstChild("Humanoid") and model ~= localPlayer.Character then
+            task.wait(0.5)
+            if isCloneOfLocal(model) then refreshCharacter(model, currentConfig) end
+        end
+    end
+end
+
+if camera then
+    table.insert(scriptConnections, camera:GetPropertyChangedSignal("CameraSubject"):Connect(onCameraSubjectChanged))
+    task.spawn(onCameraSubjectChanged)
+end
+
+table.insert(scriptConnections, RunService.Stepped:Connect(function()
+    local function enforceTransparency(char, config)
+        if not char then return end
+        local head = char:FindFirstChild("Head")
+        local ltm = head and head.LocalTransparencyModifier or 0
+        
+        if spawnedAccessories[char] then
+            for _, acc in pairs(spawnedAccessories[char]) do
+                for _, v in ipairs(acc:GetDescendants()) do
+                    if v:IsA("BasePart") then v.LocalTransparencyModifier = ltm end
+                end
+            end
+        end
+
+        local customHead = char:FindFirstChild("CustomHeadModel")
+        if customHead then
+            for _, v in ipairs(customHead:GetDescendants()) do
+                if v:IsA("BasePart") then v.LocalTransparencyModifier = ltm end
+            end
+        end
+        
+        if config and config._Korblox then
+            local fakeLeg = char:FindFirstChild("FakeKorbloxLeg")
+            local rUpper = char:FindFirstChild("RightUpperLeg")
+            if fakeLeg and rUpper and rUpper.Transparency ~= 1 then
+                rUpper.Transparency = 1
+                local rLower = char:FindFirstChild("RightLowerLeg")
+                if rLower then rLower.Transparency = 1 end
+                local rFoot = char:FindFirstChild("RightFoot")
+                if rFoot then rFoot.Transparency = 1 end
+            end
+        end
+        
+        if config and config._HeadType ~= "Default" then
+            if head and customHead and head.Transparency ~= 1 then
+                head.Transparency = 1
+                local face = head:FindFirstChildOfClass("Decal")
+                if face then face.Transparency = 1 end
+            end
+        end
+    end
+    
+    enforceTransparency(localPlayer.Character, currentConfig)
+    for userId, config in pairs(targetPlayersRegistry) do
+        local p = Players:GetPlayerByUserId(userId)
+        if p and p.Character then enforceTransparency(p.Character, config) end
+    end
+end))
+
+-- ====================================================
+-- FUNGSI CHAT EMOTES
+-- ====================================================
+local function playEmote(emoteCmd)
+    if TextChatService.ChatVersion == Enum.ChatVersion.TextChatService then
+        local channel = TextChatService.TextChannels:FindFirstChild("RBXGeneral")
+        if channel then channel:SendAsync("/e " .. emoteCmd) end
+    else
+        local defaultChat = ReplicatedStorage:FindFirstChild("DefaultChatSystemChatEvents")
+        if defaultChat and defaultChat:FindFirstChild("SayMessageRequest") then
+            defaultChat.SayMessageRequest:FireServer("/e " .. emoteCmd, "All")
+        end
+    end
+end
+
+-- ====================================================
+-- PEMBUATAN GUI (UKURAN DIPERKECIL)
+-- ====================================================
+if GUI_PARENT:FindFirstChild("AccessoryEditorUI") then GUI_PARENT.AccessoryEditorUI:Destroy() end
+
+local sg = Instance.new("ScreenGui")
+sg.Name = "AccessoryEditorUI"
+sg.ResetOnSpawn = false 
+sg.Parent = GUI_PARENT
+
+local minSquare = Instance.new("TextButton")
+minSquare.Size, minSquare.Position = UDim2.new(0, 40, 0, 40), UDim2.new(0.5, -20, 0, 20)
+minSquare.BackgroundColor3, minSquare.Text = Color3.fromRGB(40, 40, 40), "+"
+minSquare.TextColor3, minSquare.Font, minSquare.TextSize = Color3.fromRGB(255, 255, 255), Enum.Font.SourceSansBold, 24
+minSquare.BorderSizePixel, minSquare.Visible, minSquare.Draggable, minSquare.Active = 0, false, true, true
+minSquare.Parent = sg
+
+local main = Instance.new("Frame")
+-- DIPERKECIL DISINI
+main.Size, main.Position = UDim2.new(0, 380, 0, 270), UDim2.new(0.5, -190, 0.5, -135)
+main.BackgroundColor3, main.BorderSizePixel = Color3.fromRGB(25, 25, 25), 0
+main.BackgroundTransparency = 0.2
+main.Active, main.Draggable = true, true
+main.Parent = sg
+
+local title = Instance.new("TextLabel")
+title.Size, title.BackgroundColor3 = UDim2.new(1, 0, 0, 25), Color3.fromRGB(40, 40, 40)
+title.BackgroundTransparency = 0.2
+title.Text, title.TextColor3 = "LucxxHub Accesories", Color3.fromRGB(255, 255, 255)
+title.Font, title.TextSize, title.TextXAlignment = Enum.Font.SourceSansBold, 14, Enum.TextXAlignment.Left
+title.Parent = main
+
+local btnMin = Instance.new("TextButton")
+btnMin.Size, btnMin.Position, btnMin.BackgroundColor3 = UDim2.new(0, 25, 0, 25), UDim2.new(1, -25, 0, 0), Color3.fromRGB(200, 50, 50)
+btnMin.Text, btnMin.TextColor3, btnMin.BorderSizePixel = "-", Color3.fromRGB(255, 255, 255), 0
+btnMin.Parent = title
+
+btnMin.MouseButton1Click:Connect(function() main.Visible = false; minSquare.Visible = true end)
+minSquare.MouseButton1Click:Connect(function() main.Visible = true; minSquare.Visible = false end)
+
+local function createBtn(text, pos, color, parent)
+    local b = Instance.new("TextButton")
+    b.Size, b.Position, b.BackgroundColor3 = UDim2.new(0, 115, 0, 22), pos, color
+    b.Text, b.TextColor3, b.Font, b.TextSize = text, Color3.fromRGB(255, 255, 255), Enum.Font.SourceSansBold, 12
+    b.Parent = parent
+    return b
+end
+
+-- TABS
+local tabContainer = Instance.new("Frame")
+tabContainer.Size, tabContainer.Position = UDim2.new(1, 0, 0, 25), UDim2.new(0, 0, 0, 25)
+tabContainer.BackgroundColor3, tabContainer.BorderSizePixel = Color3.fromRGB(35, 35, 35), 0
+tabContainer.Parent = main
+
+local btnTabPlayer = Instance.new("TextButton")
+btnTabPlayer.Size, btnTabPlayer.Position = UDim2.new(0.33, 0, 1, 0), UDim2.new(0, 0, 0, 0)
+btnTabPlayer.BackgroundColor3, btnTabPlayer.BorderSizePixel = Color3.fromRGB(50, 50, 50), 0
+btnTabPlayer.Text, btnTabPlayer.TextColor3 = "Player & Acc", Color3.fromRGB(255, 255, 255)
+btnTabPlayer.Font, btnTabPlayer.TextSize = Enum.Font.SourceSansBold, 12
+btnTabPlayer.Parent = tabContainer
+
+local btnTabConfig = Instance.new("TextButton")
+btnTabConfig.Size, btnTabConfig.Position = UDim2.new(0.33, 0, 1, 0), UDim2.new(0.33, 0, 0, 0)
+btnTabConfig.BackgroundColor3, btnTabConfig.BorderSizePixel = Color3.fromRGB(30, 30, 30), 0
+btnTabConfig.Text, btnTabConfig.TextColor3 = "Config Sys", Color3.fromRGB(200, 200, 200)
+btnTabConfig.Font, btnTabConfig.TextSize = Enum.Font.SourceSansBold, 12
+btnTabConfig.Parent = tabContainer
+
+local btnTabEmote = Instance.new("TextButton")
+btnTabEmote.Size, btnTabEmote.Position = UDim2.new(0.34, 0, 1, 0), UDim2.new(0.66, 0, 0, 0)
+btnTabEmote.BackgroundColor3, btnTabEmote.BorderSizePixel = Color3.fromRGB(30, 30, 30), 0
+btnTabEmote.Text, btnTabEmote.TextColor3 = "Emotes", Color3.fromRGB(200, 200, 200)
+btnTabEmote.Font, btnTabEmote.TextSize = Enum.Font.SourceSansBold, 12
+btnTabEmote.Parent = tabContainer
+
+local content = Instance.new("Frame")
+content.Size, content.Position, content.BackgroundTransparency = UDim2.new(1, 0, 1, -50), UDim2.new(0, 0, 0, 50), 1
+content.Parent = main
+
+local playerTab = Instance.new("Frame")
+playerTab.Size, playerTab.BackgroundTransparency = UDim2.new(1, 0, 1, 0), 1
+playerTab.Visible = true; playerTab.Parent = content
+
+local configTab = Instance.new("Frame")
+configTab.Size, configTab.BackgroundTransparency = UDim2.new(1, 0, 1, 0), 1
+configTab.Visible = false; configTab.Parent = content
+
+local emoteTab = Instance.new("Frame")
+emoteTab.Size, emoteTab.BackgroundTransparency = UDim2.new(1, 0, 1, 0), 1
+emoteTab.Visible = false; emoteTab.Parent = content
+
+local function switchTab(activeBtn, activeFrame)
+    for _, btn in ipairs({btnTabPlayer, btnTabConfig, btnTabEmote}) do
+        if btn == activeBtn then
+            btn.BackgroundColor3, btn.TextColor3 = Color3.fromRGB(50, 50, 50), Color3.fromRGB(255, 255, 255)
+        else
+            btn.BackgroundColor3, btn.TextColor3 = Color3.fromRGB(30, 30, 30), Color3.fromRGB(200, 200, 200)
+        end
+    end
+    for _, frm in ipairs({playerTab, configTab, emoteTab}) do
+        frm.Visible = (frm == activeFrame)
+    end
+end
+btnTabPlayer.MouseButton1Click:Connect(function() switchTab(btnTabPlayer, playerTab) end)
+btnTabConfig.MouseButton1Click:Connect(function() switchTab(btnTabConfig, configTab) end)
+btnTabEmote.MouseButton1Click:Connect(function() switchTab(btnTabEmote, emoteTab) end)
+
+-- TAB 1: PLAYER & ACCESSORIES
+local listFrame = Instance.new("ScrollingFrame")
+listFrame.Size, listFrame.Position, listFrame.BackgroundColor3 = UDim2.new(0, 110, 1, -10), UDim2.new(0, 5, 0, 5), Color3.fromRGB(20, 20, 20)
+listFrame.BackgroundTransparency = 0.2
+listFrame.BorderSizePixel, listFrame.ScrollBarThickness, listFrame.CanvasSize = UDim2.new(0, 0, 0, 400), 4, UDim2.new(0, 0, 0, 400)
+listFrame.Parent = playerTab
+
+local listLayout = Instance.new("UIListLayout")
+listLayout.Padding = UDim.new(0, 2)
+listLayout.SortOrder = Enum.SortOrder.LayoutOrder
+listLayout.Parent = listFrame
+
+local panel = Instance.new("Frame")
+panel.Size, panel.Position, panel.BackgroundTransparency = UDim2.new(1, -125, 1, -10), UDim2.new(0, 120, 0, 5), 1
+panel.Parent = playerTab
+
+local activeLabel = Instance.new("TextLabel")
+activeLabel.Size, activeLabel.Text, activeLabel.TextColor3 = UDim2.new(1, 0, 0, 15), "Editing: None", Color3.fromRGB(255, 200, 0)
+activeLabel.Font, activeLabel.TextSize, activeLabel.BackgroundTransparency = Enum.Font.SourceSansBold, 12, 1
+activeLabel.TextXAlignment = Enum.TextXAlignment.Left
+activeLabel.Parent = panel
+
+local btnToggle = Instance.new("TextButton")
+btnToggle.Size, btnToggle.Position, btnToggle.BackgroundColor3 = UDim2.new(0, 70, 0, 20), UDim2.new(1, -75, 0, 0), Color3.fromRGB(100, 100, 100)
+btnToggle.Text, btnToggle.TextColor3 = "Status: -", Color3.fromRGB(255, 255, 255)
+btnToggle.Font, btnToggle.TextSize = Enum.Font.SourceSansBold, 11
+btnToggle.Parent = panel
+
+local inputs = {pos = {}, rot = {}, scale = nil}
+local function createXYZRow(labelName, yPos, key)
+    local lbl = Instance.new("TextLabel")
+    lbl.Size, lbl.Position, lbl.Text, lbl.TextColor3 = UDim2.new(0, 30, 0, 20), UDim2.new(0, 0, 0, yPos), labelName, Color3.fromRGB(200, 200, 200)
+    lbl.Font, lbl.TextSize, lbl.BackgroundTransparency, lbl.TextXAlignment = Enum.Font.SourceSans, 12, 1, Enum.TextXAlignment.Left
+    lbl.Parent = panel
+    for i, axis in ipairs({"X", "Y", "Z"}) do
+        local box = Instance.new("TextBox")
+        box.Size, box.Position, box.BackgroundColor3 = UDim2.new(0, 45, 0, 20), UDim2.new(0, 30 + (i-1)*50, 0, yPos), Color3.fromRGB(40, 40, 40)
+        box.TextColor3, box.Font, box.TextSize, box.Text = Color3.fromRGB(255, 255, 255), Enum.Font.Code, 11, "0"
+        box.Parent = panel
+        inputs[key][axis] = box
+    end
+end
+
+createXYZRow("Pos:", 25, "pos")
+createXYZRow("Rot:", 50, "rot")
+
+local lblScale = Instance.new("TextLabel")
+lblScale.Size, lblScale.Position, lblScale.Text, lblScale.TextColor3 = UDim2.new(0, 60, 0, 20), UDim2.new(0, 0, 0, 75), "Scale:", Color3.fromRGB(200, 200, 200)
+lblScale.Font, lblScale.TextSize, lblScale.BackgroundTransparency, lblScale.TextXAlignment = Enum.Font.SourceSans, 12, 1, Enum.TextXAlignment.Left
+lblScale.Parent = panel
+inputs.scale = Instance.new("TextBox")
+inputs.scale.Size, inputs.scale.Position, inputs.scale.BackgroundColor3 = UDim2.new(0, 45, 0, 20), UDim2.new(0, 35, 0, 75), Color3.fromRGB(40, 40, 40)
+inputs.scale.TextColor3, inputs.scale.Font, inputs.scale.TextSize, inputs.scale.Text = Color3.fromRGB(255, 255, 255), Enum.Font.Code, 11, "1"
+inputs.scale.Parent = panel
+
+local btnApply = createBtn("Apply Change", UDim2.new(0, 90, 0, 75), Color3.fromRGB(0, 120, 215), panel)
+btnApply.Size = UDim2.new(0, 90, 0, 22)
+
+local sep = Instance.new("Frame")
+sep.Size, sep.Position, sep.BackgroundColor3 = UDim2.new(1, 0, 0, 2), UDim2.new(0, 0, 0, 105), Color3.fromRGB(50, 50, 50)
+sep.BorderSizePixel = 0; sep.Parent = panel
+
+local lblHead = Instance.new("TextLabel")
+lblHead.Size, lblHead.Position = UDim2.new(0, 60, 0, 20), UDim2.new(0, 0, 0, 115)
+lblHead.Text, lblHead.TextColor3 = "Head:", Color3.fromRGB(200, 200, 200)
+lblHead.Font, lblHead.TextSize, lblHead.BackgroundTransparency = Enum.Font.SourceSansBold, 12, 1
+lblHead.TextXAlignment = Enum.TextXAlignment.Left; lblHead.Parent = panel
+
+local btnHeadDefault = createBtn("Default", UDim2.new(0, 40, 0, 115), Color3.fromRGB(60, 60, 60), panel)
+btnHeadDefault.Size = UDim2.new(0, 50, 0, 22)
+local btnHeadDeath = createBtn("Death", UDim2.new(0, 95, 0, 115), Color3.fromRGB(150, 20, 20), panel)
+btnHeadDeath.Size = UDim2.new(0, 55, 0, 22)
+local btnHeadHeadless = createBtn("H-less", UDim2.new(0, 155, 0, 115), Color3.fromRGB(100, 20, 150), panel)
+btnHeadHeadless.Size = UDim2.new(0, 55, 0, 22)
+
+local lblKorblox = Instance.new("TextLabel")
+lblKorblox.Size, lblKorblox.Position = UDim2.new(0, 60, 0, 20), UDim2.new(0, 0, 0, 140)
+lblKorblox.Text, lblKorblox.TextColor3 = "Korblox:", Color3.fromRGB(200, 200, 200)
+lblKorblox.Font, lblKorblox.TextSize, lblKorblox.BackgroundTransparency = Enum.Font.SourceSansBold, 12, 1
+lblKorblox.TextXAlignment = Enum.TextXAlignment.Left; lblKorblox.Parent = panel
+
+local btnKorbloxOn = createBtn("ON", UDim2.new(0, 55, 0, 140), Color3.fromRGB(46, 125, 50), panel)
+btnKorbloxOn.Size = UDim2.new(0, 50, 0, 22)
+local btnKorbloxOff = createBtn("OFF", UDim2.new(0, 110, 0, 140), Color3.fromRGB(200, 50, 50), panel)
+btnKorbloxOff.Size = UDim2.new(0, 50, 0, 22)
+
+-- TAB 2: CONFIG SYSTEM
+local btnSave = createBtn("Save Config", UDim2.new(0, 20, 0, 15), Color3.fromRGB(46, 125, 50), configTab)
+btnSave.Size = UDim2.new(0, 160, 0, 25)
+
+local btnLoad = createBtn("Load Config", UDim2.new(0, 195, 0, 15), Color3.fromRGB(198, 105, 0), configTab)
+btnLoad.Size = UDim2.new(0, 160, 0, 25)
+
+local addIdBox = Instance.new("TextBox")
+addIdBox.Size, addIdBox.Position, addIdBox.BackgroundColor3 = UDim2.new(0, 160, 0, 25), UDim2.new(0, 20, 0, 55), Color3.fromRGB(35, 35, 35)
+addIdBox.TextColor3, addIdBox.PlaceholderText, addIdBox.Font, addIdBox.TextSize = Color3.fromRGB(255, 255, 255), "Catalog ID...", Enum.Font.SourceSans, 13
+addIdBox.Parent = configTab
+
+local btnAddId = createBtn("Add To Library", UDim2.new(0, 195, 0, 55), Color3.fromRGB(120, 0, 215), configTab)
+btnAddId.Size = UDim2.new(0, 160, 0, 25)
+
+local targetBox = Instance.new("TextBox")
+targetBox.Size, targetBox.Position, targetBox.BackgroundColor3 = UDim2.new(0, 160, 0, 25), UDim2.new(0, 20, 0, 95), Color3.fromRGB(35, 35, 35)
+targetBox.TextColor3, targetBox.PlaceholderText, targetBox.Font, targetBox.TextSize = Color3.fromRGB(255, 255, 255), "Target Player...", Enum.Font.SourceSans, 13
+targetBox.Parent = configTab
+
+local btnTarget = createBtn("apply to player", UDim2.new(0, 195, 0, 95), Color3.fromRGB(180, 20, 50), configTab)
+btnTarget.Size = UDim2.new(0, 160, 0, 25)
+
+-- TAB 3: EMOTES
+local emoteScroll = Instance.new("ScrollingFrame")
+emoteScroll.Size, emoteScroll.Position = UDim2.new(1, -20, 1, -20), UDim2.new(0, 10, 0, 10)
+emoteScroll.BackgroundColor3, emoteScroll.BackgroundTransparency = Color3.fromRGB(20, 20, 20), 0.5
+emoteScroll.BorderSizePixel, emoteScroll.ScrollBarThickness = 0, 6
+emoteScroll.CanvasSize = UDim2.new(0, 0, 0, 150)
+emoteScroll.Parent = emoteTab
+
+local gridLayout = Instance.new("UIGridLayout")
+gridLayout.CellSize = UDim2.new(0, 100, 0, 30)
+gridLayout.CellPadding = UDim2.new(0, 15, 0, 10)
+gridLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+gridLayout.SortOrder = Enum.SortOrder.LayoutOrder
+gridLayout.Parent = emoteScroll
+
+local defaultEmotes = {
+    {name = "Dance 1", cmd = "dance"}, {name = "Dance 2", cmd = "dance2"},
+    {name = "Dance 3", cmd = "dance3"}, {name = "Wave", cmd = "wave"},
+    {name = "Point", cmd = "point"}, {name = "Cheer", cmd = "cheer"},
+    {name = "Laugh", cmd = "laugh"}
+}
+
+for i, emote in ipairs(defaultEmotes) do
+    local b = createBtn(emote.name, UDim2.new(0, 0, 0, 0), Color3.fromRGB(40, 80, 150), emoteScroll)
+    b.LayoutOrder = i
+    b.MouseButton1Click:Connect(function() playEmote(emote.cmd) end)
+end
+
+-- ====================================================
+-- BUTTON ACTIONS & LOGIC
+-- ====================================================
+local function changeHead(typeStr)
+    currentConfig._HeadType = typeStr
+    if localPlayer.Character then refreshCharacter(localPlayer.Character, currentConfig) end
+    for userId, config in pairs(targetPlayersRegistry) do
+        local p = Players:GetPlayerByUserId(userId)
+        if p and p.Character then config._HeadType = typeStr; refreshCharacter(p.Character, config) end
+    end
+end
+btnHeadDefault.MouseButton1Click:Connect(function() changeHead("Default") end)
+btnHeadDeath.MouseButton1Click:Connect(function() changeHead("Death Walker") end)
+btnHeadHeadless.MouseButton1Click:Connect(function() changeHead("Headless") end)
+
+local function changeKorblox(state)
+    currentConfig._Korblox = state
+    if localPlayer.Character then refreshCharacter(localPlayer.Character, currentConfig) end
+    for userId, config in pairs(targetPlayersRegistry) do
+        local p = Players:GetPlayerByUserId(userId)
+        if p and p.Character then config._Korblox = state; refreshCharacter(p.Character, config) end
+    end
+end
+btnKorbloxOn.MouseButton1Click:Connect(function() changeKorblox(true) end)
+btnKorbloxOff.MouseButton1Click:Connect(function() changeKorblox(false) end)
+
+btnTarget.MouseButton1Click:Connect(function()
+    local p = getTargetPlayer(targetBox.Text)
+    if p then
+        targetPlayersRegistry[p.UserId] = deepCopy(currentConfig)
+        if p.Character then refreshCharacter(p.Character, targetPlayersRegistry[p.UserId]) end
+        targetBox.Text = "Locked: " .. p.Name
+        task.delay(2, function() if targetBox.Text:find("Locked:") then targetBox.Text = "" end end)
+    else
+        targetBox.Text = "Not Found!"
+        task.delay(2, function() if targetBox.Text == "Not Found!" then targetBox.Text = "" end end)
+    end
+end)
+
+local function updateUIText()
+    if not selectedAccessory then return end
+    -- Cuma menampilkan sebagian nama agar text label tidak mentok
+    activeLabel.Text = "Edit: " .. string.sub(selectedAccessory, 1, 12)
+
+    local cfg = currentConfig[selectedAccessory]
+    if cfg then
+        for i, axis in ipairs({"X", "Y", "Z"}) do
+            inputs["pos"][axis].Text = tostring(cfg.pos[i])
+            inputs["rot"][axis].Text = tostring(cfg.rot[i])
+        end
+        inputs.scale.Text = tostring(cfg.scale)
+        if cfg.enabled then
+            btnToggle.Text = "Status: ON"; btnToggle.BackgroundColor3 = Color3.fromRGB(46, 125, 50)
+        else
+            btnToggle.Text = "Status: OFF"; btnToggle.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+        end
+    end
+end
+
+btnToggle.MouseButton1Click:Connect(function()
+    if not selectedAccessory then return end
+    currentConfig[selectedAccessory].enabled = not currentConfig[selectedAccessory].enabled
+    updateUIText()
+    if localPlayer.Character then
+        if currentConfig[selectedAccessory].enabled then wearAccessory(localPlayer.Character, selectedAccessory, accessoryIds[selectedAccessory], currentConfig)
+        elseif spawnedAccessories[localPlayer.Character] and spawnedAccessories[localPlayer.Character][selectedAccessory] then
+            spawnedAccessories[localPlayer.Character][selectedAccessory]:Destroy()
+            spawnedAccessories[localPlayer.Character][selectedAccessory] = nil
+        end
+    end
+    for userId, config in pairs(targetPlayersRegistry) do
+        local p = Players:GetPlayerByUserId(userId)
+        if p and p.Character then
+            config[selectedAccessory].enabled = currentConfig[selectedAccessory].enabled
+            if config[selectedAccessory].enabled then wearAccessory(p.Character, selectedAccessory, accessoryIds[selectedAccessory], config)
+            elseif spawnedAccessories[p.Character] and spawnedAccessories[p.Character][selectedAccessory] then
+                spawnedAccessories[p.Character][selectedAccessory]:Destroy()
+                spawnedAccessories[p.Character][selectedAccessory] = nil
+            end
+        end
+    end
+end)
+
+btnApply.MouseButton1Click:Connect(function()
+    if not selectedAccessory then return end
+    currentConfig[selectedAccessory].pos = {tonumber(inputs.pos.X.Text) or 0, tonumber(inputs.pos.Y.Text) or 0, tonumber(inputs.pos.Z.Text) or 0}
+    currentConfig[selectedAccessory].rot = {tonumber(inputs.rot.X.Text) or 0, tonumber(inputs.rot.Y.Text) or 0, tonumber(inputs.rot.Z.Text) or 0}
+    currentConfig[selectedAccessory].scale = tonumber(inputs.scale.Text) or 1
+    
+    if localPlayer.Character then applyConfigToSpecific(localPlayer.Character, selectedAccessory, currentConfig) end
+    for userId, config in pairs(targetPlayersRegistry) do
+        local p = Players:GetPlayerByUserId(userId)
+        if p and p.Character then
+            config[selectedAccessory].pos = deepCopy(currentConfig[selectedAccessory].pos)
+            config[selectedAccessory].rot = deepCopy(currentConfig[selectedAccessory].rot)
+            config[selectedAccessory].scale = currentConfig[selectedAccessory].scale
+            applyConfigToSpecific(p.Character, selectedAccessory, config)
+        end
+    end
+end)
+
+btnSave.MouseButton1Click:Connect(function()
+    if writefile then
+        local success, encoded = pcall(function() return HttpService:JSONEncode(currentConfig) end)
+        if success then writefile(FILE_NAME, encoded) end
+    end
+end)
+
+local function populateList()
+    if not currentConfig._Favorites then currentConfig._Favorites = {} end
+    for _, child in ipairs(listFrame:GetChildren()) do if child:IsA("TextButton") then child:Destroy() end end
+    
+    for name, _ in pairs(accessoryIds) do
+        local isFavorite = currentConfig._Favorites[name] or false
+        local btn = Instance.new("TextButton")
+        btn.Size, btn.BackgroundColor3 = UDim2.new(1, 0, 0, 24), Color3.fromRGB(50, 50, 50)
+        btn.BackgroundTransparency = 0.2
+        btn.Text, btn.TextColor3 = " " .. string.sub(name, 1, 10), Color3.fromRGB(255, 255, 255)
+        btn.Font, btn.TextSize, btn.BorderSizePixel = Enum.Font.SourceSans, 12, 0
+        btn.TextXAlignment = Enum.TextXAlignment.Left
+        btn.LayoutOrder = isFavorite and 1 or 2
+        btn.Parent = listFrame
+        
+        btn.MouseButton1Click:Connect(function() selectedAccessory = name; updateUIText() end)
+        
+        local favBtn = Instance.new("TextButton")
+        favBtn.Size, favBtn.Position, favBtn.BackgroundTransparency = UDim2.new(0, 24, 0, 24), UDim2.new(1, -24, 0, 0), 1
+        favBtn.Text = isFavorite and "⭐" or "☆"
+        favBtn.TextColor3 = isFavorite and Color3.fromRGB(255, 200, 0) or Color3.fromRGB(150, 150, 150)
+        favBtn.Font, favBtn.TextSize, favBtn.BorderSizePixel = Enum.Font.SourceSansBold, 14, 0
+        favBtn.Parent = btn
+        
+        favBtn.MouseButton1Click:Connect(function()
+            currentConfig._Favorites[name] = not currentConfig._Favorites[name]
+            populateList() 
+        end)
+    end
+end
+
+btnLoad.MouseButton1Click:Connect(function()
+    if readfile and isfile and isfile(FILE_NAME) then
+        local suc, c = pcall(function() return readfile(FILE_NAME) end)
+        if suc then
+            local ds, dec = pcall(function() return HttpService:JSONDecode(c) end)
+            if ds then 
+                for k, v in pairs(dec) do 
+                    currentConfig[k] = v 
+                    if type(v) == "table" and v.assetId then accessoryIds[k] = v.assetId end
+                end 
+                if not currentConfig._Favorites then currentConfig._Favorites = {} end
+                if currentConfig._Korblox == nil then currentConfig._Korblox = true end
+                for n, id in pairs(accessoryIds) do initConfig(n, id) end
+                populateList()
+            end
+        end
+    end
+    updateUIText()
+    if localPlayer.Character then refreshCharacter(localPlayer.Character, currentConfig) end
+end)
+
+btnAddId.MouseButton1Click:Connect(function()
+    local id = tonumber(addIdBox.Text)
+    if id then
+        addIdBox.Text = "Loading..."
+        local success, info = pcall(function() return MarketplaceService:GetProductInfo(id) end)
+        local newName = success and info.Name or ("Custom_" .. id)
+        accessoryIds[newName] = id
+        initConfig(newName, id)
+        populateList()
+        addIdBox.Text = ""
+        addIdBox.PlaceholderText = "Added: " .. string.sub(newName, 1, 10)
+        if localPlayer.Character then wearAccessory(localPlayer.Character, newName, id, currentConfig) end
+    end
+end)
+
+populateList()
+if localPlayer.Character then refreshCharacter(localPlayer.Character, currentConfig) end
+table.insert(scriptConnections, localPlayer.CharacterAdded:Connect(function(char) task.wait(1); refreshCharacter(char, currentConfig) end))
+task.spawn(function() btnLoad.MouseButton1Click:Fire() end)
+
+-- ====================================================
+-- CLEANUP
+-- ====================================================
+getgenv()._LucxxHubCleanup = function()
+    for _, conn in ipairs(scriptConnections) do
+        if conn.Connected then conn:Disconnect() end
+    end
+    table.clear(scriptConnections)
+
+    if GUI_PARENT:FindFirstChild("AccessoryEditorUI") then GUI_PARENT.AccessoryEditorUI:Destroy() end
+
+    for char, accs in pairs(spawnedAccessories) do
+        for _, acc in pairs(accs) do if acc and acc.Parent then acc:Destroy() end end
+    end
+    
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p.Character then
+            local char = p.Character
+            local customHead = char:FindFirstChild("CustomHeadModel")
+            if customHead then customHead:Destroy() end
+            
+            local origHead = char:FindFirstChild("Head")
+            if origHead then 
+                origHead.Transparency = 0
+                local face = origHead:FindFirstChildOfClass("Decal")
+                if face then face.Transparency = 0 end
+                local mesh = origHead:FindFirstChildOfClass("SpecialMesh")
+                if mesh and mesh.MeshType == Enum.MeshType.Head then mesh.Scale = Vector3.new(1.25, 1.25, 1.25) end
+            end
+            
+            local fakeLeg = char:FindFirstChild("FakeKorbloxLeg")
+            if fakeLeg then fakeLeg:Destroy() end
+            
+            local rLeg = char:FindFirstChild("Right Leg")
+            if rLeg then
+                local kMesh = rLeg:FindFirstChild("LucxxKorbloxMesh")
+                if kMesh then kMesh:Destroy() end
+            end
+            
+            local rUpper = char:FindFirstChild("RightUpperLeg")
+            local rLower = char:FindFirstChild("RightLowerLeg")
+            local rFoot = char:FindFirstChild("RightFoot")
+            if rUpper then rUpper.Transparency = 0 end
+            if rLower then rLower.Transparency = 0 end
+            if rFoot then rFoot.Transparency = 0 end
+        end
+    end
+    getgenv()._LucxxHubCleanup = nil
+end
