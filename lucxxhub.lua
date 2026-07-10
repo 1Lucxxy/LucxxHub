@@ -4,7 +4,8 @@ local scriptList = {
     {Nama = "Button Path", Url = "https://pastefy.app/27WsICh0/raw"},
     {Nama = "Ping", Url = "https://pastefy.app/EwYJQpXw/raw"},
     {Nama = "Find Path Button", Url = "https://pastefy.app/zfWvyFav/raw"},
-    
+
+}
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
 local UserInputService = game:GetService("UserInputService")
