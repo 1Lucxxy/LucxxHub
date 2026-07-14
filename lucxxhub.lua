@@ -2,7 +2,7 @@ local scriptList = {
     {Nama = "Accesories", Url = "https://pastefy.app/X4zU7Ihd/raw"},
     {Nama = "Freecam", Url = "https://pastefy.app/E1OVTGoZ/raw"},
     {Nama = "Button Path", Url = "https://pastefy.app/27WsICh0/raw"},
-    {Nama = "Ping", Url = "https://pastefy.app/EwYJQpXw/raw"},
+    {Nama = "Ping", Url = "https://pastefy.app/YxAaPOQK/raw"},
     {Nama = "Find Path Button", Url = "https://pastefy.app/zfWvyFav/raw"},
     {Nama = "anim acc", Url = "https://pastefy.app/YxAaPOQK/raw"},
 
